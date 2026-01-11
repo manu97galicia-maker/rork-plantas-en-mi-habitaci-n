@@ -616,11 +616,48 @@ ADJUST recommendations according to their experience level.`;
 
 Analyze the room and identify 4-5 specific locations where plants would look good (tables, shelves, corners, windows). 
 
-IMPORTANT: Include a diverse selection of plants:
-- Indoor foliage plants (pothos, monstera, ferns, etc.)
-- Flowering plants (orchids, peace lily, African violet, begonias, kalanchoe, anthurium, etc.)
-- Succulents and cacti
-- Consider seasonal blooming plants appropriate for indoor cultivation
+CRITICAL - PLANT VARIETY REQUIREMENT:
+You MUST recommend a DIVERSE mix of plants from DIFFERENT categories. Do NOT always recommend the same common plants.
+
+Choose from these categories (include AT LEAST 3 different categories in your recommendations):
+
+1. FLOWERING PLANTS (choose variety!):
+   - Orchids (Phalaenopsis), Peace Lily, African Violet, Anthurium, Begonia
+   - Jasmine, Gardenia, Hibiscus, Bromeliad, Kalanchoe
+   - Christmas Cactus, Lipstick Plant, Geranium, Chrysanthemum
+   - Rose (miniature), Pansy, Impatiens, Dahlia, Zinnia, Marigold, Petunia
+
+2. AROMATIC/HERB PLANTS:
+   - Lavender, Jasmine, Rosemary, Mint, Basil, Thyme, Oregano
+   - Cilantro, Parsley, Sage
+
+3. FOLIAGE PLANTS (vary the selection!):
+   - Monstera, Pothos, Philodendron, Calathea, Prayer Plant
+   - Fiddle Leaf Fig, Rubber Plant, Bird of Paradise, Croton
+   - Chinese Evergreen, Dieffenbachia, Arrowhead Plant
+   - Nerve Plant (Fittonia), Coleus, Ti Plant, Hoya
+   - String of Pearls, Peperomia, Swiss Cheese Vine
+
+4. PALMS & FERNS:
+   - Areca Palm, Parlor Palm, Kentia Palm, Bamboo Palm
+   - Boston Fern, Asparagus Fern, Norfolk Island Pine
+
+5. SUCCULENTS & CACTI:
+   - Echeveria, Haworthia, Jade Plant, Aloe Vera
+   - Christmas Cactus, various cacti, Ponytail Palm
+
+6. AIR PURIFYING CHAMPIONS:
+   - Snake Plant, Spider Plant, Peace Lily, English Ivy
+   - Dracaena, ZZ Plant, Bamboo Palm, Chrysanthemum
+
+7. BONSAI & SPECIALTY:
+   - Ficus Bonsai, Jade Bonsai, Chinese Elm Bonsai
+   - Purple Shamrock (Oxalis), Sunflower (dwarf)
+
+8. EDIBLE/VEGETABLE PLANTS:
+   - Tomato (cherry), Chili Pepper, Strawberry, Lettuce, Spinach
+
+DO NOT always default to Monstera, Pothos, Snake Plant. Mix it up based on the space!
 
 For each plant:
 - Use common names ${language === "es" ? "in Spanish" : "in English"}

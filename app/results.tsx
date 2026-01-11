@@ -21,6 +21,7 @@ import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { getTranslations } from "@/constants/translations";
 import { COMMON_PLANTS } from "@/constants/commonPlants";
 import { usePlantImages } from "@/contexts/PlantImagesContext";
+import { editImageWithPlants } from "@/services/freepikService";
 
 function PlantLegendItemComponent({ 
   plant, 
@@ -734,84 +735,23 @@ Instructions:
 
       let editedImageData: string | null = null;
       try {
-        console.log("📤 Sending image edit request...");
-        console.log("📊 Request details:", {
-          promptLength: editPrompt.length,
-          imageDataLength: params.imageData.length,
-          aspectRatio: "1:1"
-        });
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-          console.log("⏱️ Request timeout - aborting after 90 seconds");
-          controller.abort();
-        }, 90000);
-        
-        if (!isMountedRef.current) {
-          clearTimeout(timeoutId);
-          return;
-        }
-        
-        const editResponse = await fetch("https://toolkit.rork.com/images/edit/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            prompt: editPrompt,
-            images: [{ type: "image", image: params.imageData }],
-            aspectRatio: "1:1",
-            quality: "high",
-          }),
-          signal: controller.signal,
-        });
-        
-        clearTimeout(timeoutId);
+        console.log("📤 Sending image edit request via backend...");
         
         if (!isMountedRef.current) return;
-        console.log("📥 Response received with status:", editResponse.status);
-
-        if (!editResponse.ok) {
-          let errorText = '';
-          try {
-            errorText = await editResponse.text();
-            console.error(`❌ Image edit API error ${editResponse.status}:`, errorText);
-          } catch {
-            console.error(`❌ Image edit API error ${editResponse.status} - could not read error`);
-          }
-          throw new Error(`API error: ${editResponse.status} - ${errorText || 'Unknown error'}`);
-        }
-
-        const editData = await editResponse.json();
-        console.log("✅ Image edit response structure:", {
-          hasImage: !!editData.image,
-          hasBase64Data: !!editData.image?.base64Data,
-          base64Length: editData.image?.base64Data?.length || 0,
-          mimeType: editData.image?.mimeType,
-          aspectRatio: editData.image?.aspectRatio
-        });
         
-        if (!editData.image || !editData.image.base64Data) {
-          throw new Error("Response does not contain valid image data");
-        }
+        const editResult = await editImageWithPlants(editPrompt, params.imageData, "1:1");
         
-        editedImageData = editData.image.base64Data;
-        if (isMountedRef.current) {
+        if (!isMountedRef.current) return;
+        
+        if (editResult.success && editResult.imageBase64) {
+          editedImageData = editResult.imageBase64;
           setEditedImage(editedImageData);
+          console.log("✅ Edited image generated and saved successfully");
+        } else {
+          console.log("⚠️ Image edit failed:", editResult.error);
         }
-        console.log("✅ Edited image generated and saved successfully");
       } catch (editError: any) {
-        console.error("❌ Error generating edited image:", editError.message);
-        console.error("Full edit error:", {
-          message: editError?.message,
-          name: editError?.name,
-          stack: editError?.stack,
-          isAbort: editError?.name === 'AbortError',
-          isNetwork: editError?.message?.includes('network') || editError?.message?.includes('fetch')
-        });
-        if (editError.name === 'AbortError') {
-          console.log("⏱️ Image edit request timed out after 90 seconds");
-        }
+        console.error("❌ Error generating edited image:", editError?.message);
         console.log("⏩ Continuing without edited image (user will see analysis only)...");
       }
 

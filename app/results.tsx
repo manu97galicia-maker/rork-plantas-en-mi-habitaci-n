@@ -59,6 +59,9 @@ function PlantLegendItemComponent({
       ]}
       onPress={handlePress}
     >
+      <View style={styles.legendNumberBadge}>
+        <Text style={styles.legendNumberBadgeText}>{index + 1}</Text>
+      </View>
       {plantImage ? (
         <Image
           source={{ uri: plantImage }}
@@ -163,6 +166,9 @@ function PlantCardComponent({ plant, index, getPlantImage, getDifficultyColor, g
       onPress={handlePress}
       activeOpacity={0.7}
     >
+      <View style={styles.plantCardNumberBadge}>
+        <Text style={styles.plantCardNumberText}>{index + 1}</Text>
+      </View>
       {plantImage && (
         <Image
           source={{ uri: plantImage }}
@@ -1243,12 +1249,37 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderRadius: 20,
     marginBottom: 16,
-    overflow: "hidden",
+    overflow: "visible",
     elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
+    position: "relative" as const,
+  },
+  plantCardNumberBadge: {
+    position: "absolute" as const,
+    top: -12,
+    left: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#52b788",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    zIndex: 10,
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    borderWidth: 3,
+    borderColor: "#ffffff",
+  },
+  plantCardNumberText: {
+    fontSize: 18,
+    fontWeight: "800" as const,
+    color: "#ffffff",
   },
   plantInfo: {
     padding: 20,
@@ -1432,11 +1463,30 @@ const styles = StyleSheet.create({
   legendItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: 12,
     marginBottom: 12,
     paddingVertical: 8,
     paddingHorizontal: 4,
     borderRadius: 12,
+    position: "relative" as const,
+  },
+  legendNumberBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#52b788",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  legendNumberBadgeText: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: "#ffffff",
   },
   legendItemPressed: {
     backgroundColor: "rgba(82, 183, 136, 0.1)",
@@ -1481,6 +1531,8 @@ const styles = StyleSheet.create({
   plantCardImage: {
     width: "100%",
     height: 150,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   plantsGalleryCard: {
     backgroundColor: "#ffffff",

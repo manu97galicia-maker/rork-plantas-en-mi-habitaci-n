@@ -22,9 +22,10 @@ import { getTranslations } from "@/constants/translations";
 import { COMMON_PLANTS } from "@/constants/commonPlants";
 import { usePlantImages } from "@/contexts/PlantImagesContext";
 
-function PlantLegendComponent({ suggestions, getPlantImage }: {
+function PlantLegendComponent({ suggestions, getPlantImage, onPlantPress }: {
   suggestions: any[];
   getPlantImage: (id: string, name?: string) => string | undefined;
+  onPlantPress: (index: number) => void;
 }) {
   return (
     <View style={styles.plantNumberLegend}>
@@ -44,7 +45,12 @@ function PlantLegendComponent({ suggestions, getPlantImage }: {
             plantImage = undefined;
           }
           return (
-            <View key={`legend-${plantId}`} style={styles.legendItem}>
+            <TouchableOpacity 
+              key={`legend-${plantId}`} 
+              style={styles.legendItem}
+              onPress={() => onPlantPress(index)}
+              activeOpacity={0.7}
+            >
               {plantImage ? (
                 <Image
                   source={{ uri: plantImage }}
@@ -60,7 +66,7 @@ function PlantLegendComponent({ suggestions, getPlantImage }: {
                 <Text style={styles.legendPlantName}>{plantName}</Text>
                 <Text style={styles.legendPlantScientific}>{plant.scientificName || ''}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           );
         })}
       </ScrollView>
@@ -96,19 +102,19 @@ function PlantCardComponent({ plant, index, getPlantImage, getDifficultyColor, g
   const handlePress = useCallback(() => {
     if (!plant) return;
     try {
-      const safeEnriched = enrichedPlant ? {
-        id: String(enrichedPlant.id || ''),
-        name: String(enrichedPlant.name || ''),
-        scientificName: String(enrichedPlant.scientificName || ''),
-        difficulty: String(enrichedPlant.difficulty || 'Easy'),
-        lightRequirement: String(enrichedPlant.lightRequirement || ''),
-        wateringSchedule: String(enrichedPlant.wateringSchedule || ''),
-        description: String(enrichedPlant.description || ''),
-        airPurification: enrichedPlant.airPurification || null,
-        wellnessBenefits: enrichedPlant.wellnessBenefits || null,
-        careInstructions: enrichedPlant.careInstructions || null,
-      } : null;
-      if (!safeEnriched) return;
+      const sourcePlant = enrichedPlant || plant;
+      const safeEnriched = {
+        id: String(sourcePlant.id || plant.id || ''),
+        name: String(sourcePlant.name || plant.name || ''),
+        scientificName: String(sourcePlant.scientificName || plant.scientificName || ''),
+        difficulty: String(sourcePlant.difficulty || plant.difficulty || 'Easy'),
+        lightRequirement: String(sourcePlant.lightRequirement || plant.lightRequirement || ''),
+        wateringSchedule: String(sourcePlant.wateringSchedule || plant.wateringSchedule || ''),
+        description: String(sourcePlant.description || plant.description || ''),
+        airPurification: sourcePlant.airPurification || plant.airPurification || null,
+        wellnessBenefits: sourcePlant.wellnessBenefits || plant.wellnessBenefits || null,
+        careInstructions: sourcePlant.careInstructions || plant.careInstructions || null,
+      };
       safeNavigate({
         pathname: "/plant-detail",
         params: { 
@@ -117,8 +123,8 @@ function PlantCardComponent({ plant, index, getPlantImage, getDifficultyColor, g
           currentIndex: String(index)
         },
       });
-    } catch {
-      console.log('Navigation error');
+    } catch (e) {
+      console.log('Navigation error:', e);
     }
   }, [plant, enrichedPlant, safeNavigate, allPlantsJson, index]);
 
@@ -242,12 +248,12 @@ export default function ResultsScreen() {
     if (!analysis?.suggestions || !Array.isArray(analysis.suggestions)) return [];
     try {
       return analysis.suggestions.map(plant => {
-        if (!plant) return null;
+        if (!plant) return plant;
         return enrichPlantData(plant);
-      }).filter((p): p is NonNullable<typeof p> => p !== null && p !== undefined);
+      });
     } catch (e) {
       console.log('Error enriching plants:', e);
-      return analysis.suggestions.filter((p): p is NonNullable<typeof p> => p !== null && p !== undefined);
+      return analysis.suggestions;
     }
   }, [analysis?.suggestions, enrichPlantData]);
 
@@ -1001,7 +1007,37 @@ Instructions:
 
             <PlantLegend 
               suggestions={analysis.suggestions} 
-              getPlantImage={getPlantImage} 
+              getPlantImage={getPlantImage}
+              onPlantPress={(index) => {
+                const plant = analysis.suggestions[index];
+                const enriched = enrichedPlants[index];
+                if (!plant) return;
+                try {
+                  const sourcePlant = enriched || plant;
+                  const safeEnriched = {
+                    id: String(sourcePlant.id || plant.id || ''),
+                    name: String(sourcePlant.name || plant.name || ''),
+                    scientificName: String(sourcePlant.scientificName || plant.scientificName || ''),
+                    difficulty: String(sourcePlant.difficulty || plant.difficulty || 'Easy'),
+                    lightRequirement: String(sourcePlant.lightRequirement || plant.lightRequirement || ''),
+                    wateringSchedule: String(sourcePlant.wateringSchedule || plant.wateringSchedule || ''),
+                    description: String(sourcePlant.description || plant.description || ''),
+                    airPurification: sourcePlant.airPurification || plant.airPurification || null,
+                    wellnessBenefits: sourcePlant.wellnessBenefits || plant.wellnessBenefits || null,
+                    careInstructions: sourcePlant.careInstructions || plant.careInstructions || null,
+                  };
+                  safeNavigate({
+                    pathname: "/plant-detail",
+                    params: { 
+                      plantData: JSON.stringify(safeEnriched),
+                      allPlants: allPlantsJson,
+                      currentIndex: String(index)
+                    },
+                  });
+                } catch (e) {
+                  console.log('Legend navigation error:', e);
+                }
+              }}
             />
 
             {analysis.suggestions.map((plant, idx) => {

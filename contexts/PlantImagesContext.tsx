@@ -4,7 +4,7 @@ import createContextHook from '@nkzw/create-context-hook';
 import { fetchPlantImage } from '@/services/freepikService';
 
 const STORAGE_KEY = '@plant_images_cache_v4';
-const CACHE_DURATION = 30 * 24 * 60 * 60 * 1000;
+const CACHE_DURATION = 365 * 24 * 60 * 60 * 1000;
 
 interface CachedImages {
   images: Record<string, string>;

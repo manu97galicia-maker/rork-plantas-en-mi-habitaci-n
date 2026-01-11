@@ -280,16 +280,22 @@ export default function ResultsScreen() {
   const allPlantsJson = useMemo(() => {
     try {
       if (!enrichedPlants || enrichedPlants.length === 0) return '[]';
-      const simplePlants = enrichedPlants.slice(0, 10).map(p => {
+      const fullPlants = enrichedPlants.slice(0, 10).map(p => {
         if (!p) return null;
         return {
           id: String(p.id || ''),
           name: String(p.name || ''),
           scientificName: String(p.scientificName || ''),
           difficulty: String(p.difficulty || 'Easy'),
+          lightRequirement: String(p.lightRequirement || ''),
+          wateringSchedule: String(p.wateringSchedule || ''),
+          description: String(p.description || ''),
+          airPurification: p.airPurification || null,
+          wellnessBenefits: p.wellnessBenefits || null,
+          careInstructions: p.careInstructions || null,
         };
       }).filter(Boolean);
-      return JSON.stringify(simplePlants);
+      return JSON.stringify(fullPlants);
     } catch {
       return '[]';
     }

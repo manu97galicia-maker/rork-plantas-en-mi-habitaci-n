@@ -17,6 +17,7 @@ import * as Haptics from "expo-haptics";
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
+import { getTranslations } from "@/constants/translations";
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -26,8 +27,10 @@ export default function CameraScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
-  const { getRemainingScans, canScan } = useUserPreferences();
+  const { getRemainingScans, canScan, language } = useUserPreferences();
   const remainingScans = getRemainingScans();
+  const t = getTranslations(language);
+  const [showStabilizing, setShowStabilizing] = useState(false);
   const isNavigatingRef = useRef(false);
   const lastClickRef = useRef(0);
 
@@ -249,6 +252,7 @@ export default function CameraScreen() {
 
     try {
       setIsCapturing(true);
+      setShowStabilizing(true);
       if (Platform.OS !== "web") {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       }
@@ -260,6 +264,8 @@ export default function CameraScreen() {
         base64: true,
         skipProcessing: true,
       });
+      
+      setShowStabilizing(false);
 
       console.log("✅ Photo captured successfully");
 
@@ -293,6 +299,7 @@ export default function CameraScreen() {
       }
     } catch (error) {
       console.error("❌ Error taking picture:", error);
+      setShowStabilizing(false);
       Alert.alert(
         "Error",
         "Could not take photo. Please try again.",
@@ -336,9 +343,18 @@ export default function CameraScreen() {
 
             <View style={styles.guideContainer}>
               <View style={styles.guideBox} />
-              <Text style={styles.guideText}>
-                Capture the entire room for best results
-              </Text>
+              {showStabilizing ? (
+                <View style={styles.stabilizingContainer}>
+                  <ActivityIndicator size="small" color="#52b788" style={{ marginBottom: 8 }} />
+                  <Text style={styles.stabilizingText}>
+                    {t.camera.stabilizing}
+                  </Text>
+                </View>
+              ) : (
+                <Text style={styles.guideText}>
+                  Capture the entire room for best results
+                </Text>
+              )}
             </View>
 
             <View style={styles.controls}>
@@ -463,6 +479,19 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
+  },
+  stabilizingContainer: {
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: "center" as const,
+  },
+  stabilizingText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: "#52b788",
+    textAlign: "center" as const,
   },
   controls: {
     flexDirection: "row",

@@ -55,6 +55,7 @@ interface Translations {
     usePhoto: string;
     noPermission: string;
     requestPermission: string;
+    stabilizing: string;
   };
   settings: {
     title: string;
@@ -207,6 +208,7 @@ const translations: Record<Language, Translations> = {
       usePhoto: "Use Photo",
       noPermission: "No camera permission",
       requestPermission: "Grant Permission",
+      stabilizing: "Hold still for 5 seconds...",
     },
     settings: {
       title: "Settings",
@@ -357,6 +359,7 @@ const translations: Record<Language, Translations> = {
       usePhoto: "Usar foto",
       noPermission: "Sin permiso de cámara",
       requestPermission: "Conceder permiso",
+      stabilizing: "No muevas la cámara durante 5 segundos...",
     },
     settings: {
       title: "Configuración",

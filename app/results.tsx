@@ -22,6 +22,56 @@ import { getTranslations } from "@/constants/translations";
 import { COMMON_PLANTS } from "@/constants/commonPlants";
 import { usePlantImages } from "@/contexts/PlantImagesContext";
 
+function PlantLegendItemComponent({ 
+  plant, 
+  index, 
+  getPlantImage, 
+  onPress 
+}: {
+  plant: any;
+  index: number;
+  getPlantImage: (id: string, name?: string) => string | undefined;
+  onPress: () => void;
+}) {
+  if (!plant) return null;
+  const plantId = plant.id || `plant-${index}`;
+  const plantName = plant.name || 'Plant';
+  let plantImage: string | undefined;
+  try {
+    plantImage = getPlantImage(plantId, plantName);
+  } catch {
+    plantImage = undefined;
+  }
+  
+  return (
+    <Pressable 
+      key={`legend-${plantId}`} 
+      style={({ pressed }) => [
+        styles.legendItem,
+        pressed && styles.legendItemPressed
+      ]}
+      onPress={onPress}
+    >
+      {plantImage ? (
+        <Image
+          source={{ uri: plantImage }}
+          style={styles.legendPlantImage}
+          contentFit="cover"
+        />
+      ) : (
+        <View style={styles.legendNumberCircle}>
+          <Text style={styles.legendNumberLargeText}>{index + 1}</Text>
+        </View>
+      )}
+      <View style={styles.legendPlantInfo}>
+        <Text style={styles.legendPlantName}>{plantName}</Text>
+        <Text style={styles.legendPlantScientific}>{plant.scientificName || ''}</Text>
+      </View>
+    </Pressable>
+  );
+}
+const PlantLegendItem = React.memo(PlantLegendItemComponent);
+
 function PlantLegendComponent({ suggestions, getPlantImage, onPlantPress }: {
   suggestions: any[];
   getPlantImage: (id: string, name?: string) => string | undefined;
@@ -29,47 +79,17 @@ function PlantLegendComponent({ suggestions, getPlantImage, onPlantPress }: {
 }) {
   return (
     <View style={styles.plantNumberLegend}>
-      <ScrollView 
-        style={styles.legendScrollView}
-        nestedScrollEnabled={true}
-        showsVerticalScrollIndicator={true}
-      >
-        {suggestions.map((plant, index) => {
-          if (!plant) return null;
-          const plantId = plant.id || `plant-${index}`;
-          const plantName = plant.name || 'Plant';
-          let plantImage: string | undefined;
-          try {
-            plantImage = getPlantImage(plantId, plantName);
-          } catch {
-            plantImage = undefined;
-          }
-          return (
-            <TouchableOpacity 
-              key={`legend-${plantId}`} 
-              style={styles.legendItem}
-              onPress={() => onPlantPress(index)}
-              activeOpacity={0.7}
-            >
-              {plantImage ? (
-                <Image
-                  source={{ uri: plantImage }}
-                  style={styles.legendPlantImage}
-                  contentFit="cover"
-                />
-              ) : (
-                <View style={styles.legendNumberCircle}>
-                  <Text style={styles.legendNumberLargeText}>{index + 1}</Text>
-                </View>
-              )}
-              <View style={styles.legendPlantInfo}>
-                <Text style={styles.legendPlantName}>{plantName}</Text>
-                <Text style={styles.legendPlantScientific}>{plant.scientificName || ''}</Text>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+      <View style={styles.legendScrollView}>
+        {suggestions.map((plant, index) => (
+          <PlantLegendItem
+            key={`legend-item-${plant?.id || index}`}
+            plant={plant}
+            index={index}
+            getPlantImage={getPlantImage}
+            onPress={() => onPlantPress(index)}
+          />
+        ))}
+      </View>
     </View>
   );
 }
@@ -277,7 +297,7 @@ export default function ResultsScreen() {
 
   const safeNavigate = useCallback((path: string | { pathname: string; params: any }) => {
     const now = Date.now();
-    if (isNavigatingRef.current || now - lastClickRef.current < 600) {
+    if (isNavigatingRef.current || now - lastClickRef.current < 400) {
       console.log('⚠️ Navigation blocked - too fast');
       return;
     }
@@ -294,8 +314,40 @@ export default function ResultsScreen() {
     }
     setTimeout(() => {
       isNavigatingRef.current = false;
-    }, 600);
+    }, 400);
   }, [router]);
+
+  const handleLegendPlantPress = useCallback((index: number) => {
+    if (!analysis?.suggestions) return;
+    const plant = analysis.suggestions[index];
+    const enriched = enrichedPlants[index];
+    if (!plant) return;
+    try {
+      const sourcePlant = enriched || plant;
+      const safeEnriched = {
+        id: String(sourcePlant.id || plant.id || ''),
+        name: String(sourcePlant.name || plant.name || ''),
+        scientificName: String(sourcePlant.scientificName || plant.scientificName || ''),
+        difficulty: String(sourcePlant.difficulty || plant.difficulty || 'Easy'),
+        lightRequirement: String(sourcePlant.lightRequirement || plant.lightRequirement || ''),
+        wateringSchedule: String(sourcePlant.wateringSchedule || plant.wateringSchedule || ''),
+        description: String(sourcePlant.description || plant.description || ''),
+        airPurification: sourcePlant.airPurification || plant.airPurification || null,
+        wellnessBenefits: sourcePlant.wellnessBenefits || plant.wellnessBenefits || null,
+        careInstructions: sourcePlant.careInstructions || plant.careInstructions || null,
+      };
+      safeNavigate({
+        pathname: "/plant-detail",
+        params: { 
+          plantData: JSON.stringify(safeEnriched),
+          allPlants: allPlantsJson,
+          currentIndex: String(index)
+        },
+      });
+    } catch (e) {
+      console.log('Legend navigation error:', e);
+    }
+  }, [analysis?.suggestions, enrichedPlants, allPlantsJson, safeNavigate]);
 
   const handleMarkerTap = useCallback((index: number, plantName: string) => {
     try {
@@ -1008,36 +1060,7 @@ Instructions:
             <PlantLegend 
               suggestions={analysis.suggestions} 
               getPlantImage={getPlantImage}
-              onPlantPress={(index) => {
-                const plant = analysis.suggestions[index];
-                const enriched = enrichedPlants[index];
-                if (!plant) return;
-                try {
-                  const sourcePlant = enriched || plant;
-                  const safeEnriched = {
-                    id: String(sourcePlant.id || plant.id || ''),
-                    name: String(sourcePlant.name || plant.name || ''),
-                    scientificName: String(sourcePlant.scientificName || plant.scientificName || ''),
-                    difficulty: String(sourcePlant.difficulty || plant.difficulty || 'Easy'),
-                    lightRequirement: String(sourcePlant.lightRequirement || plant.lightRequirement || ''),
-                    wateringSchedule: String(sourcePlant.wateringSchedule || plant.wateringSchedule || ''),
-                    description: String(sourcePlant.description || plant.description || ''),
-                    airPurification: sourcePlant.airPurification || plant.airPurification || null,
-                    wellnessBenefits: sourcePlant.wellnessBenefits || plant.wellnessBenefits || null,
-                    careInstructions: sourcePlant.careInstructions || plant.careInstructions || null,
-                  };
-                  safeNavigate({
-                    pathname: "/plant-detail",
-                    params: { 
-                      plantData: JSON.stringify(safeEnriched),
-                      allPlants: allPlantsJson,
-                      currentIndex: String(index)
-                    },
-                  });
-                } catch (e) {
-                  console.log('Legend navigation error:', e);
-                }
-              }}
+              onPlantPress={handleLegendPlantPress}
             />
 
             {analysis.suggestions.map((plant, idx) => {
@@ -1385,6 +1408,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
     marginBottom: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 12,
+  },
+  legendItemPressed: {
+    backgroundColor: "rgba(82, 183, 136, 0.1)",
   },
   legendNumberCircle: {
     width: 50,

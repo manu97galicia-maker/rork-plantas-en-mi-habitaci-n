@@ -26,22 +26,29 @@ function PlantLegendItemComponent({
   plant, 
   index, 
   getPlantImage, 
-  onPress 
+  onPlantPress 
 }: {
   plant: any;
   index: number;
   getPlantImage: (id: string, name?: string) => string | undefined;
-  onPress: () => void;
+  onPlantPress: (index: number) => void;
 }) {
-  if (!plant) return null;
-  const plantId = plant.id || `plant-${index}`;
-  const plantName = plant.name || 'Plant';
+  const plantId = plant?.id || `plant-${index}`;
+  const plantName = plant?.name || 'Plant';
+  
+  const handlePress = useCallback(() => {
+    console.log('🌿 Legend item pressed, index:', index, 'plant:', plantName);
+    onPlantPress(index);
+  }, [index, onPlantPress, plantName]);
+
   let plantImage: string | undefined;
   try {
-    plantImage = getPlantImage(plantId, plantName);
+    plantImage = plant ? getPlantImage(plantId, plantName) : undefined;
   } catch {
     plantImage = undefined;
   }
+
+  if (!plant) return null;
   
   return (
     <Pressable 
@@ -50,7 +57,7 @@ function PlantLegendItemComponent({
         styles.legendItem,
         pressed && styles.legendItemPressed
       ]}
-      onPress={onPress}
+      onPress={handlePress}
     >
       {plantImage ? (
         <Image
@@ -82,11 +89,11 @@ function PlantLegendComponent({ suggestions, getPlantImage, onPlantPress }: {
       <View style={styles.legendScrollView}>
         {suggestions.map((plant, index) => (
           <PlantLegendItem
-            key={`legend-item-${plant?.id || index}`}
+            key={`legend-item-${plant?.id || index}-${index}`}
             plant={plant}
             index={index}
             getPlantImage={getPlantImage}
-            onPress={() => onPlantPress(index)}
+            onPlantPress={onPlantPress}
           />
         ))}
       </View>
@@ -324,10 +331,22 @@ export default function ResultsScreen() {
   }, [router]);
 
   const handleLegendPlantPress = useCallback((index: number) => {
-    if (!analysis?.suggestions) return;
+    console.log('🌱 handleLegendPlantPress called with index:', index);
+    if (!analysis?.suggestions) {
+      console.log('❌ No suggestions available');
+      return;
+    }
+    if (index < 0 || index >= analysis.suggestions.length) {
+      console.log('❌ Invalid index:', index, 'suggestions length:', analysis.suggestions.length);
+      return;
+    }
     const plant = analysis.suggestions[index];
     const enriched = enrichedPlants[index];
-    if (!plant) return;
+    if (!plant) {
+      console.log('❌ Plant not found at index:', index);
+      return;
+    }
+    console.log('✅ Found plant:', plant.name, 'at index:', index);
     try {
       const sourcePlant = enriched || plant;
       const safeEnriched = {
@@ -342,6 +361,7 @@ export default function ResultsScreen() {
         wellnessBenefits: sourcePlant.wellnessBenefits || plant.wellnessBenefits || null,
         careInstructions: sourcePlant.careInstructions || plant.careInstructions || null,
       };
+      console.log('📍 Navigating to plant-detail with index:', index);
       safeNavigate({
         pathname: "/plant-detail",
         params: { 

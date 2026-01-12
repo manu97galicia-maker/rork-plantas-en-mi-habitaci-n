@@ -1,5 +1,5 @@
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { X, Camera as CameraIcon, RotateCcw, History, Image as ImageIcon } from "lucide-react-native";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
@@ -33,6 +33,18 @@ export default function CameraScreen() {
   const [showStabilizing, setShowStabilizing] = useState(false);
   const isNavigatingRef = useRef(false);
   const lastClickRef = useRef(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log('📷 Camera screen focused - resetting states');
+      setIsCapturing(false);
+      setShowStabilizing(false);
+      isNavigatingRef.current = false;
+      return () => {
+        console.log('📷 Camera screen unfocused');
+      };
+    }, [])
+  );
 
   const safeNavigate = useCallback((path: string | { pathname: string; params: any }) => {
     const now = Date.now();
@@ -292,6 +304,9 @@ export default function CameraScreen() {
             pathname: "/results",
             params,
           });
+          setTimeout(() => {
+            setIsCapturing(false);
+          }, 500);
         });
       } else {
         console.error("❌ Photo capture failed - no base64 data");

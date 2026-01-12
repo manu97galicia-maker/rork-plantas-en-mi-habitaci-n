@@ -187,24 +187,22 @@ export default function PlantDetailScreen() {
 
       {hasMultiplePlants && (
         <>
-          {canGoBack && (
-            <TouchableOpacity
-              style={[styles.navArrow, styles.navArrowLeft]}
-              onPress={goToPreviousPlant}
-              activeOpacity={0.8}
-            >
-              <ChevronLeft size={32} color="#ffffff" />
-            </TouchableOpacity>
-          )}
-          {canGoForward && (
-            <TouchableOpacity
-              style={[styles.navArrow, styles.navArrowRight]}
-              onPress={goToNextPlant}
-              activeOpacity={0.8}
-            >
-              <ChevronRight size={32} color="#ffffff" />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={[styles.navArrow, styles.navArrowLeft, !canGoBack && styles.navArrowDisabled]}
+            onPress={goToPreviousPlant}
+            activeOpacity={canGoBack ? 0.8 : 1}
+            disabled={!canGoBack}
+          >
+            <ChevronLeft size={32} color={canGoBack ? "#ffffff" : "rgba(255,255,255,0.3)"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.navArrow, styles.navArrowRight, !canGoForward && styles.navArrowDisabled]}
+            onPress={goToNextPlant}
+            activeOpacity={canGoForward ? 0.8 : 1}
+            disabled={!canGoForward}
+          >
+            <ChevronRight size={32} color={canGoForward ? "#ffffff" : "rgba(255,255,255,0.3)"} />
+          </TouchableOpacity>
         </>
       )}
 
@@ -473,20 +471,31 @@ const styles = StyleSheet.create({
   },
   navArrow: {
     position: "absolute",
-    top: "45%",
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    top: 180,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "rgba(26, 77, 46, 0.85)",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 20,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   navArrowLeft: {
-    left: 12,
+    left: 16,
   },
   navArrowRight: {
-    right: 12,
+    right: 16,
+  },
+  navArrowDisabled: {
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   content: {
     flex: 1,

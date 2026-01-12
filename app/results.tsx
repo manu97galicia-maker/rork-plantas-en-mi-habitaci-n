@@ -83,13 +83,18 @@ function PlantLegendItemComponent({
 }
 const PlantLegendItem = React.memo(PlantLegendItemComponent);
 
-function PlantLegendComponent({ suggestions, getPlantImage, onPlantPress }: {
+function PlantLegendComponent({ suggestions, getPlantImage, onPlantPress, t }: {
   suggestions: any[];
   getPlantImage: (id: string, name?: string) => string | undefined;
   onPlantPress: (index: number) => void;
+  t: any;
 }) {
   return (
     <View style={styles.plantNumberLegend}>
+      <View style={styles.legendHeader}>
+        <Text style={styles.legendTitle}>{t.results.plantListTitle}</Text>
+        <Text style={styles.legendSubtitle}>{t.results.tapToSeeDetails}</Text>
+      </View>
       <View style={styles.legendScrollView}>
         {suggestions.map((plant, index) => (
           <PlantLegendItem
@@ -1070,6 +1075,7 @@ Instructions:
               suggestions={analysis.suggestions} 
               getPlantImage={getPlantImage}
               onPlantPress={handleLegendPlantPress}
+              t={t}
             />
 
             {analysis.suggestions.map((plant, idx) => {
@@ -1437,15 +1443,34 @@ const styles = StyleSheet.create({
   legendScrollView: {
     flex: 1,
   },
+  legendHeader: {
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    paddingBottom: 12,
+  },
+  legendTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: "#1a4d2e",
+    marginBottom: 4,
+  },
+  legendSubtitle: {
+    fontSize: 13,
+    color: "#52b788",
+    fontWeight: "500" as const,
+  },
   legendItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     marginBottom: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 12,
-    position: "relative" as const,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    backgroundColor: "#f8faf9",
+    borderWidth: 1,
+    borderColor: "#e8f0eb",
   },
   legendNumberBadge: {
     width: 28,
@@ -1466,7 +1491,9 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   legendItemPressed: {
-    backgroundColor: "rgba(82, 183, 136, 0.1)",
+    backgroundColor: "#e8f5ec",
+    borderColor: "#52b788",
+    transform: [{ scale: 0.98 }],
   },
   legendNumberCircle: {
     width: 50,
@@ -1491,14 +1518,17 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   legendPlantName: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "600" as const,
     color: "#1a4d2e",
   },
   legendPlantScientific: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#6b7280",
     fontStyle: "italic",
+  },
+  legendChevron: {
+    marginLeft: 8,
   },
   legendPlantImage: {
     width: 50,

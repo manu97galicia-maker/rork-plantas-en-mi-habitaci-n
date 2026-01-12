@@ -127,6 +127,8 @@ interface Translations {
     tapToEnlarge: string;
     tapPlantNumber: string;
     plantMarkersHint: string;
+    plantListTitle: string;
+    tapToSeeDetails: string;
   };
   plantDetail: {
     careInstructions: string;
@@ -280,6 +282,8 @@ const translations: Record<Language, Translations> = {
       tapToEnlarge: "Tap to enlarge",
       tapPlantNumber: "Tap on numbers to identify plants",
       plantMarkersHint: "Numbers show plant positions",
+      plantListTitle: "Detected Plants",
+      tapToSeeDetails: "Tap any plant to see full details",
     },
     plantDetail: {
       careInstructions: "Care Instructions",
@@ -431,6 +435,8 @@ const translations: Record<Language, Translations> = {
       tapToEnlarge: "Toca para ampliar",
       tapPlantNumber: "Toca los números para identificar plantas",
       plantMarkersHint: "Los números muestran la posición de las plantas",
+      plantListTitle: "Plantas Detectadas",
+      tapToSeeDetails: "Toca cualquier planta para ver todos los detalles",
     },
     plantDetail: {
       careInstructions: "Instrucciones de Cuidado",

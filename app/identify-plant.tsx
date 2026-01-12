@@ -166,14 +166,15 @@ Be specific and precise in the identification.`;
       console.log('📤 Sending request to AI...');
       
       let result;
-      const maxRetries = 2;
+      const maxRetries = 3;
       let lastError: any = null;
       
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
           if (attempt > 0) {
-            console.log(`🔄 Retry attempt ${attempt}/${maxRetries}...`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+            console.log(`🔄 Retry attempt ${attempt}/${maxRetries} after ${delayMs}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delayMs));
           }
           
           result = await generateObject({
@@ -190,13 +191,20 @@ Be specific and precise in the identification.`;
           });
           
           if (result && result.name) {
+            console.log(`✅ Success on attempt ${attempt + 1}`);
             break;
           }
         } catch (genError: any) {
-          console.error(`generateObject error (attempt ${attempt + 1}):`, genError?.message || 'Unknown error');
+          const errorMsg = genError?.message || 'Unknown error';
+          console.error(`generateObject error (attempt ${attempt + 1}):`, errorMsg);
           lastError = genError;
           
-          if (attempt === maxRetries) {
+          const isNetworkError = errorMsg.includes('Network request failed') || 
+                                  errorMsg.includes('Failed to fetch') ||
+                                  errorMsg.includes('network') ||
+                                  errorMsg.includes('timeout');
+          
+          if (attempt === maxRetries || (!isNetworkError && !errorMsg.includes('429'))) {
             throw lastError;
           }
         }
@@ -266,10 +274,12 @@ Be specific and precise in the identification.`;
         setError("🔑 Error 403: No permissions. Check your settings.");
       } else if (errorMessage.includes("401") || errorString.includes("401")) {
         setError("🔑 Error 401: Unauthorized. Check your settings.");
+      } else if (errorMessage.includes("Network request failed") || errorString.includes("Network request failed")) {
+        setError(language === "es" ? "🌐 Error de red. Verifica tu conexión a internet y vuelve a intentarlo. Si el problema persiste, el servicio podría estar temporalmente no disponible." : "🌐 Network error. Check your internet connection and try again. If the problem persists, the service might be temporarily unavailable.");
       } else if (errorMessage.includes("network") || errorString.includes("network") || errorName === "TypeError" && errorMessage.includes("failed")) {
-        setError("🌐 Network error. Check your internet connection and try again. If the problem persists, the service might be temporarily unavailable.");
+        setError(language === "es" ? "🌐 Error de red. Verifica tu conexión a internet y vuelve a intentarlo." : "🌐 Network error. Check your internet connection and try again.");
       } else if (errorMessage.includes("Failed to fetch") || errorString.includes("Failed to fetch")) {
-        setError("🌐 Cannot connect to the service. Check your internet connection or try again later.");
+        setError(language === "es" ? "🌐 No se puede conectar al servicio. Verifica tu conexión a internet o intenta más tarde." : "🌐 Cannot connect to the service. Check your internet connection or try again later.");
       } else {
         setError(`❌ Error: ${errorMessage || errorString || "Unknown error occurred"}`);
       }

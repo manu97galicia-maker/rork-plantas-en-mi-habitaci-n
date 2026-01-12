@@ -271,13 +271,26 @@ export default function ResultsScreen() {
       if (commonPlant) {
         return {
           ...plant,
-          airPurification: plant.airPurification || commonPlant.airPurification,
-          wellnessBenefits: plant.wellnessBenefits || commonPlant.wellnessBenefits,
+          airPurification: plant.airPurification || commonPlant.airPurification || (plant.airScore ? { score: plant.airScore, description: '', descriptionEs: '' } : undefined),
+          wellnessBenefits: plant.wellnessBenefits || commonPlant.wellnessBenefits || (plant.sleepScore || plant.stressScore ? { sleepScore: plant.sleepScore || 5, sleepDescription: '', sleepDescriptionEs: '', stressScore: plant.stressScore || 5, stressDescription: '', stressDescriptionEs: '' } : undefined),
           careInstructions: plant.careInstructions || commonPlant.careInstructions,
         };
       }
     } catch (e) {
       console.log('Error enriching plant:', e);
+    }
+    if (plant.airScore && !plant.airPurification) {
+      plant.airPurification = { score: plant.airScore, description: '', descriptionEs: '' };
+    }
+    if ((plant.sleepScore || plant.stressScore) && !plant.wellnessBenefits) {
+      plant.wellnessBenefits = { 
+        sleepScore: plant.sleepScore || 5, 
+        sleepDescription: '', 
+        sleepDescriptionEs: '', 
+        stressScore: plant.stressScore || 5, 
+        stressDescription: '', 
+        stressDescriptionEs: '' 
+      };
     }
     return plant;
   }, []);
@@ -544,27 +557,9 @@ export default function ResultsScreen() {
       wateringSchedule: z.string(),
       difficulty: z.enum(["Easy", "Moderate", "Advanced"]),
       description: z.string(),
-      airPurification: z.object({
-        score: z.number(),
-        description: z.string(),
-        descriptionEs: z.string(),
-      }).optional(),
-      wellnessBenefits: z.object({
-        sleepScore: z.number(),
-        sleepDescription: z.string(),
-        sleepDescriptionEs: z.string(),
-        stressScore: z.number(),
-        stressDescription: z.string(),
-        stressDescriptionEs: z.string(),
-      }).optional(),
-      careInstructions: z.object({
-        light: z.string(),
-        water: z.string(),
-        temperature: z.string(),
-        humidity: z.string(),
-        fertilizer: z.string(),
-        tips: z.array(z.string()),
-      }).optional(),
+      airScore: z.number().optional(),
+      sleepScore: z.number().optional(),
+      stressScore: z.number().optional(),
       position: z.object({
         x: z.number(),
         y: z.number(),
@@ -643,79 +638,29 @@ ADJUST recommendations according to their experience level.`;
       }
 
       const languageInstruction = language === "es" 
-        ? "\n\nIMPORTANTE: Responde TODA la información en ESPAÑOL (nombres comunes de plantas, descripciones, instrucciones de cuidado, consejos). Solo los nombres científicos deben estar en latín."
+        ? "\nResponde en ESPAÑOL."
         : "";
 
-      const prompt = `Analyze this image of a room and generate plant suggestions.${locationPrompt}${careLevelPrompt}${languageInstruction}
+      const prompt = `Analyze this room image and suggest 4 plants.${locationPrompt}${careLevelPrompt}${languageInstruction}
 
-Analyze the room and identify 4-5 specific locations where plants would look good (tables, shelves, corners, windows). 
+For each plant provide:
+- id: unique string
+- name: common name ${language === "es" ? "in Spanish" : ""}
+- scientificName
+- lightRequirement: "${language === "es" ? "Luz indirecta/Luz directa/Sombra" : "Indirect/Direct/Shade"}"
+- wateringSchedule: frequency
+- difficulty: "Easy", "Moderate", or "Advanced"
+- description: 1-2 sentences ${language === "es" ? "in Spanish" : ""}
+- airScore: 1-10 (air purification rating)
+- sleepScore: 1-10 (sleep benefit rating)
+- stressScore: 1-10 (stress relief rating)
+- position: {x: 10-90, y: 10-90, size: "small"/"medium"/"large"}
 
-CRITICAL - PLANT VARIETY REQUIREMENT:
-You MUST recommend a DIVERSE mix of plants from DIFFERENT categories. Do NOT always recommend the same common plants.
+Also provide:
+- lightLevel: "Low", "Medium", or "Bright"
+- spaceSize: "Small", "Medium", or "Large"
 
-Choose from these categories (include AT LEAST 3 different categories in your recommendations):
-
-1. FLOWERING PLANTS (choose variety!):
-   - Orchids (Phalaenopsis), Peace Lily, African Violet, Anthurium, Begonia
-   - Jasmine, Gardenia, Hibiscus, Bromeliad, Kalanchoe
-   - Christmas Cactus, Lipstick Plant, Geranium, Chrysanthemum
-   - Rose (miniature), Pansy, Impatiens, Dahlia, Zinnia, Marigold, Petunia
-
-2. AROMATIC/HERB PLANTS:
-   - Lavender, Jasmine, Rosemary, Mint, Basil, Thyme, Oregano
-   - Cilantro, Parsley, Sage
-
-3. FOLIAGE PLANTS (vary the selection!):
-   - Monstera, Pothos, Philodendron, Calathea, Prayer Plant
-   - Fiddle Leaf Fig, Rubber Plant, Bird of Paradise, Croton
-   - Chinese Evergreen, Dieffenbachia, Arrowhead Plant
-   - Nerve Plant (Fittonia), Coleus, Ti Plant, Hoya
-   - String of Pearls, Peperomia, Swiss Cheese Vine
-
-4. PALMS & FERNS:
-   - Areca Palm, Parlor Palm, Kentia Palm, Bamboo Palm
-   - Boston Fern, Asparagus Fern, Norfolk Island Pine
-
-5. SUCCULENTS & CACTI:
-   - Echeveria, Haworthia, Jade Plant, Aloe Vera
-   - Christmas Cactus, various cacti, Ponytail Palm
-
-6. AIR PURIFYING CHAMPIONS:
-   - Snake Plant, Spider Plant, Peace Lily, English Ivy
-   - Dracaena, ZZ Plant, Bamboo Palm, Chrysanthemum
-
-7. BONSAI & SPECIALTY:
-   - Ficus Bonsai, Jade Bonsai, Chinese Elm Bonsai
-   - Purple Shamrock (Oxalis), Sunflower (dwarf)
-
-8. EDIBLE/VEGETABLE PLANTS:
-   - Tomato (cherry), Chili Pepper, Strawberry, Lettuce, Spinach
-
-DO NOT always default to Monstera, Pothos, Snake Plant. Mix it up based on the space!
-
-For each plant:
-- Use common names ${language === "es" ? "in Spanish" : "in English"}
-- Provide the scientific name
-- Indicate light requirements ${language === "es" ? "(\"Luz indirecta\", \"Luz directa\", o \"Sombra\")" : "(\"Indirect light\", \"Direct light\", or \"Shade\")"}
-- Specify watering schedule ${language === "es" ? "(ej. \"1-2 veces/semana\", \"Cada 7-10 días\")" : "(e.g., \"1-2 times/week\", \"Every 7-10 days\")"}
-- Assign a difficulty: "Easy", "Moderate", or "Advanced"
-- Write a brief description ${language === "es" ? "in Spanish" : "in English"} mentioning why it's appropriate for the local climate and space
-- For flowering plants, mention blooming characteristics
-- Include an AIR PURIFICATION section with:
-  * score: a number from 1-10 rating how well the plant purifies air (10 = excellent like Peace Lily, Snake Plant; 1 = minimal purification)
-  * description: brief explanation in English of air purification benefits (toxins removed, oxygen production, etc.)
-  * descriptionEs: the same explanation in Spanish
-- Include a WELLNESS BENEFITS section with:
-  * sleepScore: a number from 1-10 rating how well the plant helps with sleep (10 = excellent like Lavender, Jasmine, Snake Plant that release oxygen at night; 1 = minimal benefit)
-  * sleepDescription: brief explanation in English of how it helps sleep (oxygen release at night, calming scent, humidity, etc.)
-  * sleepDescriptionEs: the same explanation in Spanish
-  * stressScore: a number from 1-10 rating how well the plant helps reduce stress (10 = excellent like Lavender, Jasmine with calming aromatherapy; 1 = minimal benefit)
-  * stressDescription: brief explanation in English of stress-relief benefits (calming appearance, aromatherapy, easy care reducing anxiety, etc.)
-  * stressDescriptionEs: the same explanation in Spanish
-- Include detailed care instructions ${language === "es" ? "in Spanish" : "in English"} adjusted for the climate
-- Assign a position in the room (x and y between 10-90, size: "small", "medium", or "large")
-
-Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small", "Medium", "Large").`;
+Vary plant types: flowering, foliage, succulents, palms, herbs.`;
 
       console.log("Sending request to Gemini 2.0 Flash...");
       console.log("Request details:", {
@@ -726,7 +671,7 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
       });
       
       let result;
-      const maxRetries = 3;
+      const maxRetries = 2;
       let lastError: any = null;
       
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -737,10 +682,10 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
           }
           
           if (attempt > 0) {
-            const delayMs = Math.min(3000 * Math.pow(1.5, attempt - 1), 10000);
+            const delayMs = 2000 + (attempt * 1000);
             console.log(`🔄 Retry attempt ${attempt}/${maxRetries} after ${delayMs}ms...`);
             if (isMountedRef.current) {
-              setLoadingStep(language === 'es' ? `Reintentando análisis (${attempt}/${maxRetries})...` : `Retrying analysis (${attempt}/${maxRetries})...`);
+              setLoadingStep(language === 'es' ? `Reintentando... (${attempt}/${maxRetries})` : `Retrying... (${attempt}/${maxRetries})`);
             }
             await new Promise(resolve => setTimeout(resolve, delayMs));
           }
@@ -751,15 +696,7 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
           }
           
           console.log(`📤 Sending analysis request (attempt ${attempt + 1})...`);
-          
-          let requestTimeoutId: ReturnType<typeof setTimeout> | null = null;
-          
-          const timeoutPromise = new Promise<never>((_, reject) => {
-            requestTimeoutId = setTimeout(() => {
-              console.log('⏱️ Request timeout after 60s');
-              reject(new Error('Request timeout'));
-            }, 60000);
-          });
+          console.log(`📝 Prompt length: ${prompt.length} chars`);
           
           const generatePromise = generateObject({
             messages: [
@@ -774,13 +711,7 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
             schema,
           });
           
-          try {
-            result = await Promise.race([generatePromise, timeoutPromise]);
-          } finally {
-            if (requestTimeoutId) {
-              clearTimeout(requestTimeoutId);
-            }
-          }
+          result = await generatePromise;
           
           console.log('📥 Response received:', {
             hasResult: !!result,
@@ -800,30 +731,23 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
           console.error(`❌ generateObject error (attempt ${attempt + 1}):`, errorMsg);
           lastError = genError;
           
-          const isRetryableError = errorMsg.includes('Network request failed') || 
-                                  errorMsg.includes('Failed to fetch') ||
+          const isRetryableError = errorMsg.includes('Network') || 
+                                  errorMsg.includes('fetch') ||
                                   errorMsg.toLowerCase().includes('network') ||
                                   errorMsg.toLowerCase().includes('timeout') ||
-                                  errorMsg.includes('Request timeout') ||
-                                  errorMsg.includes('AbortError') ||
-                                  errorMsg.includes('ECONNRESET') ||
-                                  errorMsg.includes('ETIMEDOUT') ||
                                   errorMsg.includes('429') ||
-                                  errorMsg.includes('503') ||
-                                  errorMsg.includes('502') ||
-                                  errorMsg.includes('500') ||
-                                  errorMsg.includes('504');
+                                  errorMsg.includes('50');
           
           if (attempt === maxRetries || !isRetryableError) {
             console.log('❌ Max retries reached or non-retryable error');
-            throw new Error(lastError?.message || "Failed to analyze image after retries");
+            throw new Error(lastError?.message || "Analysis failed");
           }
         }
       }
       
       if (!result || !result.suggestions || !Array.isArray(result.suggestions)) {
         console.log('❌ No valid result after all attempts');
-        throw new Error(lastError?.message || "Failed to get analysis result");
+        throw new Error(lastError?.message || "No results");
       }
 
       if (!isMountedRef.current) return;

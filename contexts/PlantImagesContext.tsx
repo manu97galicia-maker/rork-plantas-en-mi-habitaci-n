@@ -145,8 +145,19 @@ export const [PlantImagesProvider, usePlantImages] = createContextHook(() => {
   }, [saveToCache]);
 
   const getPlantImage = useCallback((plantId: string, plantName?: string): string | undefined => {
+    // Always prefer cached Freepik images first
     if (plantImages[plantId]) {
       return plantImages[plantId];
+    }
+    
+    // If not cached, trigger a fetch from Freepik and return fallback
+    if (plantName && !pendingFetches.current.has(plantId)) {
+      fetchSingleImage(plantId, plantName);
+    }
+    
+    // Return fallback while loading
+    if (plantName) {
+      return getFallbackForPlant(plantName);
     }
     
     const commonImage = getCommonPlantImage(plantId, plantName || '');
@@ -154,12 +165,8 @@ export const [PlantImagesProvider, usePlantImages] = createContextHook(() => {
       return commonImage;
     }
     
-    if (plantName) {
-      return getFallbackForPlant(plantName);
-    }
-    
     return undefined;
-  }, [plantImages]);
+  }, [plantImages, fetchSingleImage]);
 
   const prefetchPlantImage = useCallback((plantId: string, plantName: string) => {
     if (!plantImages[plantId] && !pendingFetches.current.has(plantId)) {
@@ -168,16 +175,16 @@ export const [PlantImagesProvider, usePlantImages] = createContextHook(() => {
   }, [plantImages, fetchSingleImage]);
 
   const getPlantImageWithFallback = useCallback((plantId: string, plantName: string): string => {
+    // Always prefer cached Freepik images first
     const cached = plantImages[plantId];
     if (cached) return cached;
     
-    const commonImage = getCommonPlantImage(plantId, plantName);
-    if (commonImage) return commonImage;
-    
+    // Trigger fetch from Freepik if not already fetching
     if (!pendingFetches.current.has(plantId)) {
       fetchSingleImage(plantId, plantName);
     }
     
+    // Return fallback while loading
     return getFallbackForPlant(plantName);
   }, [plantImages, fetchSingleImage]);
 

@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { ChevronLeft, Search, Droplets, Sun, X } from "lucide-react-native";
+import { ChevronLeft, Search, Droplets, Sun, X, Moon, Heart, Wind } from "lucide-react-native";
 import React, { useState, useMemo } from "react";
 import {
   View,
@@ -27,7 +27,7 @@ export default function AddPlantScreen() {
   const { addPlant } = useMyPlants();
   const { language } = useUserPreferences();
   const t = getTranslations(language);
-  const { getPlantImage } = usePlantImages();
+  const { getPlantImageWithFallback, prefetchPlantImage } = usePlantImages();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
   const [nickname, setNickname] = useState<string>("");
@@ -45,6 +45,14 @@ export default function AddPlantScreen() {
         plant.description.toLowerCase().includes(query)
     );
   }, [searchQuery]);
+
+  // Prefetch images for visible plants
+  React.useEffect(() => {
+    const plantsToFetch = filteredPlants.slice(0, 10);
+    plantsToFetch.forEach((plant) => {
+      prefetchPlantImage(plant.id, plant.name);
+    });
+  }, [filteredPlants, prefetchPlantImage]);
 
   const handleSelectPlant = (plant: Plant) => {
     setSelectedPlant(plant);
@@ -143,7 +151,11 @@ export default function AddPlantScreen() {
             ) : (
               <View style={styles.plantsList}>
                 {filteredPlants.map((plant) => {
-                  const plantImage = getPlantImage(plant.id, plant.name);
+                  const plantImage = getPlantImageWithFallback(plant.id, plant.name);
+                  const sleepScore = plant.wellnessBenefits?.sleepScore || 0;
+                  const stressScore = plant.wellnessBenefits?.stressScore || 0;
+                  const airScore = plant.airPurification?.score || 0;
+                  
                   return (
                     <TouchableOpacity
                       key={plant.id}
@@ -156,13 +168,11 @@ export default function AddPlantScreen() {
                         style={styles.plantCardGradient}
                       >
                         <View style={styles.plantCardContent}>
-                          {plantImage && (
-                            <Image
-                              source={{ uri: plantImage }}
-                              style={styles.plantCardImage}
-                              contentFit="cover"
-                            />
-                          )}
+                          <Image
+                            source={{ uri: plantImage }}
+                            style={styles.plantCardImage}
+                            contentFit="cover"
+                          />
                           <View style={styles.plantInfo}>
                             <Text style={styles.plantName}>{plant.name}</Text>
                             <Text style={styles.plantScientificName}>
@@ -171,6 +181,28 @@ export default function AddPlantScreen() {
                             <Text style={styles.plantDescription} numberOfLines={2}>
                               {plant.description}
                             </Text>
+                            
+                            {/* Wellness Benefits Row */}
+                            <View style={styles.wellnessRow}>
+                              {sleepScore > 0 && (
+                                <View style={styles.wellnessTag}>
+                                  <Moon size={10} color="#a78bfa" strokeWidth={2.5} />
+                                  <Text style={styles.wellnessText}>{sleepScore}/10</Text>
+                                </View>
+                              )}
+                              {stressScore > 0 && (
+                                <View style={styles.wellnessTag}>
+                                  <Heart size={10} color="#f472b6" strokeWidth={2.5} />
+                                  <Text style={styles.wellnessText}>{stressScore}/10</Text>
+                                </View>
+                              )}
+                              {airScore > 0 && (
+                                <View style={styles.wellnessTag}>
+                                  <Wind size={10} color="#34d399" strokeWidth={2.5} />
+                                  <Text style={styles.wellnessText}>{airScore}/10</Text>
+                                </View>
+                              )}
+                            </View>
                             
                             <View style={styles.plantTags}>
                               <View
@@ -219,6 +251,64 @@ export default function AddPlantScreen() {
               <Text style={styles.modalScientificName}>
                 {selectedPlant?.scientificName}
               </Text>
+
+              {/* Wellness Benefits Section */}
+              {(selectedPlant?.wellnessBenefits || selectedPlant?.airPurification) && (
+                <View style={styles.modalSection}>
+                  <Text style={styles.sectionTitle}>🌿 Wellness Benefits</Text>
+                  
+                  {selectedPlant?.wellnessBenefits?.sleepScore && selectedPlant.wellnessBenefits.sleepScore > 0 && (
+                    <View style={styles.wellnessBenefitItem}>
+                      <View style={styles.wellnessBenefitHeader}>
+                        <Moon size={16} color="#a78bfa" strokeWidth={2} />
+                        <Text style={styles.wellnessBenefitTitle}>Sleep Quality</Text>
+                        <View style={styles.scoreContainer}>
+                          <Text style={styles.scoreText}>{selectedPlant.wellnessBenefits.sleepScore}/10</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.wellnessBenefitDesc}>
+                        {language === 'es' 
+                          ? selectedPlant.wellnessBenefits.sleepDescriptionEs 
+                          : selectedPlant.wellnessBenefits.sleepDescription}
+                      </Text>
+                    </View>
+                  )}
+                  
+                  {selectedPlant?.wellnessBenefits?.stressScore && selectedPlant.wellnessBenefits.stressScore > 0 && (
+                    <View style={styles.wellnessBenefitItem}>
+                      <View style={styles.wellnessBenefitHeader}>
+                        <Heart size={16} color="#f472b6" strokeWidth={2} />
+                        <Text style={styles.wellnessBenefitTitle}>Stress Relief</Text>
+                        <View style={styles.scoreContainer}>
+                          <Text style={styles.scoreText}>{selectedPlant.wellnessBenefits.stressScore}/10</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.wellnessBenefitDesc}>
+                        {language === 'es' 
+                          ? selectedPlant.wellnessBenefits.stressDescriptionEs 
+                          : selectedPlant.wellnessBenefits.stressDescription}
+                      </Text>
+                    </View>
+                  )}
+                  
+                  {selectedPlant?.airPurification?.score && selectedPlant.airPurification.score > 0 && (
+                    <View style={styles.wellnessBenefitItem}>
+                      <View style={styles.wellnessBenefitHeader}>
+                        <Wind size={16} color="#34d399" strokeWidth={2} />
+                        <Text style={styles.wellnessBenefitTitle}>Air Purification</Text>
+                        <View style={styles.scoreContainer}>
+                          <Text style={styles.scoreText}>{selectedPlant.airPurification.score}/10</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.wellnessBenefitDesc}>
+                        {language === 'es' 
+                          ? selectedPlant.airPurification.descriptionEs 
+                          : selectedPlant.airPurification.description}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
 
               {selectedPlant?.careInstructions && (
                 <View style={styles.modalSection}>
@@ -406,7 +496,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "rgba(255, 255, 255, 0.8)",
     lineHeight: 20,
-    marginBottom: 12,
+    marginBottom: 8,
+  },
+  wellnessRow: {
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    gap: 6,
+    marginBottom: 8,
+  },
+  wellnessTag: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    gap: 4,
+  },
+  wellnessText: {
+    fontSize: 10,
+    fontWeight: "600" as const,
+    color: "rgba(255, 255, 255, 0.9)",
   },
   plantTags: {
     flexDirection: "row",
@@ -478,6 +588,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#64748b",
     lineHeight: 20,
+  },
+  wellnessBenefitItem: {
+    marginBottom: 16,
+    backgroundColor: "#f8fafc",
+    borderRadius: 12,
+    padding: 12,
+  },
+  wellnessBenefitHeader: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    marginBottom: 8,
+    gap: 8,
+  },
+  wellnessBenefitTitle: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#334155",
+    flex: 1,
+  },
+  scoreContainer: {
+    backgroundColor: "#e2e8f0",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  scoreText: {
+    fontSize: 12,
+    fontWeight: "700" as const,
+    color: "#475569",
+  },
+  wellnessBenefitDesc: {
+    fontSize: 13,
+    color: "#64748b",
+    lineHeight: 19,
   },
   inputGroup: {
     marginBottom: 20,

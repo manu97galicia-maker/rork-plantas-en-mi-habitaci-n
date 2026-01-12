@@ -16,12 +16,13 @@ export const plantRouter = createTRPCRouter({
       }
 
       try {
-        const searchTerm = `${input.plantName} plant`;
+        const cleanName = input.plantName.toLowerCase().trim();
+        const searchTerm = `${cleanName} houseplant indoor potted`;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
         const response = await fetch(
-          `${FREEPIK_API_URL}?term=${encodeURIComponent(searchTerm)}&page=1&limit=1&filters[content_type][photo]=1`,
+          `${FREEPIK_API_URL}?term=${encodeURIComponent(searchTerm)}&page=1&limit=5&filters[content_type][photo]=1&order=relevance`,
           {
             headers: {
               "Accept": "application/json",
@@ -41,9 +42,19 @@ export const plantRouter = createTRPCRouter({
         const data = await response.json();
 
         if (data.data && data.data.length > 0) {
-          const imageUrl = data.data[0].image?.source?.url || data.data[0].thumbnail?.url;
-          console.log(`[PlantAPI] ✓ Found image for ${input.plantName}`);
-          return { imageUrl };
+          let bestImage = null;
+          for (const item of data.data) {
+            const url = item.image?.source?.url || item.thumbnail?.url;
+            if (url) {
+              bestImage = url;
+              break;
+            }
+          }
+          
+          if (bestImage) {
+            console.log(`[PlantAPI] ✓ Found image for ${input.plantName}`);
+            return { imageUrl: bestImage };
+          }
         }
 
         return { imageUrl: null };

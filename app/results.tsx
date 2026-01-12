@@ -557,9 +557,6 @@ export default function ResultsScreen() {
       wateringSchedule: z.string(),
       difficulty: z.enum(["Easy", "Moderate", "Advanced"]),
       description: z.string(),
-      airScore: z.number().optional(),
-      sleepScore: z.number().optional(),
-      stressScore: z.number().optional(),
       position: z.object({
         x: z.number(),
         y: z.number(),
@@ -578,89 +575,34 @@ export default function ResultsScreen() {
       setError(null);
       setLoadingStep(t.results.analyzingStep);
       
-      console.log("\n========== Analyzing with Gemini 2.0 Flash ==========");
+      console.log("\n========== Analyzing room ==========");
       console.log(`Image length: ${params.imageData.length} characters`);
       
       let locationPrompt = "";
       if (locationInfo) {
-        locationPrompt = `
-
-IMPORTANT: The user is located at coordinates ${locationInfo.latitude.toFixed(2)}, ${locationInfo.longitude.toFixed(2)}${locationInfo.altitude ? ` at ${Math.round(locationInfo.altitude)}m altitude` : ""}.
-
-BASED ON THIS LOCATION:
-- Identify the region's climate (tropical, subtropical, temperate, continental, Mediterranean, arid, etc.)
-- Consider average temperature and seasonal ranges
-- Account for typical ambient humidity of the area
-- Consider altitude if available (affects temperature and pressure)
-- Evaluate if it's coastal, mountainous, desert, etc.
-
-RECOMMEND PLANTS THAT:
-1. Are native to or adapt well to that location's climate
-2. Can survive the region's typical temperatures
-3. Match the local ambient humidity
-4. Consider altitude if significant
-5. Are easy to find in that geographical region
-
-For example:
-- Warm and humid climates: tropical plants, ferns, philodendrons
-- Hot and dry climates: succulents, cacti, aloe vera
-- Temperate climates: standard indoor plants with good adaptability
-- High altitudes: cold-resistant plants adapted to low pressure
-
-ADJUST recommendations to be realistic and appropriate for that location's specific climate.`;
+        locationPrompt = `\nUser location: ${locationInfo.latitude.toFixed(1)}, ${locationInfo.longitude.toFixed(1)}. Recommend plants suitable for this climate.`;
       }
 
       let careLevelPrompt = "";
       if (careLevel) {
-        const careLevelText = careLevel === "beginner" ? "beginner (very easy-to-care-for plants)" : careLevel === "intermediate" ? "intermediate (moderate-care plants)" : "expert (can handle demanding and exotic plants)";
-        careLevelPrompt = `
-
-IMPORTANT: The user has ${careLevelText} experience level.
-
-BASED ON THEIR LEVEL:
-${careLevel === "beginner" ? `
-- Recommend ONLY "Easy" difficulty plants
-- Prioritize hardy plants that tolerate occasional neglect
-- Avoid plants requiring frequent or specific care
-- Ideal examples: Pothos, Sansevieria, Succulents, Spider Plant` : ""}
-${careLevel === "intermediate" ? `
-- Recommend "Easy" and "Moderate" difficulty plants
-- Include some plants requiring more attention but not demanding
-- Balance between ease and variety
-- Examples: Monstera, Philodendron, Calathea, Ficus` : ""}
-${careLevel === "expert" ? `
-- You can recommend plants of any difficulty, including "Advanced"
-- Include exotic, tropical or plants requiring specific care
-- User seeks challenges and variety
-- Examples: Orchids, Bonsai, Calathea ornata, carnivorous plants` : ""}
-
-ADJUST recommendations according to their experience level.`;
+        careLevelPrompt = `\nUser level: ${careLevel}. ${careLevel === "beginner" ? "Only Easy plants." : careLevel === "intermediate" ? "Easy/Moderate plants." : "Any difficulty."}`;
       }
 
-      const languageInstruction = language === "es" 
-        ? "\nResponde en ESPAÑOL."
-        : "";
+      const languageInstruction = language === "es" ? "\nResponde en ESPAÑOL." : "";
 
-      const prompt = `Analyze this room image and suggest 4 plants.${locationPrompt}${careLevelPrompt}${languageInstruction}
+      const prompt = `Analyze room, suggest 4 plants.${locationPrompt}${careLevelPrompt}${languageInstruction}
 
-For each plant provide:
+For each plant:
 - id: unique string
-- name: common name ${language === "es" ? "in Spanish" : ""}
+- name: common name
 - scientificName
-- lightRequirement: "${language === "es" ? "Luz indirecta/Luz directa/Sombra" : "Indirect/Direct/Shade"}"
-- wateringSchedule: frequency
-- difficulty: "Easy", "Moderate", or "Advanced"
-- description: 1-2 sentences ${language === "es" ? "in Spanish" : ""}
-- airScore: 1-10 (air purification rating)
-- sleepScore: 1-10 (sleep benefit rating)
-- stressScore: 1-10 (stress relief rating)
-- position: {x: 10-90, y: 10-90, size: "small"/"medium"/"large"}
+- lightRequirement: brief
+- wateringSchedule: brief
+- difficulty: Easy/Moderate/Advanced
+- description: 1 sentence
+- position: {x: 10-90, y: 10-90, size: small/medium/large}
 
-Also provide:
-- lightLevel: "Low", "Medium", or "Bright"
-- spaceSize: "Small", "Medium", or "Large"
-
-Vary plant types: flowering, foliage, succulents, palms, herbs.`;
+Also: lightLevel (Low/Medium/Bright), spaceSize (Small/Medium/Large)`;
 
       console.log("Sending request to Gemini 2.0 Flash...");
       console.log("Request details:", {

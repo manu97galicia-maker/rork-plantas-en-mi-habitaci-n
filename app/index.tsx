@@ -95,7 +95,7 @@ const getSlides = (language: Language): OnboardingSlide[] => {
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const { language, setLanguage, setCareLevel, completeOnboarding, hasCompletedOnboarding, isLoading } = useUserPreferences();
+  const { language, setLanguage, setCareLevel, hasCompletedOnboarding, isLoading } = useUserPreferences();
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [selectedCareLevel, setSelectedCareLevel] = useState<CareLevel | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(language);
@@ -163,8 +163,7 @@ export default function OnboardingScreen() {
       } else {
         if (selectedCareLevel) {
           await setCareLevel(selectedCareLevel);
-          await completeOnboarding();
-          router.push("/gallery");
+          router.push("/paywall");
         }
       }
     } finally {
@@ -172,7 +171,7 @@ export default function OnboardingScreen() {
         isProcessingRef.current = false;
       }, 500);
     }
-  }, [currentIndex, selectedLanguage, selectedCareLevel, setLanguage, setCareLevel, completeOnboarding, router, slides.length]);
+  }, [currentIndex, selectedLanguage, selectedCareLevel, setLanguage, setCareLevel, router, slides.length]);
 
   const skip = useCallback(async () => {
     const now = Date.now();
@@ -186,14 +185,13 @@ export default function OnboardingScreen() {
     try {
       await setLanguage(selectedLanguage);
       await setCareLevel("intermediate");
-      await completeOnboarding();
-      router.push("/gallery");
+      router.push("/paywall");
     } finally {
       setTimeout(() => {
         isProcessingRef.current = false;
       }, 500);
     }
-  }, [selectedLanguage, setLanguage, setCareLevel, completeOnboarding, router]);
+  }, [selectedLanguage, setLanguage, setCareLevel, router]);
 
   if (isLoading) {
     return (

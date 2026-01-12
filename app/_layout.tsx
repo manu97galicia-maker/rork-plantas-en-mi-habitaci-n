@@ -29,6 +29,7 @@ function RootLayoutNav() {
       <Stack.Screen name="profile" options={{ headerShown: false }} />
       <Stack.Screen name="photo-gallery" options={{ headerShown: false }} />
       <Stack.Screen name="add-plant" options={{ headerShown: false }} />
+      <Stack.Screen name="paywall" options={{ headerShown: false }} />
     </Stack>
   );
 }

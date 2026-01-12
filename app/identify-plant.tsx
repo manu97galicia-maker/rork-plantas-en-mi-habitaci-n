@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, MapPin, Thermometer, Droplets, Sun, Leaf, Globe, RefreshCw } from "lucide-react-native";
+import { ArrowLeft, MapPin, Thermometer, Droplets, Sun, Leaf, Globe, RefreshCw, Wind, Moon, Heart } from "lucide-react-native";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
@@ -34,6 +34,19 @@ interface PlantIdentification {
     soil: string;
     fertilizer: string;
     pruning: string;
+  };
+  airPurification?: {
+    score: number;
+    description: string;
+    descriptionEs: string;
+  };
+  wellnessBenefits?: {
+    sleepScore: number;
+    sleepDescription: string;
+    sleepDescriptionEs: string;
+    stressScore: number;
+    stressDescription: string;
+    stressDescriptionEs: string;
   };
   difficulty: 'Easy' | 'Moderate' | 'Advanced';
   tips: string[];
@@ -547,10 +560,76 @@ Be specific and precise in the identification.`;
               </View>
             )}
 
+            {identification.airPurification && (
+              <View style={styles.wellnessCard}>
+                <View style={styles.sectionHeader}>
+                  <Wind size={24} color="#16a34a" />
+                  <Text style={styles.sectionTitle}>
+                    {language === "es" ? "Purificación del Aire" : "Air Purification"}
+                  </Text>
+                </View>
+                <View style={styles.scoreContainer}>
+                  <View style={styles.scoreCircle}>
+                    <Text style={styles.scoreNumber}>{identification.airPurification.score}</Text>
+                    <Text style={styles.scoreMax}>/10</Text>
+                  </View>
+                  <Text style={styles.scoreDescription}>
+                    {language === "es" ? identification.airPurification.descriptionEs : identification.airPurification.description}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {identification.wellnessBenefits && (
+              <View style={styles.wellnessCard}>
+                <View style={styles.sectionHeader}>
+                  <Heart size={24} color="#ec4899" />
+                  <Text style={styles.sectionTitle}>
+                    {language === "es" ? "Beneficios para el Bienestar" : "Wellness Benefits"}
+                  </Text>
+                </View>
+                
+                <View style={styles.wellnessGrid}>
+                  <View style={styles.wellnessItem}>
+                    <View style={[styles.wellnessIcon, { backgroundColor: "#eef2ff" }]}>
+                      <Moon size={20} color="#6366f1" />
+                    </View>
+                    <Text style={styles.wellnessLabel}>{language === "es" ? "Sueño" : "Sleep"}</Text>
+                    <View style={styles.wellnessScoreRow}>
+                      <Text style={styles.wellnessScore}>{identification.wellnessBenefits.sleepScore}</Text>
+                      <Text style={styles.wellnessScoreMax}>/10</Text>
+                    </View>
+                    <Text style={styles.wellnessDescription} numberOfLines={3}>
+                      {language === "es" ? identification.wellnessBenefits.sleepDescriptionEs : identification.wellnessBenefits.sleepDescription}
+                    </Text>
+                  </View>
+
+                  <View style={styles.wellnessItem}>
+                    <View style={[styles.wellnessIcon, { backgroundColor: "#fdf2f8" }]}>
+                      <Heart size={20} color="#ec4899" />
+                    </View>
+                    <Text style={styles.wellnessLabel}>{language === "es" ? "Estrés" : "Stress Relief"}</Text>
+                    <View style={styles.wellnessScoreRow}>
+                      <Text style={styles.wellnessScore}>{identification.wellnessBenefits.stressScore}</Text>
+                      <Text style={styles.wellnessScoreMax}>/10</Text>
+                    </View>
+                    <Text style={styles.wellnessDescription} numberOfLines={3}>
+                      {language === "es" ? identification.wellnessBenefits.stressDescriptionEs : identification.wellnessBenefits.stressDescription}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
             {identification.toxicity && (
               <View style={styles.toxicityCard}>
                 <Text style={styles.toxicityTitle}>⚠️ {language === "es" ? "Toxicidad" : "Toxicity"}</Text>
                 <Text style={styles.toxicityText}>{identification.toxicity}</Text>
+                <Text style={styles.disclaimerText}>
+                  {language === "es" 
+                    ? "⚠️ Aviso: Esta información es orientativa. No nos hacemos responsables del uso de esta información. Consulte siempre a un profesional."
+                    : "⚠️ Disclaimer: This information is for guidance only. We are not responsible for the use of this information. Always consult a professional."}
+                </Text>
               </View>
             )}
 
@@ -825,6 +904,101 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#7f1d1d",
     lineHeight: 22,
+  },
+  disclaimerText: {
+    fontSize: 11,
+    color: "#991b1b",
+    lineHeight: 16,
+    marginTop: 12,
+    fontStyle: "italic" as const,
+  },
+  wellnessCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 16,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  scoreContainer: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 16,
+  },
+  scoreCircle: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "#f0fdf4",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    borderWidth: 3,
+    borderColor: "#16a34a",
+  },
+  scoreNumber: {
+    fontSize: 24,
+    fontWeight: "800" as const,
+    color: "#16a34a",
+  },
+  scoreMax: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#6b7280",
+  },
+  scoreDescription: {
+    flex: 1,
+    fontSize: 14,
+    color: "#374151",
+    lineHeight: 20,
+  },
+  wellnessGrid: {
+    flexDirection: "row" as const,
+    gap: 12,
+  },
+  wellnessItem: {
+    flex: 1,
+    backgroundColor: "#f9fafb",
+    borderRadius: 16,
+    padding: 16,
+    alignItems: "center" as const,
+  },
+  wellnessIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginBottom: 12,
+  },
+  wellnessLabel: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: "#1a4d2e",
+    marginBottom: 4,
+  },
+  wellnessScoreRow: {
+    flexDirection: "row" as const,
+    alignItems: "baseline" as const,
+    marginBottom: 8,
+  },
+  wellnessScore: {
+    fontSize: 22,
+    fontWeight: "800" as const,
+    color: "#1a4d2e",
+  },
+  wellnessScoreMax: {
+    fontSize: 12,
+    fontWeight: "500" as const,
+    color: "#6b7280",
+  },
+  wellnessDescription: {
+    fontSize: 12,
+    color: "#6b7280",
+    textAlign: "center" as const,
+    lineHeight: 16,
   },
   loadingContainer: {
     flex: 1,

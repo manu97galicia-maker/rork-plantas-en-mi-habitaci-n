@@ -517,7 +517,7 @@ export default function ResultsScreen() {
         score: z.number(),
         description: z.string(),
         descriptionEs: z.string(),
-      }),
+      }).optional(),
       wellnessBenefits: z.object({
         sleepScore: z.number(),
         sleepDescription: z.string(),
@@ -525,7 +525,7 @@ export default function ResultsScreen() {
         stressScore: z.number(),
         stressDescription: z.string(),
         stressDescriptionEs: z.string(),
-      }),
+      }).optional(),
       careInstructions: z.object({
         light: z.string(),
         water: z.string(),
@@ -533,7 +533,7 @@ export default function ResultsScreen() {
         humidity: z.string(),
         fertilizer: z.string(),
         tips: z.array(z.string()),
-      }),
+      }).optional(),
       position: z.object({
         x: z.number(),
         y: z.number(),
@@ -770,12 +770,8 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
       
       if (!isMountedRef.current) return;
       setAnalysis(result as RoomAnalysis);
+      setIsLoading(false);
 
-      if (!isMountedRef.current) return;
-      
-      setLoadingStep(language === "es" ? "Generando visualización con plantas..." : "Generating visualization with plants...");
-      console.log("\n========== Generating edited image with Gemini 2.5 Flash Image ==========");
-      
       const plantNames = result.suggestions.map(p => p.name).join(", ");
       
       const editPrompt = `Add these beautiful plants to this space: ${plantNames}
@@ -793,48 +789,72 @@ Instructions:
 - Add visual variety with different plant heights and textures
 - The result should be the same space but beautifully enhanced with plants`;
 
-      let editedImageData: string | null = null;
-      try {
-        console.log("📤 Sending image edit request via backend...");
-        
-        if (!isMountedRef.current) return;
-        
-        const editResult = await editImageWithPlants(editPrompt, params.imageData, "1:1");
-        
-        if (!isMountedRef.current) return;
-        
-        if (editResult.success && editResult.imageBase64) {
-          editedImageData = editResult.imageBase64;
-          setEditedImage(editedImageData);
-          console.log("✅ Edited image generated and saved successfully");
-        } else {
-          console.log("⚠️ Image edit failed:", editResult.error);
-        }
-      } catch (editError: any) {
-        console.error("❌ Error generating edited image:", editError?.message);
-        console.log("⏩ Continuing without edited image (user will see analysis only)...");
-      }
-
-      if (isMountedRef.current) {
+      const generateEditedImageAsync = async () => {
         try {
-          await addScan({
-            analysis: result as RoomAnalysis,
-            originalImage: params.imageData || '',
-            editedImage: editedImageData || undefined,
-            location: locationInfo ? {
-              latitude: locationInfo.latitude,
-              longitude: locationInfo.longitude,
-              altitude: locationInfo.altitude,
-            } : undefined,
-          });
-          console.log("✅ Scan saved to history with images");
-        } catch (saveError) {
-          console.log('Error saving scan to history:', saveError);
+          console.log("📤 Generating edited image in background...");
+          const editResult = await editImageWithPlants(editPrompt, params.imageData, "1:1");
+          
+          if (!isMountedRef.current) return;
+          
+          if (editResult.success && editResult.imageBase64) {
+            setEditedImage(editResult.imageBase64);
+            console.log("✅ Edited image generated successfully");
+            
+            try {
+              await addScan({
+                analysis: result as RoomAnalysis,
+                originalImage: params.imageData || '',
+                editedImage: editResult.imageBase64,
+                location: locationInfo ? {
+                  latitude: locationInfo.latitude,
+                  longitude: locationInfo.longitude,
+                  altitude: locationInfo.altitude,
+                } : undefined,
+              });
+              console.log("✅ Scan saved with edited image");
+            } catch (saveError) {
+              console.log('Error saving scan:', saveError);
+            }
+          } else {
+            console.log("⚠️ Image edit failed:", editResult.error);
+            try {
+              await addScan({
+                analysis: result as RoomAnalysis,
+                originalImage: params.imageData || '',
+                location: locationInfo ? {
+                  latitude: locationInfo.latitude,
+                  longitude: locationInfo.longitude,
+                  altitude: locationInfo.altitude,
+                } : undefined,
+              });
+            } catch (saveError) {
+              console.log('Error saving scan:', saveError);
+            }
+          }
+        } catch (editError: any) {
+          console.error("❌ Error generating edited image:", editError?.message);
+          if (isMountedRef.current) {
+            try {
+              await addScan({
+                analysis: result as RoomAnalysis,
+                originalImage: params.imageData || '',
+                location: locationInfo ? {
+                  latitude: locationInfo.latitude,
+                  longitude: locationInfo.longitude,
+                  altitude: locationInfo.altitude,
+                } : undefined,
+              });
+            } catch (saveError) {
+              console.log('Error saving scan:', saveError);
+            }
+          }
         }
-      }
+      };
+
+      generateEditedImageAsync();
     } catch (err: any) {
       if (!isMountedRef.current) return;
-      
+      setIsLoading(false);
       console.error("\n❌ ERROR:", err?.message || 'Unknown error');
       
       const errorMessage = err?.message || "";
@@ -859,9 +879,7 @@ Instructions:
         setError(`❌ Error: ${errorMessage || "Unknown error occurred"}`);
       }
     } finally {
-      if (isMountedRef.current) {
-        setIsLoading(false);
-      }
+      // Loading state is now handled earlier for faster UX
     }
   };
 
@@ -1391,7 +1409,7 @@ const styles = StyleSheet.create({
   },
   comparisonImage: {
     width: "100%",
-    height: 250,
+    height: 280,
     borderRadius: 16,
   },
   afterImageContainer: {

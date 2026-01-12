@@ -257,10 +257,10 @@ export default function GalleryScreen() {
 
   const navItems = [
     { icon: Camera, label: t.camera.title, path: "/camera", color: Colors.primary },
-    { icon: Scan, label: t.gallery.identifyPlant, path: "/identify-camera", color: "#4ECDC4" },
-    { icon: Leaf, label: t.myPlants.title, path: "/my-plants", color: "#FFB020" },
-    { icon: Images, label: language === "es" ? "Álbumes" : "Albums", path: "/photo-gallery", color: "#FF6B6B" },
-    { icon: User, label: language === "es" ? "Perfil" : "Profile", path: "/profile", color: "#3B82F6" },
+    { icon: Scan, label: t.gallery.identifyPlant, path: "/identify-camera", color: Colors.moss },
+    { icon: Leaf, label: t.myPlants.title, path: "/my-plants", color: Colors.sage },
+    { icon: Images, label: language === "es" ? "Álbumes" : "Albums", path: "/photo-gallery", color: Colors.accent },
+    { icon: User, label: language === "es" ? "Perfil" : "Profile", path: "/profile", color: Colors.forest },
   ];
 
   if (scanHistory.length === 0) {
@@ -853,7 +853,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   imageOverlayGreen: {
-    backgroundColor: "rgba(0,200,150,0.85)",
+    backgroundColor: "rgba(45,155,110,0.9)",
   },
   imageOverlayText: {
     fontSize: 11,
@@ -1040,7 +1040,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryLight,
   },
   actionBtnDanger: {
-    backgroundColor: "#FEF2F2",
+    backgroundColor: "#FDF2F2",
   },
   actionBtnText: {
     fontSize: 14,

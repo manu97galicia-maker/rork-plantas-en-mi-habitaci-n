@@ -29,7 +29,7 @@ interface UserPreferences {
 }
 
 const STORAGE_KEY = "@user_preferences";
-const MAX_MONTHLY_SCANS = 50;
+const MAX_MONTHLY_SCANS = 30;
 const MAX_SCAN_HISTORY = 500;
 
 const defaultPreferences: UserPreferences = {

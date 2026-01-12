@@ -40,7 +40,7 @@ const getSlides = (language: Language): OnboardingSlide[] => {
       description: t.onboarding.languageDescription,
       icon: <Globe size={56} color="#ffffff" strokeWidth={2} />,
       image: "https://images.unsplash.com/photo-1488751045188-3c55bbf9a3fa?w=800&q=80",
-      colors: ["#0f172a", "#1e293b", "#334155"],
+      colors: ["#1B3D21", "#2C5530", "#3D6B42"],
     },
     {
       id: "1",
@@ -48,7 +48,7 @@ const getSlides = (language: Language): OnboardingSlide[] => {
       description: t.onboarding.slide1Description,
       icon: <Camera size={56} color="#ffffff" strokeWidth={2} />,
       image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80",
-      colors: ["#1a1a2e", "#16213e", "#0f3460"],
+      colors: ["#1E4A28", "#2D6B3A", "#3D8B4C"],
     },
     {
       id: "2",
@@ -56,7 +56,7 @@ const getSlides = (language: Language): OnboardingSlide[] => {
       description: t.onboarding.slide2Description,
       icon: <Sparkles size={56} color="#ffffff" strokeWidth={2} />,
       image: "https://images.unsplash.com/photo-1463320726281-696a485928c7?w=800&q=80",
-      colors: ["#0f3460", "#16213e", "#533483"],
+      colors: ["#2A5F35", "#3A7F48", "#4A9F5B"],
     },
     {
       id: "3",
@@ -64,7 +64,7 @@ const getSlides = (language: Language): OnboardingSlide[] => {
       description: t.onboarding.slide3Description,
       icon: <Droplets size={56} color="#ffffff" strokeWidth={2} />,
       image: "https://images.unsplash.com/photo-1466781783364-36c955e42a7f?w=800&q=80",
-      colors: ["#533483", "#6247aa", "#7b5ea7"],
+      colors: ["#1B4D3E", "#2B6D52", "#3B8D66"],
     },
     {
       id: "4",
@@ -72,7 +72,7 @@ const getSlides = (language: Language): OnboardingSlide[] => {
       description: t.onboarding.slide4Description,
       icon: <Wind size={56} color="#ffffff" strokeWidth={2} />,
       image: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800&q=80",
-      colors: ["#047857", "#059669", "#10b981"],
+      colors: ["#2D9B6E", "#3DAB7E", "#4DBB8E"],
     },
     {
       id: "5",
@@ -80,7 +80,7 @@ const getSlides = (language: Language): OnboardingSlide[] => {
       description: t.onboarding.slide5Description,
       icon: <Moon size={56} color="#ffffff" strokeWidth={2} />,
       image: "https://images.unsplash.com/photo-1495195134817-aeb325a55b65?w=800&q=80",
-      colors: ["#4338ca", "#6366f1", "#818cf8"],
+      colors: ["#1A3D2B", "#2A5D3F", "#3A7D53"],
     },
     {
       id: "6",
@@ -88,7 +88,7 @@ const getSlides = (language: Language): OnboardingSlide[] => {
       description: t.onboarding.slide6Description,
       icon: <Leaf size={56} color="#ffffff" strokeWidth={2} />,
       image: "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=800&q=80",
-      colors: ["#7b5ea7", "#9d4edd", "#a855f7"],
+      colors: ["#1E7A54", "#2D9B6E", "#3DAB7E"],
     },
   ];
 };
@@ -198,7 +198,7 @@ export default function OnboardingScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.loadingGradient}>
+        <LinearGradient colors={["#1B3D21", "#2C5530", "#3D6B42"]} style={styles.loadingGradient}>
           <ActivityIndicator size="large" color="#ffffff" />
         </LinearGradient>
       </View>
@@ -310,7 +310,7 @@ export default function OnboardingScreen() {
           >
             <LinearGradient
               colors={currentIndex === slides.length - 1 
-                ? ["#10b981", "#059669", "#047857"]
+                ? ["#2D9B6E", "#1E7A54", "#186644"]
                 : ["rgba(255,255,255,0.3)", "rgba(255,255,255,0.2)"]}
               style={styles.nextButtonGradient}
               start={{ x: 0, y: 0 }}
@@ -404,7 +404,7 @@ function LanguageSelection({ item, index, scrollX, selectedLanguage, onSelectLan
                     activeOpacity={0.7}
                   >
                     <LinearGradient
-                      colors={isSelected ? ["#3b82f6", "#2563eb"] : ["rgba(255,255,255,0.1)", "rgba(255,255,255,0.05)"]}
+                      colors={isSelected ? ["#2D9B6E", "#1E7A54"] : ["rgba(255,255,255,0.1)", "rgba(255,255,255,0.05)"]}
                       style={styles.languageCardGradient}
                     >
                       <Text style={styles.languageFlag}>{lang.flag}</Text>
@@ -457,21 +457,21 @@ function CareLevelSelection({ item, index, scrollX, selectedLevel, onSelectLevel
       title: t.onboarding.beginner,
       description: t.onboarding.beginnerDescription,
       icon: <Sprout size={40} color="#ffffff" strokeWidth={2} />,
-      color: "#52b788",
+      color: "#3DAB7E",
     },
     {
       id: "intermediate",
       title: t.onboarding.intermediate,
       description: t.onboarding.intermediateDescription,
       icon: <TreeDeciduous size={40} color="#ffffff" strokeWidth={2} />,
-      color: "#2d6a4f",
+      color: "#2D9B6E",
     },
     {
       id: "expert",
       title: t.onboarding.expert,
       description: t.onboarding.expertDescription,
       icon: <Users size={40} color="#ffffff" strokeWidth={2} />,
-      color: "#1b4332",
+      color: "#1E7A54",
     },
   ];
 
@@ -626,7 +626,7 @@ function OnboardingItem({ item, index, scrollX }: OnboardingItemProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1a1a2e",
+    backgroundColor: "#1B3D21",
   },
   safeArea: {
     flex: 1,

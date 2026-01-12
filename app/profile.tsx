@@ -107,8 +107,8 @@ export default function ProfileScreen() {
 
             <View style={styles.statsGrid}>
               <View style={styles.statItem}>
-                <View style={[styles.statIconBg, { backgroundColor: "#E8F4FF" }]}>
-                  <Camera size={20} color="#3B82F6" />
+                <View style={[styles.statIconBg, { backgroundColor: Colors.mint }]}>
+                  <Camera size={20} color={Colors.forest} />
                 </View>
                 <Text style={styles.statValue}>{scanHistory.length}</Text>
                 <Text style={styles.statLabel}>
@@ -116,8 +116,8 @@ export default function ProfileScreen() {
                 </Text>
               </View>
               <View style={styles.statItem}>
-                <View style={[styles.statIconBg, { backgroundColor: "#FFF4E5" }]}>
-                  <Leaf size={20} color="#FFB020" />
+                <View style={[styles.statIconBg, { backgroundColor: Colors.primaryLight }]}>
+                  <Leaf size={20} color={Colors.primary} />
                 </View>
                 <Text style={styles.statValue}>{plants.length}</Text>
                 <Text style={styles.statLabel}>
@@ -164,7 +164,7 @@ export default function ProfileScreen() {
                 onPress={() => setShowCareLevelModal(true)}
                 activeOpacity={0.7}
               >
-                <View style={[styles.menuIconBg, { backgroundColor: "#E8F4FF" }]}>
+                <View style={[styles.menuIconBg, { backgroundColor: Colors.mint }]}>
                   {getCareLevelIcon()}
                 </View>
                 <View style={styles.menuContent}>
@@ -187,8 +187,8 @@ export default function ProfileScreen() {
                 onPress={() => router.push("/photo-gallery" as any)}
                 activeOpacity={0.7}
               >
-                <View style={[styles.menuIconBg, { backgroundColor: "#FEF2F2" }]}>
-                  <Images size={20} color="#FF6B6B" />
+                <View style={[styles.menuIconBg, { backgroundColor: Colors.accentTertiary }]}>
+                  <Images size={20} color={Colors.moss} />
                 </View>
                 <View style={styles.menuContent}>
                   <Text style={styles.menuTitle}>
@@ -206,8 +206,8 @@ export default function ProfileScreen() {
                 onPress={() => router.push("/my-plants")}
                 activeOpacity={0.7}
               >
-                <View style={[styles.menuIconBg, { backgroundColor: "#FFF4E5" }]}>
-                  <Leaf size={20} color="#FFB020" />
+                <View style={[styles.menuIconBg, { backgroundColor: Colors.primaryLight }]}>
+                  <Leaf size={20} color={Colors.primary} />
                 </View>
                 <View style={styles.menuContent}>
                   <Text style={styles.menuTitle}>

@@ -143,7 +143,7 @@ export default function AddPlantScreen() {
             ) : (
               <View style={styles.plantsList}>
                 {filteredPlants.map((plant) => {
-                  const plantImage = getPlantImage(plant.id);
+                  const plantImage = getPlantImage(plant.id, plant.name);
                   return (
                     <TouchableOpacity
                       key={plant.id}

@@ -50,12 +50,19 @@ const PLANT_FALLBACK_IMAGES: Record<string, string> = {
 };
 
 const getCommonPlantImage = (plantId: string, plantName: string): string | undefined => {
-  const commonPlant = COMMON_PLANTS.find(
-    (p) => p.id === plantId || 
-           p.name?.toLowerCase() === plantName?.toLowerCase() ||
-           plantName?.toLowerCase().includes(p.name?.toLowerCase()) ||
-           p.name?.toLowerCase().includes(plantName?.toLowerCase())
-  );
+  const normalizedName = (plantName || '').toLowerCase().trim();
+  const normalizedId = (plantId || '').toLowerCase().trim();
+  
+  const commonPlant = COMMON_PLANTS.find((p) => {
+    if (p.id === plantId) return true;
+    if (normalizedId && p.id.toLowerCase() === normalizedId) return true;
+    if (normalizedName && normalizedName.length > 2) {
+      if (p.name?.toLowerCase() === normalizedName) return true;
+      if (normalizedName.includes(p.name?.toLowerCase() || '')) return true;
+      if (p.name?.toLowerCase().includes(normalizedName)) return true;
+    }
+    return false;
+  });
   return commonPlant?.imageUrl;
 };
 

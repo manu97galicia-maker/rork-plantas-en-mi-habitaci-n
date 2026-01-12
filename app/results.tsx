@@ -111,10 +111,10 @@ function PlantLegendComponent({ suggestions, getPlantImage, onPlantPress, t }: {
 }
 const PlantLegend = React.memo(PlantLegendComponent);
 
-function PlantCardComponent({ plant, index, getPlantImage, getDifficultyColor, getDifficultyText, enrichedPlant, safeNavigate, language, allPlantsJson, totalPlants }: {
+function PlantCardComponent({ plant, index, getPlantImageWithFallback, getDifficultyColor, getDifficultyText, enrichedPlant, safeNavigate, language, allPlantsJson, totalPlants }: {
   plant: any;
   index: number;
-  getPlantImage: (id: string, name?: string) => string | undefined;
+  getPlantImageWithFallback: (id: string, name: string) => string;
   getDifficultyColor: (d: string) => string;
   getDifficultyText: (d: string) => string;
   enrichedPlant: any;
@@ -127,13 +127,13 @@ function PlantCardComponent({ plant, index, getPlantImage, getDifficultyColor, g
   const plantName = plant?.name || 'Plant';
   
   const plantImage = useMemo(() => {
-    if (!plant) return undefined;
+    if (!plant) return 'https://images.unsplash.com/photo-1463320898484-cdcfb6d08e12?w=400&q=70';
     try {
-      return getPlantImage(plantId, plantName);
+      return getPlantImageWithFallback(plantId, plantName);
     } catch {
-      return undefined;
+      return 'https://images.unsplash.com/photo-1463320898484-cdcfb6d08e12?w=400&q=70';
     }
-  }, [getPlantImage, plantId, plantName, plant]);
+  }, [getPlantImageWithFallback, plantId, plantName, plant]);
 
   const handlePress = useCallback(() => {
     if (!plant) return;
@@ -176,7 +176,7 @@ function PlantCardComponent({ plant, index, getPlantImage, getDifficultyColor, g
         <Text style={styles.plantCardNumberText}>{index + 1}</Text>
       </View>
       <Image
-        source={{ uri: plantImage || 'https://images.unsplash.com/photo-1463320898484-cdcfb6d08e12?w=400&q=70' }}
+        source={{ uri: plantImage }}
         style={styles.plantCardImage}
         contentFit="cover"
       />
@@ -252,7 +252,7 @@ export default function ResultsScreen() {
   const [showMarkers, setShowMarkers] = useState(false);
   const markersTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isNavigatingRef = useRef(false);
-  const { getPlantImage, prefetchPlantImage } = usePlantImages();
+  const { getPlantImage, prefetchPlantImage, getPlantImageWithFallback } = usePlantImages();
   const lastClickRef = useRef(0);
   const isProcessingTapRef = useRef(false);
   const lastMarkerTapRef = useRef(0);
@@ -461,15 +461,20 @@ export default function ResultsScreen() {
       const timeoutId = setTimeout(() => {
         if (isMountedRef.current && analysis.suggestions.length > 0) {
           try {
-            const firstPlant = analysis.suggestions[0];
-            if (firstPlant?.id && firstPlant?.name) {
-              prefetchPlantImage(firstPlant.id, firstPlant.name);
-            }
+            analysis.suggestions.forEach((plant, index) => {
+              if (plant?.id && plant?.name) {
+                setTimeout(() => {
+                  if (isMountedRef.current) {
+                    prefetchPlantImage(plant.id, plant.name);
+                  }
+                }, index * 500);
+              }
+            });
           } catch {
-            console.log('Error prefetching first image');
+            console.log('Error prefetching images');
           }
         }
-      }, 3000);
+      }, 1000);
       return () => {
         clearTimeout(timeoutId);
       };
@@ -1078,7 +1083,7 @@ Plant placement instructions:
                   key={plant?.id || `plant-${idx}`}
                   plant={plant}
                   index={idx}
-                  getPlantImage={getPlantImage}
+                  getPlantImageWithFallback={getPlantImageWithFallback}
                   getDifficultyColor={getDifficultyColor}
                   getDifficultyText={getDifficultyText}
                   enrichedPlant={enrichedPlants[idx]}

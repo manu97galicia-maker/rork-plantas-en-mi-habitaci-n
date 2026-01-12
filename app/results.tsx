@@ -493,15 +493,35 @@ export default function ResultsScreen() {
   }, [analysis?.suggestions?.length]);
 
   const analyzeRoom = async () => {
+    console.log('🔄 Starting room analysis...');
+    
     try {
+      if (!isMountedRef.current) {
+        console.log('⚠️ Component not mounted, aborting analysis');
+        return;
+      }
+      
       const imageData = params.imageData;
-      if (!imageData || typeof imageData !== 'string' || imageData.length < 100) {
+      
+      if (!imageData || typeof imageData !== 'string') {
+        console.log('❌ Invalid image data type');
         if (isMountedRef.current) {
           setError(language === 'es' ? 'Datos de imagen inválidos' : 'Invalid image data');
           setIsLoading(false);
         }
         return;
       }
+      
+      if (imageData.length < 100) {
+        console.log('❌ Image data too small:', imageData.length);
+        if (isMountedRef.current) {
+          setError(language === 'es' ? 'Datos de imagen inválidos' : 'Invalid image data');
+          setIsLoading(false);
+        }
+        return;
+      }
+      
+      console.log('📷 Image data length:', imageData.length);
       
       abortControllerRef.current = new AbortController();
 
@@ -706,13 +726,18 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
       });
       
       let result;
-      const maxRetries = 4;
+      const maxRetries = 3;
       let lastError: any = null;
       
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
+          if (!isMountedRef.current) {
+            console.log('⚠️ Component unmounted during retry loop');
+            return;
+          }
+          
           if (attempt > 0) {
-            const delayMs = Math.min(2000 * Math.pow(2, attempt - 1), 16000);
+            const delayMs = Math.min(2000 * Math.pow(2, attempt - 1), 12000);
             console.log(`🔄 Retry attempt ${attempt}/${maxRetries} after ${delayMs}ms...`);
             if (isMountedRef.current) {
               setLoadingStep(language === 'es' ? `Reintentando análisis (${attempt}/${maxRetries})...` : `Retrying analysis (${attempt}/${maxRetries})...`);
@@ -720,10 +745,19 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
             await new Promise(resolve => setTimeout(resolve, delayMs));
           }
           
-          if (!isMountedRef.current) return;
+          if (!isMountedRef.current) {
+            console.log('⚠️ Component unmounted after delay');
+            return;
+          }
+          
+          console.log(`📤 Sending analysis request (attempt ${attempt + 1})...`);
           
           const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Request timeout')), 60000);
+            const timeoutId = setTimeout(() => {
+              console.log('⏱️ Request timeout after 45s');
+              reject(new Error('Request timeout'));
+            }, 45000);
+            return () => clearTimeout(timeoutId);
           });
           
           const generatePromise = generateObject({
@@ -741,31 +775,43 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
           
           result = await Promise.race([generatePromise, timeoutPromise]);
           
-          if (result && result.suggestions && result.suggestions.length > 0) {
+          console.log('📥 Response received:', {
+            hasResult: !!result,
+            hasSuggestions: !!(result && result.suggestions),
+            suggestionsCount: result?.suggestions?.length || 0
+          });
+          
+          if (result && result.suggestions && Array.isArray(result.suggestions) && result.suggestions.length > 0) {
             console.log(`✅ Success on attempt ${attempt + 1}`);
             break;
+          } else {
+            console.log('⚠️ Invalid or empty result, retrying...');
+            lastError = new Error('Empty or invalid response');
           }
         } catch (genError: any) {
-          const errorMsg = genError?.message || 'Unknown error';
-          console.error(`generateObject error (attempt ${attempt + 1}):`, errorMsg);
+          const errorMsg = String(genError?.message || genError || 'Unknown error');
+          console.error(`❌ generateObject error (attempt ${attempt + 1}):`, errorMsg);
           lastError = genError;
           
           const isRetryableError = errorMsg.includes('Network request failed') || 
                                   errorMsg.includes('Failed to fetch') ||
-                                  errorMsg.includes('network') ||
-                                  errorMsg.includes('timeout') ||
+                                  errorMsg.toLowerCase().includes('network') ||
+                                  errorMsg.toLowerCase().includes('timeout') ||
                                   errorMsg.includes('Request timeout') ||
                                   errorMsg.includes('429') ||
                                   errorMsg.includes('503') ||
-                                  errorMsg.includes('502');
+                                  errorMsg.includes('502') ||
+                                  errorMsg.includes('500');
           
           if (attempt === maxRetries || !isRetryableError) {
+            console.log('❌ Max retries reached or non-retryable error');
             throw new Error(lastError?.message || "Failed to analyze image after retries");
           }
         }
       }
       
-      if (!result) {
+      if (!result || !result.suggestions || !Array.isArray(result.suggestions)) {
+        console.log('❌ No valid result after all attempts');
         throw new Error(lastError?.message || "Failed to get analysis result");
       }
 
@@ -801,20 +847,35 @@ Instructions:
 - The result should be the same space but beautifully enhanced with plants`;
 
       const generateEditedImageAsync = async () => {
+        if (!isMountedRef.current) {
+          console.log('⚠️ Component unmounted, skipping image edit');
+          return;
+        }
+        
         try {
           console.log("📤 Generating edited image in background...");
-          const editResult = await editImageWithPlants(editPrompt, params.imageData, "1:1");
           
-          if (!isMountedRef.current) return;
+          const safeImageData = params.imageData || '';
+          if (!safeImageData || safeImageData.length < 100) {
+            console.log('⚠️ Invalid image data for editing');
+            return;
+          }
           
-          if (editResult.success && editResult.imageBase64) {
+          const editResult = await editImageWithPlants(editPrompt, safeImageData, "1:1");
+          
+          if (!isMountedRef.current) {
+            console.log('⚠️ Component unmounted after image edit');
+            return;
+          }
+          
+          if (editResult && editResult.success && editResult.imageBase64) {
             setEditedImage(editResult.imageBase64);
             console.log("✅ Edited image generated successfully");
             
             try {
               await addScan({
                 analysis: result as RoomAnalysis,
-                originalImage: params.imageData || '',
+                originalImage: safeImageData,
                 editedImage: editResult.imageBase64,
                 location: locationInfo ? {
                   latitude: locationInfo.latitude,
@@ -824,14 +885,14 @@ Instructions:
               });
               console.log("✅ Scan saved with edited image");
             } catch (saveError) {
-              console.log('Error saving scan:', saveError);
+              console.log('⚠️ Error saving scan:', saveError);
             }
           } else {
-            console.log("⚠️ Image edit failed:", editResult.error);
+            console.log("⚠️ Image edit failed:", editResult?.error || 'Unknown error');
             try {
               await addScan({
                 analysis: result as RoomAnalysis,
-                originalImage: params.imageData || '',
+                originalImage: safeImageData,
                 location: locationInfo ? {
                   latitude: locationInfo.latitude,
                   longitude: locationInfo.longitude,
@@ -839,16 +900,17 @@ Instructions:
                 } : undefined,
               });
             } catch (saveError) {
-              console.log('Error saving scan:', saveError);
+              console.log('⚠️ Error saving scan:', saveError);
             }
           }
         } catch (editError: any) {
-          console.error("❌ Error generating edited image:", editError?.message);
+          console.error("❌ Error generating edited image:", editError?.message || editError);
           if (isMountedRef.current) {
             try {
+              const safeImageData = params.imageData || '';
               await addScan({
                 analysis: result as RoomAnalysis,
-                originalImage: params.imageData || '',
+                originalImage: safeImageData,
                 location: locationInfo ? {
                   latitude: locationInfo.latitude,
                   longitude: locationInfo.longitude,
@@ -856,13 +918,17 @@ Instructions:
                 } : undefined,
               });
             } catch (saveError) {
-              console.log('Error saving scan:', saveError);
+              console.log('⚠️ Error saving scan:', saveError);
             }
           }
         }
       };
 
-      generateEditedImageAsync();
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          generateEditedImageAsync();
+        }
+      }, 100);
     } catch (err: any) {
       if (!isMountedRef.current) return;
       setIsLoading(false);
@@ -893,10 +959,26 @@ Instructions:
       // Loading state is now handled earlier for faster UX
     }
     } catch (outerError: any) {
-      console.error('❌ Outer error in analyzeRoom:', outerError);
+      const errorMsg = String(outerError?.message || outerError || 'Unknown error');
+      console.error('❌ Outer error in analyzeRoom:', errorMsg);
+      console.error('❌ Error stack:', outerError?.stack);
+      
       if (isMountedRef.current) {
         setIsLoading(false);
-        setError(language === 'es' ? 'Error inesperado. Por favor, intenta de nuevo.' : 'Unexpected error. Please try again.');
+        
+        if (errorMsg.toLowerCase().includes('network') || errorMsg.includes('Failed to fetch')) {
+          setError(language === 'es' 
+            ? '🌐 Error de conexión. Verifica tu internet e intenta de nuevo.' 
+            : '🌐 Connection error. Check your internet and try again.');
+        } else if (errorMsg.includes('timeout')) {
+          setError(language === 'es' 
+            ? '⏱️ La solicitud tardó demasiado. Intenta con una imagen más pequeña.' 
+            : '⏱️ Request took too long. Try with a smaller image.');
+        } else {
+          setError(language === 'es' 
+            ? 'Error inesperado. Por favor, intenta de nuevo.' 
+            : 'Unexpected error. Please try again.');
+        }
       }
     }
   };

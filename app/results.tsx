@@ -247,8 +247,8 @@ export default function ResultsScreen() {
   const [loadingStep, setLoadingStep] = useState<string>("");
   const [locationData, setLocationData] = useState<LocationData | null>(null);
   const [enlargedImage, setEnlargedImage] = useState<{ uri: string; label: string; isAfter?: boolean } | null>(null);
-  const [selectedPlantIndex, setSelectedPlantIndex] = useState<number | null>(null);
-  const [showPlantTooltip, setShowPlantTooltip] = useState<{ index: number; name: string } | null>(null);
+  const [, setSelectedPlantIndex] = useState<number | null>(null);
+  const [, setShowPlantTooltip] = useState<{ index: number; name: string } | null>(null);
   const [showMarkers, setShowMarkers] = useState(false);
   const markersTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isNavigatingRef = useRef(false);
@@ -399,35 +399,7 @@ export default function ResultsScreen() {
     }
   }, [analysis?.suggestions, enrichedPlants, allPlantsJson, safeNavigate]);
 
-  const handleMarkerTap = useCallback((index: number, plantName: string) => {
-    try {
-      const now = Date.now();
-      if (isProcessingTapRef.current || now - lastMarkerTapRef.current < 300) {
-        return;
-      }
-      isProcessingTapRef.current = true;
-      lastMarkerTapRef.current = now;
-      
-      setSelectedPlantIndex(index);
-      setShowPlantTooltip({ index, name: plantName });
-      
-      if (markersTimeoutRef.current) {
-        clearTimeout(markersTimeoutRef.current);
-      }
-      markersTimeoutRef.current = setTimeout(() => {
-        setShowMarkers(false);
-        setShowPlantTooltip(null);
-        setSelectedPlantIndex(null);
-      }, 4000);
-      
-      setTimeout(() => {
-        isProcessingTapRef.current = false;
-      }, 300);
-    } catch (e) {
-      console.log('Marker tap error:', e);
-      isProcessingTapRef.current = false;
-    }
-  }, []);
+
 
   const handleAfterImageTap = useCallback(() => {
     try {
@@ -955,98 +927,85 @@ Instructions:
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {editedImage && (
-              <View style={styles.comparisonCard}>
-                <Text style={styles.comparisonTitle}>{t.results.beforeAfter}</Text>
-                
-                <View style={styles.imageComparisonContainer}>
-                  <TouchableOpacity 
-                    style={styles.comparisonImageWrapper}
-                    onPress={() => {
-                      if (params.imageData && !imageError) {
-                        setEnlargedImage({ 
-                          uri: `data:image/jpeg;base64,${params.imageData}`, 
-                          label: t.results.before 
-                        });
-                      }
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.comparisonLabel}>{t.results.before}</Text>
-                    {params.imageData && !imageError ? (
-                      <Image
-                        source={{ uri: `data:image/jpeg;base64,${params.imageData}` }}
-                        style={styles.comparisonImage}
-                        contentFit="cover"
-                        onError={() => setImageError(true)}
-                      />
-                    ) : (
-                      <View style={[styles.comparisonImage, { backgroundColor: '#e5e7eb', justifyContent: 'center', alignItems: 'center' }]}>
-                        <Text style={{ color: '#6b7280' }}>{language === 'es' ? 'Imagen no disponible' : 'Image unavailable'}</Text>
-                      </View>
-                    )}
-                    <Text style={styles.tapToEnlargeText}>{t.results.tapToEnlarge}</Text>
-                  </TouchableOpacity>
-                  
-                  <View style={styles.comparisonImageWrapper}>
-                    <Text style={styles.comparisonLabel}>{t.results.after}</Text>
-                    <TouchableOpacity
-                      onPress={handleAfterImageTap}
-                      activeOpacity={0.9}
-                      style={styles.afterImageContainer}
-                      delayPressIn={50}
-                    >
-                      <Image
-                        source={{ uri: `data:image/png;base64,${editedImage}` }}
-                        style={styles.comparisonImage}
-                        contentFit="cover"
-                      />
-                      {showMarkers && analysis?.suggestions && Array.isArray(analysis.suggestions) && analysis.suggestions.slice(0, 5).map((plant, index) => {
-                        if (!plant || typeof plant !== 'object') return null;
-                        const posX = plant.position?.x ?? (20 + index * 15);
-                        const posY = plant.position?.y ?? (30 + index * 10);
-                        return (
-                          <TouchableOpacity
-                            key={`marker-${plant.id || index}`}
-                            style={[
-                              styles.plantMarker,
-                              {
-                                left: `${posX}%`,
-                                top: `${posY}%`,
-                              },
-                              selectedPlantIndex === index && styles.plantMarkerSelected,
-                            ]}
-                            onPress={() => handleMarkerTap(index, plant.name || 'Plant')}
-                            activeOpacity={0.8}
-                            delayPressIn={50}
-                          >
-                            <Text style={styles.plantMarkerText}>{index + 1}</Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                      {showMarkers && showPlantTooltip && (
-                        <View 
-                          style={[
-                            styles.plantTooltip,
-                            {
-                              left: `${analysis?.suggestions[showPlantTooltip.index]?.position?.x || 50}%`,
-                              top: `${(analysis?.suggestions[showPlantTooltip.index]?.position?.y || 50) - 12}%`,
-                            }
-                          ]}
-                        >
-                          <Text style={styles.plantTooltipText}>{showPlantTooltip.name}</Text>
-                        </View>
-                      )}
-                    </TouchableOpacity>
-                    <Text style={styles.tapToEnlargeText}>{language === 'es' ? 'Toca para ver los números de plantas' : 'Tap to see plant numbers'}</Text>
+            <View style={styles.comparisonCard}>
+              <Text style={styles.comparisonTitle}>{t.results.beforeAfter}</Text>
+              
+              <View style={styles.imageComparisonRow}>
+                <TouchableOpacity 
+                  style={styles.comparisonImageBox}
+                  onPress={() => {
+                    if (params.imageData && !imageError) {
+                      setEnlargedImage({ 
+                        uri: `data:image/jpeg;base64,${params.imageData}`, 
+                        label: t.results.before 
+                      });
+                    }
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.labelBadgeBefore}>
+                    <Text style={styles.labelBadgeText}>{t.results.before}</Text>
                   </View>
+                  {params.imageData && !imageError ? (
+                    <Image
+                      source={{ uri: `data:image/jpeg;base64,${params.imageData}` }}
+                      style={styles.comparisonImageSquare}
+                      contentFit="cover"
+                      onError={() => setImageError(true)}
+                    />
+                  ) : (
+                    <View style={[styles.comparisonImageSquare, styles.imagePlaceholder]}>
+                      <Text style={styles.imagePlaceholderText}>{language === 'es' ? 'Sin imagen' : 'No image'}</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+                
+                <View style={styles.arrowContainer}>
+                  <Text style={styles.arrowText}>→</Text>
                 </View>
                 
-                <Text style={styles.comparisonHint}>
-                  {t.results.beforeAfterHint}
-                </Text>
+                <TouchableOpacity 
+                  style={styles.comparisonImageBox}
+                  onPress={() => {
+                    if (editedImage) {
+                      setEnlargedImage({ 
+                        uri: `data:image/png;base64,${editedImage}`, 
+                        label: t.results.after,
+                        isAfter: true
+                      });
+                    } else {
+                      handleAfterImageTap();
+                    }
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.labelBadgeAfter}>
+                    <Text style={styles.labelBadgeText}>{t.results.after}</Text>
+                  </View>
+                  {editedImage ? (
+                    <Image
+                      source={{ uri: `data:image/png;base64,${editedImage}` }}
+                      style={styles.comparisonImageSquare}
+                      contentFit="cover"
+                    />
+                  ) : (
+                    <View style={[styles.comparisonImageSquare, styles.imageLoading]}>
+                      <ActivityIndicator size="small" color="#52b788" />
+                      <Text style={styles.imageLoadingText}>{language === 'es' ? 'Generando...' : 'Generating...'}</Text>
+                    </View>
+                  )}
+                  {editedImage && (
+                    <View style={styles.sparklesBadge}>
+                      <Sparkles size={14} color="#ffffff" />
+                    </View>
+                  )}
+                </TouchableOpacity>
               </View>
-            )}
+              
+              <Text style={styles.comparisonHint}>
+                {language === 'es' ? 'Toca cualquier imagen para ampliar' : 'Tap any image to enlarge'}
+              </Text>
+            </View>
 
             <View style={styles.analysisCard}>
               <Text style={styles.analysisTitle}>{t.results.spaceAnalysis}</Text>
@@ -1452,7 +1411,84 @@ const styles = StyleSheet.create({
     color: "#6b7280",
     textAlign: "center",
     marginTop: 16,
-    fontStyle: "italic",
+    fontStyle: "italic" as const,
+  },
+  imageComparisonRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    gap: 8,
+  },
+  comparisonImageBox: {
+    flex: 1,
+    position: "relative" as const,
+  },
+  comparisonImageSquare: {
+    width: "100%",
+    aspectRatio: 1,
+    borderRadius: 16,
+  },
+  labelBadgeBefore: {
+    position: "absolute" as const,
+    top: 8,
+    left: 8,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    zIndex: 10,
+  },
+  labelBadgeAfter: {
+    position: "absolute" as const,
+    top: 8,
+    left: 8,
+    backgroundColor: "#52b788",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    zIndex: 10,
+  },
+  labelBadgeText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#ffffff",
+  },
+  arrowContainer: {
+    paddingHorizontal: 4,
+  },
+  arrowText: {
+    fontSize: 24,
+    color: "#52b788",
+    fontWeight: "700" as const,
+  },
+  imagePlaceholder: {
+    backgroundColor: "#e5e7eb",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+  },
+  imagePlaceholderText: {
+    color: "#6b7280",
+    fontSize: 12,
+  },
+  imageLoading: {
+    backgroundColor: "#f0fdf4",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  },
+  imageLoadingText: {
+    color: "#52b788",
+    fontSize: 12,
+    fontWeight: "500" as const,
+  },
+  sparklesBadge: {
+    position: "absolute" as const,
+    top: 8,
+    right: 8,
+    backgroundColor: "#52b788",
+    padding: 6,
+    borderRadius: 12,
+    zIndex: 10,
   },
   plantNumberLegend: {
     backgroundColor: "#ffffff",

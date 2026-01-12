@@ -256,7 +256,7 @@ export default function CameraScreen() {
     if (!canScan()) {
       Alert.alert(
         "Limit Reached",
-        "You have reached the limit of 30 scans this month. The limit resets next month.",
+        "You have reached the limit of 40 scans this month. The limit resets next month.",
         [{ text: "OK" }]
       );
       return;
@@ -271,11 +271,17 @@ export default function CameraScreen() {
 
       console.log("📸 Starting photo capture...");
       
-      const photo = await cameraRef.current.takePictureAsync({
+      const capturePromise = cameraRef.current.takePictureAsync({
         quality: 0.6,
         base64: true,
-        skipProcessing: true,
+        skipProcessing: Platform.OS === 'android',
       });
+      
+      const timeoutPromise = new Promise<null>((_, reject) => {
+        setTimeout(() => reject(new Error('Camera timeout')), 15000);
+      });
+      
+      const photo = await Promise.race([capturePromise, timeoutPromise]);
       
       setShowStabilizing(false);
 
@@ -311,16 +317,25 @@ export default function CameraScreen() {
       } else {
         console.error("❌ Photo capture failed - no base64 data");
         setIsCapturing(false);
+        setShowStabilizing(false);
+        Alert.alert(
+          "Error",
+          "Could not capture photo. Please try again.",
+          [{ text: "OK" }]
+        );
       }
     } catch (error) {
       console.error("❌ Error taking picture:", error);
       setShowStabilizing(false);
+      setIsCapturing(false);
+      const errorMessage = error instanceof Error && error.message === 'Camera timeout' 
+        ? "The camera took too long to respond. Please try again."
+        : "Could not take photo. Please try again.";
       Alert.alert(
         "Error",
-        "Could not take photo. Please try again.",
+        errorMessage,
         [{ text: "OK" }]
       );
-      setIsCapturing(false);
     }
   };
 

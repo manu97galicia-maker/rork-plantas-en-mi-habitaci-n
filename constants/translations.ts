@@ -151,6 +151,13 @@ interface Translations {
     sleepScore: string;
     stressReduction: string;
     stressScore: string;
+    safetyInfo: string;
+    petSafe: string;
+    notPetSafe: string;
+    allergens: string;
+    safeForPets: string;
+    toxicToPets: string;
+    disclaimer: string;
   };
 }
 
@@ -306,6 +313,13 @@ const translations: Record<Language, Translations> = {
       sleepScore: "Sleep Score",
       stressReduction: "Stress Reduction",
       stressScore: "Relaxation Score",
+    safetyInfo: "Safety Information",
+    petSafe: "Pet Safe",
+    notPetSafe: "Not Pet Safe",
+    allergens: "Allergens",
+    safeForPets: "Safe for pets",
+    toxicToPets: "Toxic to pets",
+    disclaimer: "This information is for educational purposes only. We are not responsible for any harm to people, pets, or plants. Always consult a veterinarian or specialist before exposing pets or people with allergies to new plants.",
     },
   },
   es: {
@@ -459,6 +473,13 @@ const translations: Record<Language, Translations> = {
       sleepScore: "Puntuación de Sueño",
       stressReduction: "Reducción del Estrés",
       stressScore: "Puntuación de Relajación",
+    safetyInfo: "Información de Seguridad",
+    petSafe: "Seguro para mascotas",
+    notPetSafe: "No seguro para mascotas",
+    allergens: "Alérgenos",
+    safeForPets: "Seguro para mascotas",
+    toxicToPets: "Tóxico para mascotas",
+    disclaimer: "Esta información es solo con fines educativos. No nos hacemos responsables de ningún daño a personas, mascotas o plantas. Consulte siempre a un veterinario o especialista antes de exponer a mascotas o personas con alergias a nuevas plantas.",
     },
   },
 };

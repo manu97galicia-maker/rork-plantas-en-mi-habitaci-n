@@ -13,6 +13,14 @@ export interface WellnessBenefits {
   stressDescriptionEs: string;
 }
 
+export interface SafetyInfo {
+  petSafe: boolean;
+  petSafeDescription: string;
+  petSafeDescriptionEs: string;
+  allergenInfo: string;
+  allergenInfoEs: string;
+}
+
 export interface Plant {
   id: string;
   name: string;
@@ -23,6 +31,7 @@ export interface Plant {
   description: string;
   airPurification?: AirPurification;
   wellnessBenefits?: WellnessBenefits;
+  safetyInfo?: SafetyInfo;
   careInstructions: {
     light: string;
     water: string;

@@ -33,6 +33,13 @@ export const COMMON_PLANTS: Plant[] = [
         'Provide a moss pole for support',
         'Rotate plant for even growth'
       ]
+    },
+    safetyInfo: {
+      petSafe: false,
+      petSafeDescription: 'Toxic to cats and dogs if ingested. Contains calcium oxalate crystals that can cause oral irritation, drooling, and vomiting.',
+      petSafeDescriptionEs: 'Tóxica para gatos y perros si se ingiere. Contiene cristales de oxalato de calcio que pueden causar irritación oral, babeo y vómitos.',
+      allergenInfo: 'Generally safe for most people. Rare cases of skin irritation from sap contact.',
+      allergenInfoEs: 'Generalmente segura para la mayoría de personas. Casos raros de irritación cutánea por contacto con la savia.'
     }
   },
   {
@@ -67,6 +74,13 @@ export const COMMON_PLANTS: Plant[] = [
         'Trim to encourage bushier growth',
         'Can be propagated easily in water'
       ]
+    },
+    safetyInfo: {
+      petSafe: false,
+      petSafeDescription: 'Toxic to cats and dogs. Contains calcium oxalate crystals causing mouth irritation, excessive drooling, and difficulty swallowing.',
+      petSafeDescriptionEs: 'Tóxica para gatos y perros. Contiene cristales de oxalato de calcio que causan irritación bucal, babeo excesivo y dificultad para tragar.',
+      allergenInfo: 'May cause skin irritation in sensitive individuals upon contact with sap.',
+      allergenInfoEs: 'Puede causar irritación cutánea en personas sensibles al contacto con la savia.'
     }
   },
   {
@@ -101,6 +115,13 @@ export const COMMON_PLANTS: Plant[] = [
         'Great air purifier',
         'Very low maintenance'
       ]
+    },
+    safetyInfo: {
+      petSafe: false,
+      petSafeDescription: 'Mildly toxic to cats and dogs. Can cause nausea, vomiting, and diarrhea if ingested in large quantities.',
+      petSafeDescriptionEs: 'Ligeramente tóxica para gatos y perros. Puede causar náuseas, vómitos y diarrea si se ingiere en grandes cantidades.',
+      allergenInfo: 'Generally hypoallergenic and safe for most people. Excellent air purifier that can reduce allergens.',
+      allergenInfoEs: 'Generalmente hipoalergénica y segura para la mayoría. Excelente purificador que puede reducir alérgenos.'
     }
   },
   {
@@ -135,6 +156,13 @@ export const COMMON_PLANTS: Plant[] = [
         'Easy to propagate from plantlets',
         'Safe for pets'
       ]
+    },
+    safetyInfo: {
+      petSafe: true,
+      petSafeDescription: 'Non-toxic and safe for cats, dogs, and other pets. One of the best pet-friendly houseplants available.',
+      petSafeDescriptionEs: 'No tóxica y segura para gatos, perros y otras mascotas. Una de las mejores plantas de interior aptas para mascotas.',
+      allergenInfo: 'Safe for people with allergies. Actually helps purify air and remove allergens from the environment.',
+      allergenInfoEs: 'Segura para personas con alergias. De hecho, ayuda a purificar el aire y eliminar alérgenos del ambiente.'
     }
   },
   {
@@ -169,6 +197,13 @@ export const COMMON_PLANTS: Plant[] = [
         'Remove spent flowers',
         'Toxic to pets'
       ]
+    },
+    safetyInfo: {
+      petSafe: false,
+      petSafeDescription: 'Toxic to cats and dogs. Contains calcium oxalate crystals that cause severe mouth burning, drooling, and vomiting.',
+      petSafeDescriptionEs: 'Tóxica para gatos y perros. Contiene cristales de oxalato de calcio que causan ardor severo en la boca, babeo y vómitos.',
+      allergenInfo: 'May trigger allergies in sensitive individuals. Pollen from flowers can cause respiratory issues in some people.',
+      allergenInfoEs: 'Puede provocar alergias en personas sensibles. El polen de las flores puede causar problemas respiratorios en algunas personas.'
     }
   },
   {
@@ -203,6 +238,13 @@ export const COMMON_PLANTS: Plant[] = [
         'Can grow quite tall',
         'Prune to control size'
       ]
+    },
+    safetyInfo: {
+      petSafe: false,
+      petSafeDescription: 'Toxic to cats and dogs if ingested. Milky sap can cause skin irritation and digestive upset in pets.',
+      petSafeDescriptionEs: 'Tóxica para gatos y perros si se ingiere. La savia lechosa puede causar irritación cutánea y malestar digestivo en mascotas.',
+      allergenInfo: 'Latex in sap may cause allergic reactions in people with latex allergies. Use gloves when pruning.',
+      allergenInfoEs: 'El látex de la savia puede causar reacciones alérgicas en personas con alergia al látex. Use guantes al podar.'
     }
   },
   {
@@ -237,6 +279,13 @@ export const COMMON_PLANTS: Plant[] = [
         'Stores water in rhizomes',
         'Very slow growing'
       ]
+    },
+    safetyInfo: {
+      petSafe: false,
+      petSafeDescription: 'Toxic to cats and dogs. All parts contain calcium oxalate crystals that cause oral irritation and gastrointestinal issues.',
+      petSafeDescriptionEs: 'Tóxica para gatos y perros. Todas las partes contienen cristales de oxalato de calcio que causan irritación oral y problemas gastrointestinales.',
+      allergenInfo: 'Generally safe for most people. May cause skin irritation in those with sensitive skin upon contact.',
+      allergenInfoEs: 'Generalmente segura para la mayoría. Puede causar irritación cutánea en personas con piel sensible al contacto.'
     }
   },
   {
@@ -271,6 +320,13 @@ export const COMMON_PLANTS: Plant[] = [
         'Use well-draining cactus soil',
         'Yellow leaves indicate overwatering'
       ]
+    },
+    safetyInfo: {
+      petSafe: false,
+      petSafeDescription: 'Toxic to cats and dogs if ingested. The gel is safe topically for humans but toxic to pets causing vomiting and diarrhea.',
+      petSafeDescriptionEs: 'Tóxica para gatos y perros si se ingiere. El gel es seguro tópicamente para humanos pero tóxico para mascotas causando vómitos y diarrea.',
+      allergenInfo: 'Generally safe and beneficial for skin. Some people may experience contact dermatitis from the latex layer beneath the skin.',
+      allergenInfoEs: 'Generalmente segura y beneficiosa para la piel. Algunas personas pueden experimentar dermatitis por contacto con la capa de látex bajo la piel.'
     }
   },
   {

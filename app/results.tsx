@@ -175,13 +175,11 @@ function PlantCardComponent({ plant, index, getPlantImage, getDifficultyColor, g
       <View style={styles.plantCardNumberBadge}>
         <Text style={styles.plantCardNumberText}>{index + 1}</Text>
       </View>
-      {plantImage && (
-        <Image
-          source={{ uri: plantImage }}
-          style={styles.plantCardImage}
-          contentFit="cover"
-        />
-      )}
+      <Image
+        source={{ uri: plantImage || 'https://images.unsplash.com/photo-1463320898484-cdcfb6d08e12?w=400&q=70' }}
+        style={styles.plantCardImage}
+        contentFit="cover"
+      />
       <View style={styles.plantInfo}>
         <View style={styles.plantHeader}>
           <View style={{ flex: 1 }}>

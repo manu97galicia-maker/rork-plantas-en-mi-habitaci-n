@@ -12,6 +12,10 @@ import {
   Leaf,
   Moon,
   Heart,
+  PawPrint,
+  AlertTriangle,
+  ShieldCheck,
+  ShieldAlert,
 } from "lucide-react-native";
 import React, { useState, useCallback } from "react";
 import {
@@ -145,25 +149,21 @@ export default function PlantDetailScreen() {
     }
   };
 
-  const plantImage = getPlantImage(plant.id) || plant.imageUrl;
+  const plantImage = getPlantImage(plant.id, plant.name) || plant.imageUrl;
 
   return (
     <View style={styles.container}>
-      {plantImage ? (
-        <Image
-          source={{ uri: plantImage }}
-          style={styles.headerImage}
-          contentFit="cover"
-          cachePolicy="memory-disk"
-          transition={200}
-          placeholder={{ blurhash: "LGF5?xYk^6#M@-5c,1J5@[or[Q6." }}
-          onError={(error) => {
-            console.error(`Error loading image of ${plant.name}:`, error.error || error);
-          }}
-        />
-      ) : (
-        <View style={[styles.headerImage, { backgroundColor: '#e5e7eb' }]} />
-      )}
+      <Image
+        source={{ uri: plantImage || 'https://images.unsplash.com/photo-1463320898484-cdcfb6d08e12?w=400&q=70' }}
+        style={styles.headerImage}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+        transition={200}
+        placeholder={{ blurhash: "LGF5?xYk^6#M@-5c,1J5@[or[Q6." }}
+        onError={(error) => {
+          console.error(`Error loading image of ${plant.name}:`, error.error || error);
+        }}
+      />
       <LinearGradient
         colors={["transparent", "rgba(0, 0, 0, 0.6)"]}
         style={styles.headerGradient}
@@ -407,6 +407,63 @@ export default function PlantDetailScreen() {
               )}
             </>
           )}
+
+          {plant.safetyInfo && (
+            <>
+              <View style={styles.divider} />
+
+              <Text style={styles.sectionTitle}>{t.plantDetail.safetyInfo}</Text>
+
+              <View style={styles.safetyCard}>
+                <View style={styles.safetyItem}>
+                  <View style={[
+                    styles.safetyIconContainer,
+                    plant.safetyInfo.petSafe ? styles.safetyIconSafe : styles.safetyIconDanger
+                  ]}>
+                    <PawPrint size={24} color="#ffffff" />
+                  </View>
+                  <View style={styles.safetyContent}>
+                    <View style={styles.safetyHeader}>
+                      {plant.safetyInfo.petSafe ? (
+                        <ShieldCheck size={18} color="#16a34a" />
+                      ) : (
+                        <ShieldAlert size={18} color="#dc2626" />
+                      )}
+                      <Text style={[
+                        styles.safetyTitle,
+                        plant.safetyInfo.petSafe ? styles.safetyTitleSafe : styles.safetyTitleDanger
+                      ]}>
+                        {plant.safetyInfo.petSafe ? t.plantDetail.petSafe : t.plantDetail.notPetSafe}
+                      </Text>
+                    </View>
+                    <Text style={styles.safetyDescription}>
+                      {language === 'es' ? plant.safetyInfo.petSafeDescriptionEs : plant.safetyInfo.petSafeDescription}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.safetyDivider} />
+
+                <View style={styles.safetyItem}>
+                  <View style={[styles.safetyIconContainer, styles.safetyIconAllergen]}>
+                    <AlertTriangle size={24} color="#ffffff" />
+                  </View>
+                  <View style={styles.safetyContent}>
+                    <Text style={styles.safetyTitleAllergen}>{t.plantDetail.allergens}</Text>
+                    <Text style={styles.safetyDescription}>
+                      {language === 'es' ? plant.safetyInfo.allergenInfoEs : plant.safetyInfo.allergenInfo}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </>
+          )}
+
+          <View style={styles.disclaimerContainer}>
+            <Text style={styles.disclaimerText}>
+              {t.plantDetail.disclaimer}
+            </Text>
+          </View>
 
           <View style={{ height: 20 }} />
         </View>
@@ -756,5 +813,80 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#e9d5ff",
     marginVertical: 16,
+  },
+  safetyCard: {
+    backgroundColor: "#fefce8",
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "#fef08a",
+  },
+  safetyItem: {
+    flexDirection: "row" as const,
+    gap: 16,
+  },
+  safetyIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  safetyIconSafe: {
+    backgroundColor: "#16a34a",
+  },
+  safetyIconDanger: {
+    backgroundColor: "#dc2626",
+  },
+  safetyIconAllergen: {
+    backgroundColor: "#f59e0b",
+  },
+  safetyContent: {
+    flex: 1,
+  },
+  safetyHeader: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6,
+    marginBottom: 6,
+  },
+  safetyTitle: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+  },
+  safetyTitleSafe: {
+    color: "#16a34a",
+  },
+  safetyTitleDanger: {
+    color: "#dc2626",
+  },
+  safetyTitleAllergen: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: "#b45309",
+    marginBottom: 6,
+  },
+  safetyDescription: {
+    fontSize: 14,
+    color: "#374151",
+    lineHeight: 22,
+  },
+  safetyDivider: {
+    height: 1,
+    backgroundColor: "#fef08a",
+    marginVertical: 16,
+  },
+  disclaimerContainer: {
+    marginTop: 24,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+  },
+  disclaimerText: {
+    fontSize: 11,
+    color: "#9ca3af",
+    lineHeight: 16,
+    textAlign: "center" as const,
+    fontStyle: "italic" as const,
   },
 });

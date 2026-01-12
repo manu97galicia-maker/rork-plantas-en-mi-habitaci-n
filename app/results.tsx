@@ -241,6 +241,7 @@ export default function ResultsScreen() {
   const [analysis, setAnalysis] = useState<RoomAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
   const [editedImage, setEditedImage] = useState<string | null>(null);
   const [plantsOnlyImage] = useState<string | null>(null);
   const [loadingStep, setLoadingStep] = useState<string>("");
@@ -447,9 +448,17 @@ export default function ResultsScreen() {
 
   useEffect(() => {
     isMountedRef.current = true;
-    if (params.imageData) {
-      analyzeRoom();
+    
+    const imageData = params.imageData;
+    if (!imageData || typeof imageData !== 'string' || imageData.length < 100) {
+      console.error('❌ Invalid or missing image data');
+      setError(language === 'es' ? 'Datos de imagen inválidos. Por favor, intenta de nuevo.' : 'Invalid image data. Please try again.');
+      setIsLoading(false);
+      return;
     }
+    
+    analyzeRoom();
+    
     return () => {
       isMountedRef.current = false;
       if (abortControllerRef.current) {
@@ -484,15 +493,17 @@ export default function ResultsScreen() {
   }, [analysis?.suggestions?.length]);
 
   const analyzeRoom = async () => {
-    if (!params.imageData) {
-      if (isMountedRef.current) {
-        setError("Image not found");
-        setIsLoading(false);
+    try {
+      const imageData = params.imageData;
+      if (!imageData || typeof imageData !== 'string' || imageData.length < 100) {
+        if (isMountedRef.current) {
+          setError(language === 'es' ? 'Datos de imagen inválidos' : 'Invalid image data');
+          setIsLoading(false);
+        }
+        return;
       }
-      return;
-    }
-    
-    abortControllerRef.current = new AbortController();
+      
+      abortControllerRef.current = new AbortController();
 
     let locationInfo: LocationData | null = null;
     if (params.latitude && params.longitude) {
@@ -855,7 +866,7 @@ Instructions:
     } catch (err: any) {
       if (!isMountedRef.current) return;
       setIsLoading(false);
-      console.error("\n❌ ERROR:", err?.message || 'Unknown error');
+      console.error("\n❌ ERROR:", err?.message || err || 'Unknown error');
       
       const errorMessage = err?.message || "";
       const errorString = String(err || "");
@@ -880,6 +891,13 @@ Instructions:
       }
     } finally {
       // Loading state is now handled earlier for faster UX
+    }
+    } catch (outerError: any) {
+      console.error('❌ Outer error in analyzeRoom:', outerError);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+        setError(language === 'es' ? 'Error inesperado. Por favor, intenta de nuevo.' : 'Unexpected error. Please try again.');
+      }
     }
   };
 
@@ -985,18 +1003,29 @@ Instructions:
                 <View style={styles.imageComparisonContainer}>
                   <TouchableOpacity 
                     style={styles.comparisonImageWrapper}
-                    onPress={() => setEnlargedImage({ 
-                      uri: `data:image/jpeg;base64,${params.imageData}`, 
-                      label: t.results.before 
-                    })}
+                    onPress={() => {
+                      if (params.imageData && !imageError) {
+                        setEnlargedImage({ 
+                          uri: `data:image/jpeg;base64,${params.imageData}`, 
+                          label: t.results.before 
+                        });
+                      }
+                    }}
                     activeOpacity={0.8}
                   >
                     <Text style={styles.comparisonLabel}>{t.results.before}</Text>
-                    <Image
-                      source={{ uri: `data:image/jpeg;base64,${params.imageData}` }}
-                      style={styles.comparisonImage}
-                      contentFit="cover"
-                    />
+                    {params.imageData && !imageError ? (
+                      <Image
+                        source={{ uri: `data:image/jpeg;base64,${params.imageData}` }}
+                        style={styles.comparisonImage}
+                        contentFit="cover"
+                        onError={() => setImageError(true)}
+                      />
+                    ) : (
+                      <View style={[styles.comparisonImage, { backgroundColor: '#e5e7eb', justifyContent: 'center', alignItems: 'center' }]}>
+                        <Text style={{ color: '#6b7280' }}>{language === 'es' ? 'Imagen no disponible' : 'Image unavailable'}</Text>
+                      </View>
+                    )}
                     <Text style={styles.tapToEnlargeText}>{t.results.tapToEnlarge}</Text>
                   </TouchableOpacity>
                   

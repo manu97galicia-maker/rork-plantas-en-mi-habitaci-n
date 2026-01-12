@@ -60,32 +60,47 @@ export default function IdentifyPlantScreen() {
   const [identification, setIdentification] = useState<PlantIdentification | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
   const hasStartedRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
-    if (params.imageData && !hasStartedRef.current) {
+    isMountedRef.current = true;
+    
+    const imageData = params.imageData;
+    if (!imageData || typeof imageData !== 'string' || imageData.length < 100) {
+      console.error('❌ Invalid or missing image data');
+      setError(language === 'es' ? 'Datos de imagen inválidos. Por favor, intenta de nuevo.' : 'Invalid image data. Please try again.');
+      setIsLoading(false);
+      return;
+    }
+    
+    if (!hasStartedRef.current) {
       hasStartedRef.current = true;
       console.log('🌱 Starting plant identification...');
       identifyPlant();
     }
     
     return () => {
+      isMountedRef.current = false;
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.imageData]);
+  }, []);
 
   const identifyPlant = useCallback(async () => {
-    if (!params.imageData) {
-      setError("Image not found");
-      setIsLoading(false);
-      return;
-    }
+    try {
+      const imageData = params.imageData;
+      if (!imageData || typeof imageData !== 'string' || imageData.length < 100) {
+        setError(language === 'es' ? 'Datos de imagen inválidos' : 'Invalid image data');
+        setIsLoading(false);
+        return;
+      }
 
-    abortControllerRef.current = new AbortController();
+      abortControllerRef.current = new AbortController();
 
     const schema = z.object({
       name: z.string(),
@@ -307,7 +322,16 @@ Be specific and precise in the identification.`;
         setError(`❌ Error: ${errorMessage || errorString || "Unknown error occurred"}`);
       }
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+    } catch (outerError: any) {
+      console.error('❌ Outer error in identifyPlant:', outerError);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+        setError(language === 'es' ? 'Error inesperado. Por favor, intenta de nuevo.' : 'Unexpected error. Please try again.');
+      }
     }
   }, [params.imageData, language, addScan]);
 
@@ -422,11 +446,19 @@ Be specific and precise in the identification.`;
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.imageCard}>
-              <Image
-                source={{ uri: `data:image/jpeg;base64,${params.imageData}` }}
-                style={styles.plantImage}
-                contentFit="cover"
-              />
+              {params.imageData && !imageError ? (
+                <Image
+                  source={{ uri: `data:image/jpeg;base64,${params.imageData}` }}
+                  style={styles.plantImage}
+                  contentFit="cover"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <View style={[styles.plantImage, { backgroundColor: '#e5e7eb', justifyContent: 'center', alignItems: 'center' }]}>
+                  <Leaf size={48} color="#9ca3af" />
+                  <Text style={{ color: '#6b7280', marginTop: 8 }}>{language === 'es' ? 'Imagen no disponible' : 'Image unavailable'}</Text>
+                </View>
+              )}
             </View>
 
             <View style={styles.identificationCard}>

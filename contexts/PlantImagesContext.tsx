@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { fetchPlantImage } from '@/services/freepikService';
+import { COMMON_PLANTS } from '@/constants/commonPlants';
 
 const STORAGE_KEY = '@plant_images_cache_v4';
 const CACHE_DURATION = 365 * 24 * 60 * 60 * 1000;
@@ -48,7 +49,20 @@ const PLANT_FALLBACK_IMAGES: Record<string, string> = {
   'default': 'https://images.unsplash.com/photo-1463320898484-cdcfb6d08e12?w=400&q=70',
 };
 
+const getCommonPlantImage = (plantId: string, plantName: string): string | undefined => {
+  const commonPlant = COMMON_PLANTS.find(
+    (p) => p.id === plantId || 
+           p.name?.toLowerCase() === plantName?.toLowerCase() ||
+           plantName?.toLowerCase().includes(p.name?.toLowerCase()) ||
+           p.name?.toLowerCase().includes(plantName?.toLowerCase())
+  );
+  return commonPlant?.imageUrl;
+};
+
 const getFallbackForPlant = (plantName: string): string => {
+  const commonImage = getCommonPlantImage('', plantName);
+  if (commonImage) return commonImage;
+  
   const name = plantName.toLowerCase();
   for (const key of Object.keys(PLANT_FALLBACK_IMAGES)) {
     if (key !== 'default' && name.includes(key)) {
@@ -128,6 +142,11 @@ export const [PlantImagesProvider, usePlantImages] = createContextHook(() => {
       return plantImages[plantId];
     }
     
+    const commonImage = getCommonPlantImage(plantId, plantName || '');
+    if (commonImage) {
+      return commonImage;
+    }
+    
     if (plantName) {
       return getFallbackForPlant(plantName);
     }
@@ -144,6 +163,9 @@ export const [PlantImagesProvider, usePlantImages] = createContextHook(() => {
   const getPlantImageWithFallback = useCallback((plantId: string, plantName: string): string => {
     const cached = plantImages[plantId];
     if (cached) return cached;
+    
+    const commonImage = getCommonPlantImage(plantId, plantName);
+    if (commonImage) return commonImage;
     
     if (!pendingFetches.current.has(plantId)) {
       fetchSingleImage(plantId, plantName);

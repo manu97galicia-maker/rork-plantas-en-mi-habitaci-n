@@ -678,11 +678,19 @@ Also: lightLevel (Low/Medium/Bright), spaceSize (Small/Medium/Large)`;
       setAnalysis(result as RoomAnalysis);
       setIsLoading(false);
 
-      const plantNames = result.suggestions.map(p => p.name).join(", ");
+      const plantNamesWithNumbers = result.suggestions.map((p, i) => `${i + 1}. ${p.name}`).join(", ");
       
-      const editPrompt = `Add these beautiful plants to this space: ${plantNames}
+      const editPrompt = `Add these beautiful plants to this space with VISIBLE NUMBER LABELS: ${plantNamesWithNumbers}
 
-Instructions:
+CRITICAL INSTRUCTION - NUMBER LABELS:
+- Add a clearly visible circular number badge/label next to EACH plant
+- The number should be in a small circle (like a pin marker) positioned near each plant
+- Use green circles with white numbers for the labels
+- Numbers should be: 1, 2, 3, 4 corresponding to the plant order
+- Make the numbers large enough to be easily readable
+- Position numbers so they don't cover the plants but are clearly associated with them
+
+Plant placement instructions:
 - Keep the existing environment, structures, and features unchanged
 - Add the specified plants in natural and appropriate locations
 - For indoor spaces: use corners, tables, shelves, floor, windowsills with decorative pots
@@ -693,7 +701,7 @@ Instructions:
 - Make the plants look naturally integrated into the environment
 - Create proper lighting and shadows for the plants
 - Add visual variety with different plant heights and textures
-- The result should be the same space but beautifully enhanced with plants`;
+- The result should be the same space but beautifully enhanced with numbered plants`;
 
       const generateEditedImageAsync = async () => {
         if (!isMountedRef.current) {

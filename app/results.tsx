@@ -695,13 +695,13 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
       });
       
       let result;
-      const maxRetries = 3;
+      const maxRetries = 4;
       let lastError: any = null;
       
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
           if (attempt > 0) {
-            const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+            const delayMs = Math.min(2000 * Math.pow(2, attempt - 1), 16000);
             console.log(`🔄 Retry attempt ${attempt}/${maxRetries} after ${delayMs}ms...`);
             if (isMountedRef.current) {
               setLoadingStep(language === 'es' ? `Reintentando análisis (${attempt}/${maxRetries})...` : `Retrying analysis (${attempt}/${maxRetries})...`);
@@ -711,7 +711,11 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
           
           if (!isMountedRef.current) return;
           
-          result = await generateObject({
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Request timeout')), 60000);
+          });
+          
+          const generatePromise = generateObject({
             messages: [
               {
                 role: "user",
@@ -724,6 +728,8 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
             schema,
           });
           
+          result = await Promise.race([generatePromise, timeoutPromise]);
+          
           if (result && result.suggestions && result.suggestions.length > 0) {
             console.log(`✅ Success on attempt ${attempt + 1}`);
             break;
@@ -733,12 +739,16 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
           console.error(`generateObject error (attempt ${attempt + 1}):`, errorMsg);
           lastError = genError;
           
-          const isNetworkError = errorMsg.includes('Network request failed') || 
+          const isRetryableError = errorMsg.includes('Network request failed') || 
                                   errorMsg.includes('Failed to fetch') ||
                                   errorMsg.includes('network') ||
-                                  errorMsg.includes('timeout');
+                                  errorMsg.includes('timeout') ||
+                                  errorMsg.includes('Request timeout') ||
+                                  errorMsg.includes('429') ||
+                                  errorMsg.includes('503') ||
+                                  errorMsg.includes('502');
           
-          if (attempt === maxRetries || (!isNetworkError && !errorMsg.includes('429'))) {
+          if (attempt === maxRetries || !isRetryableError) {
             throw new Error(lastError?.message || "Failed to analyze image after retries");
           }
         }

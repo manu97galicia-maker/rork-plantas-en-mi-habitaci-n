@@ -166,18 +166,22 @@ Be specific and precise in the identification.`;
       console.log('📤 Sending request to AI...');
       
       let result;
-      const maxRetries = 3;
+      const maxRetries = 4;
       let lastError: any = null;
       
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
           if (attempt > 0) {
-            const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+            const delayMs = Math.min(2000 * Math.pow(2, attempt - 1), 16000);
             console.log(`🔄 Retry attempt ${attempt}/${maxRetries} after ${delayMs}ms...`);
             await new Promise(resolve => setTimeout(resolve, delayMs));
           }
           
-          result = await generateObject({
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Request timeout')), 60000);
+          });
+          
+          const generatePromise = generateObject({
             messages: [
               {
                 role: "user",
@@ -190,6 +194,8 @@ Be specific and precise in the identification.`;
             schema,
           });
           
+          result = await Promise.race([generatePromise, timeoutPromise]);
+          
           if (result && result.name) {
             console.log(`✅ Success on attempt ${attempt + 1}`);
             break;
@@ -199,12 +205,16 @@ Be specific and precise in the identification.`;
           console.error(`generateObject error (attempt ${attempt + 1}):`, errorMsg);
           lastError = genError;
           
-          const isNetworkError = errorMsg.includes('Network request failed') || 
+          const isRetryableError = errorMsg.includes('Network request failed') || 
                                   errorMsg.includes('Failed to fetch') ||
                                   errorMsg.includes('network') ||
-                                  errorMsg.includes('timeout');
+                                  errorMsg.includes('timeout') ||
+                                  errorMsg.includes('Request timeout') ||
+                                  errorMsg.includes('429') ||
+                                  errorMsg.includes('503') ||
+                                  errorMsg.includes('502');
           
-          if (attempt === maxRetries || (!isNetworkError && !errorMsg.includes('429'))) {
+          if (attempt === maxRetries || !isRetryableError) {
             throw lastError;
           }
         }

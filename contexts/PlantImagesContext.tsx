@@ -12,7 +12,7 @@ interface CachedImages {
   version: number;
 }
 
-const CACHE_VERSION = 4;
+const CACHE_VERSION = 5;
 
 const PLANT_FALLBACK_IMAGES: Record<string, string> = {
   'monstera': 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&q=70',
@@ -29,7 +29,10 @@ const PLANT_FALLBACK_IMAGES: Record<string, string> = {
   'succulent': 'https://images.unsplash.com/photo-1509223197845-458d87c8d921?w=400&q=70',
   'aloe': 'https://images.unsplash.com/photo-1596548438137-d51ea5c83807?w=400&q=70',
   'cactus': 'https://images.unsplash.com/photo-1459156212016-c812468e2115?w=400&q=70',
-  'zz': 'https://images.unsplash.com/photo-1632207691143-643e2bdf0e6f?w=400&q=70',
+  'zz': 'https://images.unsplash.com/photo-1637967886160-fd78dc3ce3f5?w=400&q=70',
+  'zamioculcas': 'https://images.unsplash.com/photo-1637967886160-fd78dc3ce3f5?w=400&q=70',
+  'cast iron': 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400&q=70',
+  'aspidistra': 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400&q=70',
   'orchid': 'https://images.unsplash.com/photo-1566836610593-62a64888a216?w=400&q=70',
   'rose': 'https://images.unsplash.com/photo-1518882605630-8eb590c6f424?w=400&q=70',
   'lavender': 'https://images.unsplash.com/photo-1499002238440-d264edd596ec?w=400&q=70',

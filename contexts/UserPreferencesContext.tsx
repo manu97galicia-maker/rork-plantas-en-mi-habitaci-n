@@ -50,7 +50,7 @@ const [UserPreferencesProviderBase, useUserPreferencesBase] = createContextHook(
 
   const loadPreferences = async () => {
     try {
-      const RESET_KEY = '@user_preferences_reset_v2';
+      const RESET_KEY = '@user_preferences_reset_v3';
       const hasReset = await AsyncStorage.getItem(RESET_KEY);
       if (!hasReset) {
         await AsyncStorage.removeItem(STORAGE_KEY);

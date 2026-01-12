@@ -10,7 +10,6 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
-  InteractionManager,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -63,15 +62,14 @@ export default function IdentifyCameraScreen() {
       if (!result.canceled && result.assets[0]?.base64) {
         console.log("🚀 Navigating to identify plant... Image size:", result.assets[0].base64.length);
         
-        InteractionManager.runAfterInteractions(() => {
-          router.push({
-            pathname: "/identify-plant",
-            params: { imageData: result.assets[0].base64 },
-          });
-          setTimeout(() => {
-            setIsCapturing(false);
-          }, 500);
+        router.push({
+          pathname: "/identify-plant",
+          params: { imageData: result.assets[0].base64 },
         });
+        
+        setTimeout(() => {
+          setIsCapturing(false);
+        }, 1000);
       } else {
         setIsCapturing(false);
       }
@@ -87,8 +85,14 @@ export default function IdentifyCameraScreen() {
   }, [isCapturing, canScan, router]);
 
   const takePicture = useCallback(async () => {
-    if (!cameraRef.current || isCapturing) {
-      console.log('⚠️ Camera not ready or already capturing');
+    if (isCapturing) {
+      console.log('⚠️ Already capturing');
+      return;
+    }
+    
+    if (!cameraRef.current) {
+      console.log('⚠️ Camera ref not ready');
+      Alert.alert("Error", "Camera is not ready. Please wait a moment and try again.");
       return;
     }
 
@@ -101,14 +105,17 @@ export default function IdentifyCameraScreen() {
       return;
     }
 
-    try {
-      setIsCapturing(true);
-      if (Platform.OS !== "web") {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      }
+    setIsCapturing(true);
+    
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
 
-      console.log("📸 Starting plant photo capture...");
-      
+    console.log("📸 Starting plant photo capture...");
+    
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    
+    try {
       const capturePromise = cameraRef.current.takePictureAsync({
         quality: 0.4,
         base64: true,
@@ -116,35 +123,34 @@ export default function IdentifyCameraScreen() {
       });
       
       const timeoutPromise = new Promise<null>((_, reject) => {
-        setTimeout(() => reject(new Error('Camera timeout')), 15000);
+        timeoutId = setTimeout(() => {
+          console.log('⏱️ Camera timeout triggered');
+          reject(new Error('Camera timeout'));
+        }, 10000);
       });
       
       const photo = await Promise.race([capturePromise, timeoutPromise]);
+      
+      if (timeoutId) clearTimeout(timeoutId);
 
-      console.log("✅ Plant photo captured successfully");
+      console.log("✅ Plant photo captured, has base64:", !!photo?.base64);
 
       if (photo && photo.base64) {
         console.log("🚀 Navigating to identify plant... Image size:", photo.base64.length);
         
-        InteractionManager.runAfterInteractions(() => {
-          router.push({
-            pathname: "/identify-plant",
-            params: { imageData: photo.base64 },
-          });
-          setTimeout(() => {
-            setIsCapturing(false);
-          }, 500);
+        router.push({
+          pathname: "/identify-plant",
+          params: { imageData: photo.base64 },
         });
+        
+        setTimeout(() => {
+          setIsCapturing(false);
+        }, 1000);
       } else {
-        console.error("❌ Photo capture failed - no base64 data");
-        setIsCapturing(false);
-        Alert.alert(
-          "Error",
-          "Could not capture photo. Please try again.",
-          [{ text: "OK" }]
-        );
+        throw new Error('No base64 data in photo');
       }
     } catch (error) {
+      if (timeoutId) clearTimeout(timeoutId);
       console.error("❌ Error taking picture:", error);
       setIsCapturing(false);
       const errorMessage = error instanceof Error && error.message === 'Camera timeout' 

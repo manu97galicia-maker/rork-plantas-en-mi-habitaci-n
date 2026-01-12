@@ -10,7 +10,6 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
-  InteractionManager,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -247,10 +246,17 @@ export default function CameraScreen() {
 
   const takePicture = async () => {
     const now = Date.now();
-    if (!cameraRef.current || isCapturing || isNavigatingRef.current || now - lastClickRef.current < 500) {
+    if (isCapturing || isNavigatingRef.current || now - lastClickRef.current < 500) {
       console.log('⚠️ Take picture blocked - action in progress');
       return;
     }
+    
+    if (!cameraRef.current) {
+      console.log('⚠️ Camera ref not ready');
+      Alert.alert("Error", "Camera is not ready. Please wait a moment and try again.");
+      return;
+    }
+    
     lastClickRef.current = now;
 
     if (!canScan()) {
@@ -262,15 +268,18 @@ export default function CameraScreen() {
       return;
     }
 
-    try {
-      setIsCapturing(true);
-      setShowStabilizing(true);
-      if (Platform.OS !== "web") {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      }
+    setIsCapturing(true);
+    setShowStabilizing(true);
+    
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
 
-      console.log("📸 Starting photo capture...");
-      
+    console.log("📸 Starting photo capture...");
+    
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    
+    try {
       const capturePromise = cameraRef.current.takePictureAsync({
         quality: 0.6,
         base64: true,
@@ -278,14 +287,17 @@ export default function CameraScreen() {
       });
       
       const timeoutPromise = new Promise<null>((_, reject) => {
-        setTimeout(() => reject(new Error('Camera timeout')), 15000);
+        timeoutId = setTimeout(() => {
+          console.log('⏱️ Camera timeout triggered');
+          reject(new Error('Camera timeout'));
+        }, 10000);
       });
       
       const photo = await Promise.race([capturePromise, timeoutPromise]);
       
-      setShowStabilizing(false);
-
-      console.log("✅ Photo captured successfully");
+      if (timeoutId) clearTimeout(timeoutId);
+      
+      console.log("✅ Photo captured, has base64:", !!photo?.base64);
 
       if (photo && photo.base64) {
         const params: any = { imageData: photo.base64 };
@@ -304,33 +316,27 @@ export default function CameraScreen() {
         }
         
         console.log("🚀 Navigating to results...");
-        
-        InteractionManager.runAfterInteractions(() => {
-          safeNavigate({
-            pathname: "/results",
-            params,
-          });
-          setTimeout(() => {
-            setIsCapturing(false);
-          }, 500);
-        });
-      } else {
-        console.error("❌ Photo capture failed - no base64 data");
-        setIsCapturing(false);
         setShowStabilizing(false);
-        Alert.alert(
-          "Error",
-          "Could not capture photo. Please try again.",
-          [{ text: "OK" }]
-        );
+        
+        router.push({
+          pathname: "/results",
+          params,
+        } as any);
+        
+        setTimeout(() => {
+          setIsCapturing(false);
+        }, 1000);
+      } else {
+        throw new Error('No base64 data in photo');
       }
     } catch (error) {
+      if (timeoutId) clearTimeout(timeoutId);
       console.error("❌ Error taking picture:", error);
       setShowStabilizing(false);
       setIsCapturing(false);
       const errorMessage = error instanceof Error && error.message === 'Camera timeout' 
         ? "The camera took too long to respond. Please try again."
-        : "Could not take photo. Please try again.";
+        : "Could not capture photo. Please try again.";
       Alert.alert(
         "Error",
         errorMessage,

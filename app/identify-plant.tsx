@@ -56,7 +56,7 @@ interface PlantIdentification {
 export default function IdentifyPlantScreen() {
   const params = useLocalSearchParams<{ imageData: string }>();
   const router = useRouter();
-  const { addScan, language } = useUserPreferences();
+  const { language } = useUserPreferences();
   const [identification, setIdentification] = useState<PlantIdentification | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -256,47 +256,6 @@ Be specific and precise in the identification.`;
 
       console.log("✅ Plant identified successfully:", result.name);
       setIdentification(result as PlantIdentification);
-
-      const mapLightLevel = (light: string): 'Low' | 'Medium' | 'Bright' => {
-        const lightLower = light.toLowerCase();
-        if (lightLower.includes('low') || lightLower.includes('shade') || lightLower.includes('indirect')) return 'Low';
-        if (lightLower.includes('bright') || lightLower.includes('direct') || lightLower.includes('full')) return 'Bright';
-        return 'Medium';
-      };
-
-      try {
-        await addScan({
-          analysis: {
-            lightLevel: mapLightLevel(result.care.light),
-            spaceSize: 'Medium',
-            suggestions: [
-              {
-                id: Date.now().toString(),
-                name: result.name,
-                scientificName: result.scientificName,
-                lightRequirement: result.care.light,
-                wateringSchedule: result.care.water,
-                difficulty: result.difficulty,
-                description: result.description,
-                airPurification: result.airPurification,
-                wellnessBenefits: result.wellnessBenefits,
-                careInstructions: {
-                  light: result.care.light,
-                  water: result.care.water,
-                  temperature: result.care.temperature,
-                  humidity: result.care.humidity,
-                  fertilizer: result.care.fertilizer,
-                  tips: result.tips,
-                },
-              },
-            ],
-          },
-          originalImage: '',
-        });
-        console.log('✅ Scan saved to history');
-      } catch (saveError) {
-        console.log('Error saving scan:', saveError);
-      }
     } catch (err: any) {
       console.error("\n❌ ERROR identifying plant:", err?.message || 'Unknown error');
       
@@ -333,7 +292,7 @@ Be specific and precise in the identification.`;
         setError(language === 'es' ? 'Error inesperado. Por favor, intenta de nuevo.' : 'Unexpected error. Please try again.');
       }
     }
-  }, [params.imageData, language, addScan]);
+  }, [params.imageData, language]);
 
   const retryIdentification = useCallback(() => {
     hasStartedRef.current = false;

@@ -737,7 +737,7 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
           }
           
           if (attempt > 0) {
-            const delayMs = Math.min(2000 * Math.pow(2, attempt - 1), 12000);
+            const delayMs = Math.min(3000 * Math.pow(1.5, attempt - 1), 10000);
             console.log(`🔄 Retry attempt ${attempt}/${maxRetries} after ${delayMs}ms...`);
             if (isMountedRef.current) {
               setLoadingStep(language === 'es' ? `Reintentando análisis (${attempt}/${maxRetries})...` : `Retrying analysis (${attempt}/${maxRetries})...`);
@@ -752,12 +752,13 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
           
           console.log(`📤 Sending analysis request (attempt ${attempt + 1})...`);
           
+          let requestTimeoutId: ReturnType<typeof setTimeout> | null = null;
+          
           const timeoutPromise = new Promise<never>((_, reject) => {
-            const timeoutId = setTimeout(() => {
-              console.log('⏱️ Request timeout after 45s');
+            requestTimeoutId = setTimeout(() => {
+              console.log('⏱️ Request timeout after 60s');
               reject(new Error('Request timeout'));
-            }, 45000);
-            return () => clearTimeout(timeoutId);
+            }, 60000);
           });
           
           const generatePromise = generateObject({
@@ -773,7 +774,13 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
             schema,
           });
           
-          result = await Promise.race([generatePromise, timeoutPromise]);
+          try {
+            result = await Promise.race([generatePromise, timeoutPromise]);
+          } finally {
+            if (requestTimeoutId) {
+              clearTimeout(requestTimeoutId);
+            }
+          }
           
           console.log('📥 Response received:', {
             hasResult: !!result,
@@ -798,10 +805,14 @@ Also evaluate the light level ("Low", "Medium", "Bright") and space size ("Small
                                   errorMsg.toLowerCase().includes('network') ||
                                   errorMsg.toLowerCase().includes('timeout') ||
                                   errorMsg.includes('Request timeout') ||
+                                  errorMsg.includes('AbortError') ||
+                                  errorMsg.includes('ECONNRESET') ||
+                                  errorMsg.includes('ETIMEDOUT') ||
                                   errorMsg.includes('429') ||
                                   errorMsg.includes('503') ||
                                   errorMsg.includes('502') ||
-                                  errorMsg.includes('500');
+                                  errorMsg.includes('500') ||
+                                  errorMsg.includes('504');
           
           if (attempt === maxRetries || !isRetryableError) {
             console.log('❌ Max retries reached or non-retryable error');
@@ -938,8 +949,8 @@ Instructions:
       const errorString = String(err || "");
       const errorName = err?.name || "";
       
-      if (errorMessage.includes("timeout") || errorString.includes("timeout")) {
-        setError("⏱️ Request timed out. The image might be too large or the service is slow. Try with a smaller image or try again later.");
+      if (errorMessage.includes("timeout") || errorString.includes("timeout") || errorMessage.includes("Request timeout")) {
+        setError(language === 'es' ? "⏱️ La solicitud tardó demasiado. El servicio está ocupado. Por favor, intenta de nuevo en unos segundos." : "⏱️ Request timed out. The service is busy. Please try again in a few seconds.");
       } else if (errorMessage.includes("429") || errorString.includes("429")) {
         setError("⏱️ Request limit reached. Wait a moment and try again.");
       } else if (errorMessage.includes("403") || errorString.includes("403")) {

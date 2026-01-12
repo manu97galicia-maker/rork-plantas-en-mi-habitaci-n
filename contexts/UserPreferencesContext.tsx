@@ -29,7 +29,7 @@ interface UserPreferences {
 }
 
 const STORAGE_KEY = "@user_preferences";
-const MAX_MONTHLY_SCANS = 30;
+const MAX_MONTHLY_SCANS = 40;
 const MAX_SCAN_HISTORY = 500;
 
 const defaultPreferences: UserPreferences = {
@@ -50,6 +50,16 @@ const [UserPreferencesProviderBase, useUserPreferencesBase] = createContextHook(
 
   const loadPreferences = async () => {
     try {
+      const RESET_KEY = '@user_preferences_reset_v2';
+      const hasReset = await AsyncStorage.getItem(RESET_KEY);
+      if (!hasReset) {
+        await AsyncStorage.removeItem(STORAGE_KEY);
+        await AsyncStorage.setItem(RESET_KEY, 'true');
+        console.log('🔄 Reset user preferences for fresh start with 40 credits');
+        setPreferences({ ...defaultPreferences });
+        setIsLoading(false);
+        return;
+      }
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
         try {

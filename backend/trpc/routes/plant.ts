@@ -96,9 +96,11 @@ export const plantRouter = createTRPCRouter({
 
         clearTimeout(timeoutId);
 
+        const contentType = response.headers.get("content-type") || "";
+        const responseText = await response.text();
+        
         if (!response.ok) {
-          const errorText = await response.text().catch(() => "Unknown error");
-          console.error(`[PlantAPI] Image edit API error ${response.status}:`, errorText);
+          console.error(`[PlantAPI] Image edit API error ${response.status}:`, responseText.substring(0, 200));
           return { 
             success: false, 
             error: `API error: ${response.status}`,
@@ -106,9 +108,29 @@ export const plantRouter = createTRPCRouter({
           };
         }
 
-        const data = await response.json();
+        if (!contentType.includes("application/json")) {
+          console.error(`[PlantAPI] Unexpected content-type: ${contentType}, response: ${responseText.substring(0, 200)}`);
+          return { 
+            success: false, 
+            error: "Invalid response format from server",
+            imageBase64: null 
+          };
+        }
+
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          console.error(`[PlantAPI] JSON parse error:`, responseText.substring(0, 200));
+          return { 
+            success: false, 
+            error: "Failed to parse server response",
+            imageBase64: null 
+          };
+        }
 
         if (!data.image || !data.image.base64Data) {
+          console.error(`[PlantAPI] Missing image data in response:`, JSON.stringify(data).substring(0, 200));
           return { 
             success: false, 
             error: "Response does not contain valid image data",

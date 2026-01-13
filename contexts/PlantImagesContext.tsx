@@ -13,7 +13,7 @@ interface CachedImages {
   version: number;
 }
 
-const CACHE_VERSION = 7;
+const CACHE_VERSION = 8;
 
 const PLANT_FALLBACK_IMAGES: Record<string, string> = {
   'monstera': 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&q=70',

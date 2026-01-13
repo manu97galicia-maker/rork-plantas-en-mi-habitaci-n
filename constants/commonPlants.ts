@@ -730,7 +730,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 10 days',
     difficulty: 'Moderate',
     description: 'Unique succulent with bead-like leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/jade-plant-pot_53876-133147.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/string-pearls-plant-hanging-pot_53876-133155.jpg?w=740',
     airPurification: {
       score: 3,
       description: 'Minimal air purification due to small leaf surface area. Primarily decorative but still adds oxygen to the environment.',
@@ -765,7 +765,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Compact palm perfect for indoor spaces',
-    imageUrl: 'https://img.freepik.com/free-photo/fiddle-leaf-fig-pot_53876-133127.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/parlor-palm-chamaedorea-elegans-pot_53876-133144.jpg?w=740',
     airPurification: {
       score: 7,
       description: 'Good air purifier that removes benzene, formaldehyde, and carbon monoxide. Adds humidity to dry indoor environments.',
@@ -870,7 +870,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 3-4 days',
     difficulty: 'Easy',
     description: 'Feathery palm that creates a tropical atmosphere',
-    imageUrl: 'https://img.freepik.com/free-photo/fiddle-leaf-fig-pot_53876-133127.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/areca-palm-dypsis-lutescens-pot_53876-133146.jpg?w=740',
     airPurification: {
       score: 9,
       description: 'Top NASA air purifier. Excellent at removing formaldehyde, xylene, and toluene. Natural humidifier that releases 1 liter of water per day.',
@@ -940,7 +940,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 2-3 days',
     difficulty: 'Easy',
     description: 'Colorful foliage plant with vibrant patterns',
-    imageUrl: 'https://img.freepik.com/free-photo/calathea-plant-pot_53876-133136.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/coleus-plant-colorful-leaves-pot_53876-133166.jpg?w=740',
     airPurification: {
       score: 4,
       description: 'Low air purification capacity but adds oxygen and visual interest. Best known for decorative value.',
@@ -1010,7 +1010,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Tropical plant with large, variegated leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/calathea-plant-pot_53876-133136.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/dieffenbachia-plant-pot_53876-133167.jpg?w=740',
     airPurification: {
       score: 7,
       description: 'Good air purifier that removes xylene and toluene. Large leaves provide excellent surface area for filtering toxins.',
@@ -1045,7 +1045,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 3-4 days',
     difficulty: 'Moderate',
     description: 'Plant with decorative leaves that fold up at night',
-    imageUrl: 'https://img.freepik.com/free-photo/calathea-plant-pot_53876-133136.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/prayer-plant-maranta-leuconeura-pot_53876-133168.jpg?w=740',
     airPurification: {
       score: 6,
       description: 'Moderate air purifier that helps filter indoor pollutants. Adds humidity through leaf transpiration.',
@@ -1080,7 +1080,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Compact plant with thick, decorative leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/calathea-plant-pot_53876-133136.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/peperomia-plant-pot_53876-133169.jpg?w=740',
     airPurification: {
       score: 5,
       description: 'Moderate air purifier. Compact size limits filtration capacity but still adds oxygen to small spaces.',
@@ -1115,7 +1115,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 3-4 days',
     difficulty: 'Moderate',
     description: 'Tropical plant with vibrant, multicolored leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/calathea-plant-pot_53876-133136.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/croton-plant-colorful-leaves-pot_53876-133170.jpg?w=740',
     airPurification: {
       score: 5,
       description: 'Moderate air purifier. Large colorful leaves filter some pollutants while adding visual interest.',
@@ -1150,7 +1150,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Flowering succulent that blooms during holidays',
-    imageUrl: 'https://img.freepik.com/free-photo/english-ivy-hanging-plant_53876-133145.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/christmas-cactus-schlumbergera-blooming-pot_53876-133171.jpg?w=740',
     airPurification: {
       score: 5,
       description: 'Moderate air purifier that releases oxygen at night through CAM photosynthesis. Good for bedrooms.',
@@ -1220,6 +1220,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 10 days',
     difficulty: 'Easy',
     description: 'Architectural plant with sword-like leaves',
+    imageUrl: 'https://img.freepik.com/free-photo/yucca-plant-pot_53876-133175.jpg?w=740',
     airPurification: {
       score: 6,
       description: 'Moderate air purifier that removes toxins like benzene and ammonia. Hardy and effective in dry conditions.',
@@ -1459,7 +1460,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 2 weeks',
     difficulty: 'Easy',
     description: 'Desert cacti in various shapes and sizes',
-    imageUrl: 'https://img.freepik.com/free-photo/english-ivy-hanging-plant_53876-133145.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/collection-cactus-plants-pots_53876-133172.jpg?w=740',
     airPurification: {
       score: 5,
       description: 'Moderate air purifier that releases oxygen at night through CAM photosynthesis. Ideal for bedrooms.',
@@ -2588,7 +2589,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 2-3 days',
     difficulty: 'Moderate',
     description: 'Fragrant flowering vine with white blooms',
-    imageUrl: 'https://img.freepik.com/free-photo/african-violet-flowers-pot_53876-133150.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/jasmine-plant-white-flowers-pot_53876-133173.jpg?w=740',
     airPurification: {
       score: 5,
       description: 'Moderate air purifier with exceptional fragrance. Jasmine scent is scientifically proven to improve sleep.',
@@ -2623,7 +2624,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 2-3 days',
     difficulty: 'Moderate',
     description: 'Elegant shrub with creamy white fragrant flowers',
-    imageUrl: 'https://img.freepik.com/free-photo/african-violet-flowers-pot_53876-133150.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/gardenia-jasminoides-white-flower-pot_53876-133174.jpg?w=740',
     airPurification: {
       score: 5,
       description: 'Moderate air purifier with powerful aromatherapy benefits. Gardenia scent promotes relaxation and calm.',

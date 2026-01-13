@@ -93,30 +93,18 @@ function PlantLegendComponent({ suggestions, getPlantImage, onPlantPress, t }: {
 }
 const PlantLegend = React.memo(PlantLegendComponent);
 
-function PlantCardComponent({ plant, index, getPlantImageWithFallback, getDifficultyColor, getDifficultyText, enrichedPlant, safeNavigate, language, allPlantsJson, totalPlants }: {
+function PlantCardComponent({ plant, index, getDifficultyColor, getDifficultyText, enrichedPlant, safeNavigate, language, allPlantsJson }: {
   plant: any;
   index: number;
-  getPlantImageWithFallback: (id: string, name: string) => string;
   getDifficultyColor: (d: string) => string;
   getDifficultyText: (d: string) => string;
   enrichedPlant: any;
   safeNavigate: (path: any) => void;
   language: string;
   allPlantsJson: string;
-  totalPlants: number;
 }) {
-  const plantId = plant?.id || `plant-${index}`;
   const plantName = plant?.name || 'Plant';
   
-  const plantImage = useMemo(() => {
-    if (!plant) return 'https://images.unsplash.com/photo-1463320898484-cdcfb6d08e12?w=400&q=70';
-    try {
-      return getPlantImageWithFallback(plantId, plantName);
-    } catch {
-      return 'https://images.unsplash.com/photo-1463320898484-cdcfb6d08e12?w=400&q=70';
-    }
-  }, [getPlantImageWithFallback, plantId, plantName, plant]);
-
   const handlePress = useCallback(() => {
     if (!plant) return;
     try {
@@ -157,11 +145,6 @@ function PlantCardComponent({ plant, index, getPlantImageWithFallback, getDiffic
       <View style={styles.plantCardNumberBadge}>
         <Text style={styles.plantCardNumberText}>{index + 1}</Text>
       </View>
-      <Image
-        source={{ uri: plantImage }}
-        style={styles.plantCardImage}
-        contentFit="cover"
-      />
       <View style={styles.plantInfo}>
         <View style={styles.plantHeader}>
           <View style={{ flex: 1 }}>
@@ -234,7 +217,7 @@ export default function ResultsScreen() {
   const [showMarkers, setShowMarkers] = useState(false);
   const markersTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isNavigatingRef = useRef(false);
-  const { getPlantImage, prefetchPlantImage, getPlantImageWithFallback } = usePlantImages();
+  const { getPlantImage, prefetchPlantImage } = usePlantImages();
   const lastClickRef = useRef(0);
   const isProcessingTapRef = useRef(false);
   const lastMarkerTapRef = useRef(0);
@@ -1065,14 +1048,12 @@ Plant placement instructions:
                   key={plant?.id || `plant-${idx}`}
                   plant={plant}
                   index={idx}
-                  getPlantImageWithFallback={getPlantImageWithFallback}
                   getDifficultyColor={getDifficultyColor}
                   getDifficultyText={getDifficultyText}
                   enrichedPlant={enrichedPlants[idx]}
                   safeNavigate={safeNavigate}
                   language={language}
                   allPlantsJson={allPlantsJson}
-                  totalPlants={analysis.suggestions.length}
                 />
               );
             })}
@@ -1222,7 +1203,7 @@ const styles = StyleSheet.create({
   },
   plantCardNumberBadge: {
     position: "absolute" as const,
-    top: -12,
+    top: -14,
     left: 16,
     width: 36,
     height: 36,
@@ -1246,6 +1227,7 @@ const styles = StyleSheet.create({
   },
   plantInfo: {
     padding: 20,
+    paddingTop: 24,
   },
   plantHeader: {
     flexDirection: "row",
@@ -1592,12 +1574,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
   },
-  plantCardImage: {
-    width: "100%",
-    height: 150,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
+
   plantsGalleryCard: {
     backgroundColor: "#ffffff",
     borderRadius: 20,

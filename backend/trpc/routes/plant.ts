@@ -4,6 +4,15 @@ import { createTRPCRouter, rateLimitedProcedure } from "../create-context";
 const FREEPIK_API_KEY = process.env.FREEPIK_API_KEY || "";
 const FREEPIK_API_URL = "https://api.freepik.com/v1/resources";
 
+type FreepikSearchResponse = {
+  data?: {
+    image?: { source?: { url?: string } };
+    thumbnail?: { url?: string };
+    assets?: { preview?: { url?: string }; image?: { url?: string } };
+    url?: string;
+  }[];
+};
+
 export const plantRouter = createTRPCRouter({
   searchImage: rateLimitedProcedure
     .input(z.object({ plantName: z.string() }))
@@ -17,12 +26,12 @@ export const plantRouter = createTRPCRouter({
 
       try {
         const cleanName = input.plantName.toLowerCase().trim();
-        const searchTerm = `${cleanName} houseplant indoor potted`;
+        const searchTerm = `${cleanName} plant`; 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000);
 
         const response = await fetch(
-          `${FREEPIK_API_URL}?term=${encodeURIComponent(searchTerm)}&page=1&limit=5&filters[content_type][photo]=1&order=relevance`,
+          `${FREEPIK_API_URL}?term=${encodeURIComponent(searchTerm)}&page=1&limit=1&filters[content_type][photo]=1&order=relevance`,
           {
             headers: {
               "Accept": "application/json",
@@ -39,22 +48,20 @@ export const plantRouter = createTRPCRouter({
           return { imageUrl: null, error: `API error: ${response.status}` };
         }
 
-        const data = await response.json();
+        const data = (await response.json()) as FreepikSearchResponse;
 
-        if (data.data && data.data.length > 0) {
-          let bestImage = null;
-          for (const item of data.data) {
-            const url = item.image?.source?.url || item.thumbnail?.url;
-            if (url) {
-              bestImage = url;
-              break;
-            }
-          }
-          
-          if (bestImage) {
-            console.log(`[PlantAPI] ✓ Found image for ${input.plantName}`);
-            return { imageUrl: bestImage };
-          }
+        const first = data.data?.[0];
+        const bestImage =
+          first?.image?.source?.url ||
+          first?.assets?.image?.url ||
+          first?.assets?.preview?.url ||
+          first?.thumbnail?.url ||
+          first?.url ||
+          null;
+
+        if (bestImage) {
+          console.log(`[PlantAPI] ✓ Found image for ${input.plantName}`);
+          return { imageUrl: bestImage };
         }
 
         return { imageUrl: null };

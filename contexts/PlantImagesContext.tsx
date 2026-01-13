@@ -4,7 +4,7 @@ import createContextHook from '@nkzw/create-context-hook';
 import { fetchPlantImage } from '@/services/freepikService';
 import { COMMON_PLANTS } from '@/constants/commonPlants';
 
-const STORAGE_KEY = '@plant_images_cache_v4';
+const STORAGE_KEY = '@plant_images_cache_v6';
 const CACHE_DURATION = 365 * 24 * 60 * 60 * 1000;
 
 interface CachedImages {
@@ -13,7 +13,7 @@ interface CachedImages {
   version: number;
 }
 
-const CACHE_VERSION = 5;
+const CACHE_VERSION = 6;
 
 const PLANT_FALLBACK_IMAGES: Record<string, string> = {
   'monstera': 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&q=70',
@@ -122,25 +122,28 @@ export const [PlantImagesProvider, usePlantImages] = createContextHook(() => {
     if (pendingFetches.current.has(plantId)) {
       return null;
     }
-    
+
     pendingFetches.current.add(plantId);
-    
+
     try {
+      console.log(`[PlantImages] Fetching Freepik image for ${plantName} (${plantId})`);
       const url = await fetchPlantImage(plantName);
       if (url) {
-        setPlantImages(prev => {
+        setPlantImages((prev) => {
           const updated = { ...prev, [plantId]: url };
           saveToCache(updated);
           return updated;
         });
         return url;
       }
-    } catch {
-      console.log('[PlantImages] Fetch error for:', plantName);
+
+      console.log(`[PlantImages] Freepik returned no image for ${plantName} (${plantId})`);
+    } catch (e: any) {
+      console.log('[PlantImages] Fetch error for:', plantName, e?.message);
     } finally {
       pendingFetches.current.delete(plantId);
     }
-    
+
     return null;
   }, [saveToCache]);
 
@@ -189,6 +192,7 @@ export const [PlantImagesProvider, usePlantImages] = createContextHook(() => {
   }, [plantImages, fetchSingleImage]);
 
   const refreshImages = useCallback(async () => {
+    console.log('[PlantImages] Manual refresh: clearing cache');
     await AsyncStorage.removeItem(STORAGE_KEY);
     setPlantImages({});
     pendingFetches.current.clear();

@@ -20,14 +20,13 @@ import { COMMON_PLANTS } from "@/constants/commonPlants";
 import { Plant } from "@/types/plant";
 import * as Haptics from "expo-haptics";
 import { usePlantImages } from "@/contexts/PlantImagesContext";
-import { Image } from "expo-image";
 
 export default function AddPlantScreen() {
   const router = useRouter();
   const { addPlant } = useMyPlants();
   const { language } = useUserPreferences();
   const t = getTranslations(language);
-  const { getPlantImageWithFallback, prefetchPlantImage } = usePlantImages();
+  const { prefetchPlantImage } = usePlantImages();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
   const [nickname, setNickname] = useState<string>("");
@@ -151,7 +150,6 @@ export default function AddPlantScreen() {
             ) : (
               <View style={styles.plantsList}>
                 {filteredPlants.map((plant) => {
-                  const plantImage = getPlantImageWithFallback(plant.id, plant.name);
                   const sleepScore = plant.wellnessBenefits?.sleepScore || 0;
                   const stressScore = plant.wellnessBenefits?.stressScore || 0;
                   const airScore = plant.airPurification?.score || 0;
@@ -168,11 +166,6 @@ export default function AddPlantScreen() {
                         style={styles.plantCardGradient}
                       >
                         <View style={styles.plantCardContent}>
-                          <Image
-                            source={{ uri: plantImage }}
-                            style={styles.plantCardImage}
-                            contentFit="cover"
-                          />
                           <View style={styles.plantInfo}>
                             <Text style={styles.plantName}>{plant.name}</Text>
                             <Text style={styles.plantScientificName}>

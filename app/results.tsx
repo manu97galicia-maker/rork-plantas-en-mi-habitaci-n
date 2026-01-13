@@ -42,13 +42,6 @@ function PlantLegendItemComponent({
     onPlantPress(index);
   }, [index, onPlantPress, plantName]);
 
-  let plantImage: string | undefined;
-  try {
-    plantImage = plant ? getPlantImage(plantId, plantName) : undefined;
-  } catch {
-    plantImage = undefined;
-  }
-
   if (!plant) return null;
   
   return (
@@ -63,17 +56,6 @@ function PlantLegendItemComponent({
       <View style={styles.legendNumberBadge}>
         <Text style={styles.legendNumberBadgeText}>{index + 1}</Text>
       </View>
-      {plantImage ? (
-        <Image
-          source={{ uri: plantImage }}
-          style={styles.legendPlantImage}
-          contentFit="cover"
-        />
-      ) : (
-        <View style={styles.legendNumberCircle}>
-          <Text style={styles.legendNumberLargeText}>{index + 1}</Text>
-        </View>
-      )}
       <View style={styles.legendPlantInfo}>
         <Text style={styles.legendPlantName}>{plantName}</Text>
         <Text style={styles.legendPlantScientific}>{plant.scientificName || ''}</Text>

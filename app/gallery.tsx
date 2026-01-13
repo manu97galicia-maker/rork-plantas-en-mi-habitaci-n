@@ -470,16 +470,11 @@ export default function GalleryScreen() {
                     {isExpanded && (
                       <View style={styles.expandedContent}>
                         <Text style={styles.expandedTitle}>{language === "es" ? "Plantas recomendadas:" : "Recommended plants:"}</Text>
-                        {scan.analysis.suggestions.map((plant) => (
+                        {scan.analysis.suggestions.map((plant, index) => (
                           <View key={plant.id} style={styles.plantRow}>
-                            <Image
-                              source={{ uri: plant.imageUrl }}
-                              style={styles.plantThumb}
-                              contentFit="cover"
-                              cachePolicy="memory-disk"
-                              placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
-                              transition={200}
-                            />
+                            <View style={styles.plantNumberBadge}>
+                              <Text style={styles.plantNumberText}>{index + 1}</Text>
+                            </View>
                             <View style={styles.plantInfo}>
                               <Text style={styles.plantName}>{plant.name}</Text>
                               <Text style={styles.plantScientific}>{plant.scientificName}</Text>
@@ -1005,11 +1000,18 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     gap: 12,
   },
-  plantThumb: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: Colors.lightTertiary,
+  plantNumberBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Colors.primaryLight,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  plantNumberText: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.primary,
   },
   plantInfo: {
     flex: 1,

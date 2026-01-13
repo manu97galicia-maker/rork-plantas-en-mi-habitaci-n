@@ -24,24 +24,17 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
 import type { Plant } from "@/types/plant";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { getTranslations } from "@/constants/translations";
-import { usePlantImages } from "@/contexts/PlantImagesContext";
-
-const { width } = Dimensions.get("window");
 
 export default function PlantDetailScreen() {
   const params = useLocalSearchParams<{ plantData: string; allPlants?: string; currentIndex?: string }>();
   const router = useRouter();
   const { language } = useUserPreferences();
   const t = getTranslations(language);
-  const { getPlantImage } = usePlantImages();
 
   const [currentPlantIndex, setCurrentPlantIndex] = useState(() => {
     return params.currentIndex ? parseInt(params.currentIndex, 10) : 0;
@@ -149,30 +142,12 @@ export default function PlantDetailScreen() {
     }
   };
 
-  const plantImage = getPlantImage(plant.id, plant.name) || plant.imageUrl;
-
   return (
     <View style={styles.container}>
-      <Image
-        source={{ uri: plantImage || 'https://images.unsplash.com/photo-1463320898484-cdcfb6d08e12?w=400&q=70' }}
-        style={styles.headerImage}
-        contentFit="cover"
-        cachePolicy="memory-disk"
-        transition={200}
-        placeholder={{ blurhash: "LGF5?xYk^6#M@-5c,1J5@[or[Q6." }}
-        onError={(error) => {
-          console.error(`Error loading image of ${plant.name}:`, error.error || error);
-        }}
-      />
-      <LinearGradient
-        colors={["transparent", "rgba(0, 0, 0, 0.6)"]}
-        style={styles.headerGradient}
-      />
-
       <SafeAreaView style={styles.safeArea} edges={["top"]}>
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <ArrowLeft size={24} color="#ffffff" />
+            <ArrowLeft size={24} color="#1a4d2e" />
           </TouchableOpacity>
           
           {hasMultiplePlants && (
@@ -193,7 +168,7 @@ export default function PlantDetailScreen() {
             activeOpacity={canGoBack ? 0.8 : 1}
             disabled={!canGoBack}
           >
-            <ChevronLeft size={32} color={canGoBack ? "#ffffff" : "rgba(255,255,255,0.3)"} />
+            <ChevronLeft size={32} color={canGoBack ? "#1a4d2e" : "rgba(26,77,46,0.3)"} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.navArrow, styles.navArrowRight, !canGoForward && styles.navArrowDisabled]}
@@ -201,13 +176,13 @@ export default function PlantDetailScreen() {
             activeOpacity={canGoForward ? 0.8 : 1}
             disabled={!canGoForward}
           >
-            <ChevronRight size={32} color={canGoForward ? "#ffffff" : "rgba(255,255,255,0.3)"} />
+            <ChevronRight size={32} color={canGoForward ? "#1a4d2e" : "rgba(26,77,46,0.3)"} />
           </TouchableOpacity>
         </>
       )}
 
       <ScrollView
-        style={styles.content}
+        style={styles.contentNoImage}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -271,140 +246,150 @@ export default function PlantDetailScreen() {
             </>
           )}
 
-          {plant.wellnessBenefits && (
-            <>
-              <View style={styles.divider} />
+          <View style={styles.divider} />
 
-              <Text style={styles.sectionTitle}>{t.plantDetail.wellnessBenefits}</Text>
+          <Text style={styles.sectionTitle}>{t.plantDetail.wellnessBenefits}</Text>
 
-              <View style={styles.wellnessCard}>
-                <View style={styles.wellnessItem}>
-                  <View style={styles.wellnessHeader}>
-                    <View style={styles.wellnessIconContainer}>
-                      <Moon size={24} color="#ffffff" />
-                    </View>
-                    <View style={styles.wellnessScoreContainer}>
-                      <Text style={styles.wellnessScoreLabel}>{t.plantDetail.sleepScore}</Text>
-                      <View style={styles.wellnessScoreRow}>
-                        <Text style={styles.wellnessScore}>{plant.wellnessBenefits.sleepScore}</Text>
-                        <Text style={styles.wellnessScoreMax}>{t.plantDetail.outOf10}</Text>
-                      </View>
-                    </View>
-                  </View>
-                  <View style={styles.wellnessBar}>
-                    <View style={[styles.wellnessBarFillSleep, { width: `${plant.wellnessBenefits.sleepScore * 10}%` }]} />
-                  </View>
-                  <Text style={styles.wellnessDescription}>
-                    {language === 'es' ? plant.wellnessBenefits.sleepDescriptionEs : plant.wellnessBenefits.sleepDescription}
-                  </Text>
+          <View style={styles.wellnessCard}>
+            <View style={styles.wellnessItem}>
+              <View style={styles.wellnessHeader}>
+                <View style={styles.wellnessIconContainer}>
+                  <Moon size={24} color="#ffffff" />
                 </View>
-
-                <View style={styles.wellnessDivider} />
-
-                <View style={styles.wellnessItem}>
-                  <View style={styles.wellnessHeader}>
-                    <View style={[styles.wellnessIconContainer, styles.wellnessIconStress]}>
-                      <Heart size={24} color="#ffffff" />
-                    </View>
-                    <View style={styles.wellnessScoreContainer}>
-                      <Text style={styles.wellnessScoreLabel}>{t.plantDetail.stressScore}</Text>
-                      <View style={styles.wellnessScoreRow}>
-                        <Text style={[styles.wellnessScore, styles.wellnessScoreStress]}>{plant.wellnessBenefits.stressScore}</Text>
-                        <Text style={styles.wellnessScoreMax}>{t.plantDetail.outOf10}</Text>
-                      </View>
-                    </View>
-                  </View>
-                  <View style={styles.wellnessBar}>
-                    <View style={[styles.wellnessBarFillStress, { width: `${plant.wellnessBenefits.stressScore * 10}%` }]} />
-                  </View>
-                  <Text style={styles.wellnessDescription}>
-                    {language === 'es' ? plant.wellnessBenefits.stressDescriptionEs : plant.wellnessBenefits.stressDescription}
-                  </Text>
-                </View>
-              </View>
-            </>
-          )}
-
-          {(plant.careInstructions || plant.lightRequirement) && (
-            <>
-              <View style={styles.divider} />
-
-              <Text style={styles.sectionTitle}>{t.plantDetail.careInstructions}</Text>
-
-              <View style={styles.careSection}>
-                <View style={styles.careItem}>
-                  <View style={styles.careIconContainer}>
-                    <Sun size={24} color="#f59e0b" />
-                  </View>
-                  <View style={styles.careContent}>
-                    <Text style={styles.careTitle}>{t.plantDetail.light}</Text>
-                    <Text style={styles.careText}>{plant.careInstructions?.light || plant.lightRequirement || 'N/A'}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.careItem}>
-                  <View style={styles.careIconContainer}>
-                    <Droplets size={24} color="#3b82f6" />
-                  </View>
-                  <View style={styles.careContent}>
-                    <Text style={styles.careTitle}>{t.plantDetail.watering}</Text>
-                    <Text style={styles.careText}>{plant.careInstructions?.water || plant.wateringSchedule || 'N/A'}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.careItem}>
-                  <View style={styles.careIconContainer}>
-                    <ThermometerSun size={24} color="#ef4444" />
-                  </View>
-                  <View style={styles.careContent}>
-                    <Text style={styles.careTitle}>{t.plantDetail.temperature}</Text>
-                    <Text style={styles.careText}>
-                      {plant.careInstructions?.temperature || 'N/A'}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.careItem}>
-                  <View style={styles.careIconContainer}>
-                    <Wind size={24} color="#06b6d4" />
-                  </View>
-                  <View style={styles.careContent}>
-                    <Text style={styles.careTitle}>{t.plantDetail.humidity}</Text>
-                    <Text style={styles.careText}>
-                      {plant.careInstructions?.humidity || 'N/A'}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.careItem}>
-                  <View style={styles.careIconContainer}>
-                    <Sprout size={24} color="#52b788" />
-                  </View>
-                  <View style={styles.careContent}>
-                    <Text style={styles.careTitle}>{t.plantDetail.fertilizer}</Text>
-                    <Text style={styles.careText}>
-                      {plant.careInstructions?.fertilizer || 'N/A'}
-                    </Text>
+                <View style={styles.wellnessScoreContainer}>
+                  <Text style={styles.wellnessScoreLabel}>{t.plantDetail.sleepScore}</Text>
+                  <View style={styles.wellnessScoreRow}>
+                    <Text style={styles.wellnessScore}>{plant.wellnessBenefits?.sleepScore || 7}</Text>
+                    <Text style={styles.wellnessScoreMax}>{t.plantDetail.outOf10}</Text>
                   </View>
                 </View>
               </View>
+              <View style={styles.wellnessBar}>
+                <View style={[styles.wellnessBarFillSleep, { width: `${(plant.wellnessBenefits?.sleepScore || 7) * 10}%` }]} />
+              </View>
+              <Text style={styles.wellnessDescription}>
+                {plant.wellnessBenefits ? 
+                  (language === 'es' ? plant.wellnessBenefits.sleepDescriptionEs : plant.wellnessBenefits.sleepDescription) :
+                  (language === 'es' ? 'Esta planta ayuda a mejorar la calidad del sueño purificando el aire y creando un ambiente más relajante.' : 'This plant helps improve sleep quality by purifying the air and creating a more relaxing environment.')}
+              </Text>
+            </View>
 
-              {plant.careInstructions?.tips && plant.careInstructions.tips.length > 0 && (
-                <>
-                  <View style={styles.divider} />
+            <View style={styles.wellnessDivider} />
 
-                  <Text style={styles.sectionTitle}>{t.plantDetail.additionalTips}</Text>
-
-                  <View style={styles.tipsContainer}>
-                    {plant.careInstructions.tips.map((tip, index) => (
-                      <View key={index} style={styles.tipItem}>
-                        <CheckCircle2 size={20} color="#52b788" />
-                        <Text style={styles.tipText}>{tip || ''}</Text>
-                      </View>
-                    ))}
+            <View style={styles.wellnessItem}>
+              <View style={styles.wellnessHeader}>
+                <View style={[styles.wellnessIconContainer, styles.wellnessIconStress]}>
+                  <Heart size={24} color="#ffffff" />
+                </View>
+                <View style={styles.wellnessScoreContainer}>
+                  <Text style={styles.wellnessScoreLabel}>{t.plantDetail.stressScore}</Text>
+                  <View style={styles.wellnessScoreRow}>
+                    <Text style={[styles.wellnessScore, styles.wellnessScoreStress]}>{plant.wellnessBenefits?.stressScore || 8}</Text>
+                    <Text style={styles.wellnessScoreMax}>{t.plantDetail.outOf10}</Text>
                   </View>
-                </>
-              )}
+                </View>
+              </View>
+              <View style={styles.wellnessBar}>
+                <View style={[styles.wellnessBarFillStress, { width: `${(plant.wellnessBenefits?.stressScore || 8) * 10}%` }]} />
+              </View>
+              <Text style={styles.wellnessDescription}>
+                {plant.wellnessBenefits ? 
+                  (language === 'es' ? plant.wellnessBenefits.stressDescriptionEs : plant.wellnessBenefits.stressDescription) :
+                  (language === 'es' ? 'Ayuda a reducir el estrés y la ansiedad mejorando la calidad del aire interior y proporcionando una conexión visual con la naturaleza.' : 'Helps reduce stress and anxiety by improving indoor air quality and providing a visual connection to nature.')}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.divider} />
+
+          <Text style={styles.sectionTitle}>{t.plantDetail.careInstructions}</Text>
+          <Text style={styles.careIntro}>
+            {language === 'es' ? 
+              'Sigue estas recomendaciones para mantener tu planta saludable y próspera:' : 
+              'Follow these recommendations to keep your plant healthy and thriving:'}
+          </Text>
+
+          <View style={styles.careSection}>
+            <View style={styles.careItem}>
+              <View style={styles.careIconContainer}>
+                <Sun size={24} color="#f59e0b" />
+              </View>
+              <View style={styles.careContent}>
+                <Text style={styles.careTitle}>{t.plantDetail.light}</Text>
+                <Text style={styles.careText}>
+                  {plant.careInstructions?.light || plant.lightRequirement || 
+                    (language === 'es' ? 'Luz indirecta brillante a media. Evita la luz solar directa que puede quemar las hojas.' : 'Bright to medium indirect light. Avoid direct sunlight which can burn the leaves.')}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.careItem}>
+              <View style={styles.careIconContainer}>
+                <Droplets size={24} color="#3b82f6" />
+              </View>
+              <View style={styles.careContent}>
+                <Text style={styles.careTitle}>{t.plantDetail.watering}</Text>
+                <Text style={styles.careText}>
+                  {plant.careInstructions?.water || plant.wateringSchedule || 
+                    (language === 'es' ? 'Regar cuando la tierra esté seca al tacto. Evita el exceso de agua para prevenir la pudrición de raíces.' : 'Water when soil feels dry to touch. Avoid overwatering to prevent root rot.')}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.careItem}>
+              <View style={styles.careIconContainer}>
+                <ThermometerSun size={24} color="#ef4444" />
+              </View>
+              <View style={styles.careContent}>
+                <Text style={styles.careTitle}>{t.plantDetail.temperature}</Text>
+                <Text style={styles.careText}>
+                  {plant.careInstructions?.temperature || 
+                    (language === 'es' ? 'Temperatura ideal entre 18-24°C. Proteger de corrientes de aire frío y calefacción directa.' : 'Ideal temperature between 18-24°C (65-75°F). Protect from cold drafts and direct heating.')}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.careItem}>
+              <View style={styles.careIconContainer}>
+                <Wind size={24} color="#06b6d4" />
+              </View>
+              <View style={styles.careContent}>
+                <Text style={styles.careTitle}>{t.plantDetail.humidity}</Text>
+                <Text style={styles.careText}>
+                  {plant.careInstructions?.humidity || 
+                    (language === 'es' ? 'Humedad media a alta. Rociar las hojas ocasionalmente o usar un humidificador si el aire es seco.' : 'Medium to high humidity. Mist leaves occasionally or use a humidifier if air is dry.')}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.careItem}>
+              <View style={styles.careIconContainer}>
+                <Sprout size={24} color="#52b788" />
+              </View>
+              <View style={styles.careContent}>
+                <Text style={styles.careTitle}>{t.plantDetail.fertilizer}</Text>
+                <Text style={styles.careText}>
+                  {plant.careInstructions?.fertilizer || 
+                    (language === 'es' ? 'Fertilizar mensualmente durante la temporada de crecimiento (primavera-verano) con fertilizante líquido diluido.' : 'Fertilize monthly during growing season (spring-summer) with diluted liquid fertilizer.')}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {plant.careInstructions?.tips && plant.careInstructions.tips.length > 0 && (
+            <>
+              <View style={styles.divider} />
+
+              <Text style={styles.sectionTitle}>{t.plantDetail.additionalTips}</Text>
+
+              <View style={styles.tipsContainer}>
+                {plant.careInstructions.tips.map((tip, index) => (
+                  <View key={index} style={styles.tipItem}>
+                    <CheckCircle2 size={20} color="#52b788" />
+                    <Text style={styles.tipText}>{tip || ''}</Text>
+                  </View>
+                ))}
+              </View>
             </>
           )}
 
@@ -477,27 +462,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f8f9fa",
   },
-  headerImage: {
-    width: width,
-    height: 360,
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#e5e7eb",
-  },
-  headerGradient: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 360,
-  },
+
   safeArea: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
+    backgroundColor: "#f8f9fa",
     zIndex: 10,
   },
   headerRow: {
@@ -511,12 +478,12 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "#e5e7eb",
     alignItems: "center",
     justifyContent: "center",
   },
   plantCounter: {
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "#1a4d2e",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
@@ -528,21 +495,21 @@ const styles = StyleSheet.create({
   },
   navArrow: {
     position: "absolute",
-    top: 180,
+    top: 140,
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "rgba(26, 77, 46, 0.85)",
+    backgroundColor: "#e5e7eb",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 20,
     elevation: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.2,
     shadowRadius: 6,
     borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
+    borderColor: "#d1d5db",
   },
   navArrowLeft: {
     left: 16,
@@ -551,21 +518,26 @@ const styles = StyleSheet.create({
     right: 16,
   },
   navArrowDisabled: {
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "#f3f4f6",
+    borderColor: "#e5e7eb",
   },
   content: {
     flex: 1,
     marginTop: 300,
+  },
+  contentNoImage: {
+    flex: 1,
+    marginTop: 0,
   },
   scrollContent: {
     paddingBottom: 40,
   },
   card: {
     backgroundColor: "#ffffff",
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
     padding: 24,
+    paddingTop: 12,
     minHeight: "100%",
   },
   plantHeader: {
@@ -600,6 +572,13 @@ const styles = StyleSheet.create({
     color: "#374151",
     lineHeight: 26,
     marginBottom: 20,
+  },
+  careIntro: {
+    fontSize: 15,
+    color: "#6b7280",
+    lineHeight: 22,
+    marginBottom: 20,
+    fontStyle: "italic" as const,
   },
   quickInfo: {
     flexDirection: "row",

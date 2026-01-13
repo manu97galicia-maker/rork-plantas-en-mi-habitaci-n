@@ -19,14 +19,13 @@ import { getTranslations } from "@/constants/translations";
 import { COMMON_PLANTS } from "@/constants/commonPlants";
 import { Plant } from "@/types/plant";
 import * as Haptics from "expo-haptics";
-import { usePlantImages } from "@/contexts/PlantImagesContext";
 
 export default function AddPlantScreen() {
   const router = useRouter();
   const { addPlant } = useMyPlants();
   const { language } = useUserPreferences();
   const t = getTranslations(language);
-  const { prefetchPlantImage } = usePlantImages();
+  
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
   const [nickname, setNickname] = useState<string>("");
@@ -45,13 +44,7 @@ export default function AddPlantScreen() {
     );
   }, [searchQuery]);
 
-  // Prefetch images for visible plants
-  React.useEffect(() => {
-    const plantsToFetch = filteredPlants.slice(0, 10);
-    plantsToFetch.forEach((plant) => {
-      prefetchPlantImage(plant.id, plant.name);
-    });
-  }, [filteredPlants, prefetchPlantImage]);
+
 
   const handleSelectPlant = (plant: Plant) => {
     setSelectedPlant(plant);
@@ -467,12 +460,7 @@ const styles = StyleSheet.create({
   plantInfo: {
     flex: 1,
   },
-  plantCardImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 12,
-    marginRight: 12,
-  },
+
   plantName: {
     fontSize: 18,
     fontWeight: "800" as const,

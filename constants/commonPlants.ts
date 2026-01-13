@@ -9,7 +9,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Popular tropical plant with large, split leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/monstera-deliciosa-plant-pot_53876-133126.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/monstera-plant-pot_23-2149198581.jpg?w=740',
     airPurification: {
       score: 7,
       description: 'Good air purifier that removes formaldehyde and other VOCs. Its large leaves provide excellent surface area for filtering toxins.',
@@ -51,7 +51,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Hardy trailing plant, perfect for beginners',
-    imageUrl: 'https://img.freepik.com/free-photo/golden-pothos-plant-gray-pot_53876-133148.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/pothos-plant-white-pot_23-2149198587.jpg?w=740',
     airPurification: {
       score: 8,
       description: 'Excellent air purifier recognized by NASA. Effectively removes formaldehyde, benzene, xylene, and carbon monoxide from indoor air.',
@@ -93,7 +93,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Bi-weekly',
     difficulty: 'Easy',
     description: 'Drought-tolerant plant with upright, sword-like leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/sansevieria-plant-pot_53876-133156.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/sansevieria-plant-gray-pot_23-2149198590.jpg?w=740',
     airPurification: {
       score: 9,
       description: 'One of the best air purifiers. Converts CO2 to oxygen at night. Removes benzene, formaldehyde, trichloroethylene, xylene, and toluene.',
@@ -135,7 +135,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Fast-growing plant with arching leaves and baby plantlets',
-    imageUrl: 'https://img.freepik.com/free-photo/spider-plant-white-pot_53876-133143.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/chlorophytum-comosum-spider-plant-white-pot_23-2149198595.jpg?w=740',
     airPurification: {
       score: 9,
       description: 'NASA-approved top air purifier. Removes 95% of formaldehyde in 24 hours. Also filters carbon monoxide, xylene, and benzene.',
@@ -177,7 +177,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Elegant plant with white flowers and glossy leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/peace-lily-plant-pot_53876-133141.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/spathiphyllum-peace-lily-white-pot_23-2149198600.jpg?w=740',
     airPurification: {
       score: 10,
       description: 'Top NASA air purifier. Removes benzene, formaldehyde, trichloroethylene, ammonia, xylene, and toluene. Also increases humidity.',
@@ -219,7 +219,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Large-leaved plant with glossy, dark green foliage',
-    imageUrl: 'https://img.freepik.com/free-photo/rubber-plant-pot_53876-133128.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/ficus-elastica-rubber-plant-pot_23-2149198605.jpg?w=740',
     airPurification: {
       score: 8,
       description: 'Effective at removing formaldehyde from air. Large waxy leaves trap airborne particles and increase oxygen levels in rooms.',
@@ -261,7 +261,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Bi-weekly',
     difficulty: 'Easy',
     description: 'Extremely low-maintenance plant with glossy, waxy leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/zz-plant-white-pot_53876-133157.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/zamioculcas-zamiifolia-zz-plant-pot_23-2149198610.jpg?w=740',
     airPurification: {
       score: 7,
       description: 'Good air purifier that removes xylene, toluene, and benzene. Its waxy leaves help filter airborne toxins effectively.',
@@ -303,7 +303,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Bi-weekly',
     difficulty: 'Easy',
     description: 'Succulent with medicinal gel in thick leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/aloe-vera-plant-pot_53876-133149.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/aloe-vera-pot-isolated-white-background_23-2149198615.jpg?w=740',
     airPurification: {
       score: 7,
       description: 'Removes formaldehyde and benzene from air. Releases oxygen at night, making it ideal for bedrooms. Also monitors air quality.',
@@ -345,7 +345,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Versatile plant with heart-shaped leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/philodendron-plant-pot_53876-133139.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/philodendron-hederaceum-heart-leaf-pot_23-2149198620.jpg?w=740',
     airPurification: {
       score: 8,
       description: 'Excellent at removing formaldehyde, especially from new furniture and carpets. Heart-shaped leaves filter various indoor pollutants.',
@@ -380,7 +380,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 2-3 days',
     difficulty: 'Moderate',
     description: 'Lush fern with graceful, arching fronds',
-    imageUrl: 'https://img.freepik.com/free-photo/boston-fern-hanging-basket_53876-133142.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/nephrolepis-exaltata-boston-fern-hanging-pot_23-2149198625.jpg?w=740',
     airPurification: {
       score: 9,
       description: 'Top air purifier and natural humidifier. Removes formaldehyde, xylene, and toluene. Adds moisture to dry indoor environments.',
@@ -415,7 +415,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Moderate',
     description: 'Decorative plant with patterned leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/calathea-plant-pot_53876-133136.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/calathea-orbifolia-prayer-plant-pot_23-2149198630.jpg?w=740',
     airPurification: {
       score: 6,
       description: 'Moderate air purifier. Helps filter common household toxins and adds humidity to the air through transpiration.',
@@ -450,7 +450,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 10 days',
     difficulty: 'Easy',
     description: 'Succulent with thick, oval-shaped leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/jade-plant-pot_53876-133147.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/crassula-ovata-jade-plant-succulent-pot_23-2149198635.jpg?w=740',
     airPurification: {
       score: 4,
       description: 'Low air purification capacity but releases oxygen at night. Good for bedrooms as it improves nighttime air quality.',
@@ -485,7 +485,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Classic trailing plant with lobed leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/english-ivy-hanging-plant_53876-133145.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/hedera-helix-english-ivy-hanging-pot_23-2149198640.jpg?w=740',
     airPurification: {
       score: 9,
       description: 'Exceptional air purifier. Removes benzene, formaldehyde, xylene, and toluene. Also reduces airborne mold particles by 78%.',
@@ -520,7 +520,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Upright plant with colorful, striped foliage',
-    imageUrl: 'https://img.freepik.com/free-photo/dracaena-plant-pot_53876-133137.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/dracaena-marginata-dragon-tree-pot_23-2149198645.jpg?w=740',
     airPurification: {
       score: 8,
       description: 'NASA-recognized air purifier. Removes benzene, formaldehyde, trichloroethylene, and xylene. Very effective for home offices.',
@@ -555,7 +555,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Moderate',
     description: 'Trendy plant with large, violin-shaped leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/fiddle-leaf-fig-pot_53876-133127.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/ficus-lyrata-fiddle-leaf-fig-tree-pot_23-2149198650.jpg?w=740',
     airPurification: {
       score: 7,
       description: 'Good air purifier with large leaves that filter toxins. Removes formaldehyde and increases oxygen levels in rooms.',
@@ -590,7 +590,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Moderate',
     description: 'Elegant flowering plant with exotic blooms',
-    imageUrl: 'https://img.freepik.com/free-photo/phalaenopsis-orchid-white-pot_53876-133130.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/phalaenopsis-orchid-flower-white-pot_23-2149198655.jpg?w=740',
     airPurification: {
       score: 5,
       description: 'Moderate air purifier. Releases oxygen at night and removes xylene from the air. Ideal for bedrooms.',
@@ -625,7 +625,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Moderate',
     description: 'Tropical plant with large banana-like leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/bird-paradise-plant-pot_53876-133135.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/strelitzia-reginae-bird-paradise-plant_23-2149198660.jpg?w=740',
     airPurification: {
       score: 6,
       description: 'Moderate air purifier. Large leaves provide good surface area for filtering dust and common indoor pollutants.',
@@ -660,7 +660,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 3-4 days',
     difficulty: 'Moderate',
     description: 'Compact flowering plant with fuzzy leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/african-violet-flowers-pot_53876-133150.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/saintpaulia-african-violet-purple-flowers_23-2149198665.jpg?w=740',
     airPurification: {
       score: 4,
       description: 'Low air purification but helps increase oxygen levels. Fuzzy leaves can trap some airborne dust particles.',
@@ -695,7 +695,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Hardy plant with colorful, patterned foliage',
-    imageUrl: 'https://img.freepik.com/free-photo/chinese-evergreen-plant-pot_53876-133138.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/aglaonema-chinese-evergreen-pot_23-2149198670.jpg?w=740',
     airPurification: {
       score: 8,
       description: 'Excellent air purifier recognized by NASA. Removes benzene and formaldehyde effectively. Great for low-light areas.',
@@ -730,7 +730,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 10 days',
     difficulty: 'Moderate',
     description: 'Unique succulent with bead-like leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/string-pearls-plant-hanging-pot_53876-133155.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/senecio-rowleyanus-string-pearls-hanging_23-2149198675.jpg?w=740',
     airPurification: {
       score: 3,
       description: 'Minimal air purification due to small leaf surface area. Primarily decorative but still adds oxygen to the environment.',
@@ -765,7 +765,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Compact palm perfect for indoor spaces',
-    imageUrl: 'https://img.freepik.com/free-photo/parlor-palm-chamaedorea-elegans-pot_53876-133144.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/chamaedorea-elegans-parlor-palm-pot_23-2149198680.jpg?w=740',
     airPurification: {
       score: 7,
       description: 'Good air purifier that removes benzene, formaldehyde, and carbon monoxide. Adds humidity to dry indoor environments.',
@@ -800,7 +800,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 10 days',
     difficulty: 'Easy',
     description: 'Variety of small succulents with thick, fleshy leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/succulent-plants-arrangement_53876-133158.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/variety-succulent-plants-pots_23-2149198685.jpg?w=740',
     airPurification: {
       score: 5,
       description: 'Moderate air purification. Some varieties release oxygen at night through CAM photosynthesis.',
@@ -835,7 +835,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 3-4 days',
     difficulty: 'Easy',
     description: 'Tropical plant with colorful, long-lasting blooms',
-    imageUrl: 'https://img.freepik.com/free-photo/bromeliad-plant-pot_53876-133151.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/guzmania-bromeliad-red-flower-pot_23-2149198690.jpg?w=740',
     airPurification: {
       score: 6,
       description: 'Moderate air purifier that releases oxygen at night. Helps remove toxins and adds humidity to indoor spaces.',
@@ -870,7 +870,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 3-4 days',
     difficulty: 'Easy',
     description: 'Feathery palm that creates a tropical atmosphere',
-    imageUrl: 'https://img.freepik.com/free-photo/areca-palm-dypsis-lutescens-pot_53876-133146.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/dypsis-lutescens-areca-palm-pot_23-2149198695.jpg?w=740',
     airPurification: {
       score: 9,
       description: 'Top NASA air purifier. Excellent at removing formaldehyde, xylene, and toluene. Natural humidifier that releases 1 liter of water per day.',
@@ -905,7 +905,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Plant with umbrella-like leaf clusters',
-    imageUrl: 'https://img.freepik.com/free-photo/umbrella-plant-schefflera-pot_53876-133153.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/schefflera-arboricola-umbrella-plant-pot_23-2149198700.jpg?w=740',
     airPurification: {
       score: 7,
       description: 'Good air purifier that removes benzene, formaldehyde, and toluene. Large leaf surface area increases filtration capacity.',
@@ -940,7 +940,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 2-3 days',
     difficulty: 'Easy',
     description: 'Colorful foliage plant with vibrant patterns',
-    imageUrl: 'https://img.freepik.com/free-photo/coleus-plant-colorful-leaves-pot_53876-133166.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/coleus-plant-colorful-foliage-pot_23-2149198705.jpg?w=740',
     airPurification: {
       score: 4,
       description: 'Low air purification capacity but adds oxygen and visual interest. Best known for decorative value.',
@@ -975,7 +975,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Vining plant with waxy leaves and fragrant flowers',
-    imageUrl: 'https://img.freepik.com/free-photo/hoya-plant-pot_53876-133154.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/hoya-carnosa-wax-plant-pot_23-2149198710.jpg?w=740',
     airPurification: {
       score: 6,
       description: 'Moderate air purifier with thick waxy leaves that filter pollutants. Adds oxygen throughout the day.',
@@ -1010,7 +1010,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Tropical plant with large, variegated leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/dieffenbachia-plant-pot_53876-133167.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/dieffenbachia-dumb-cane-plant-pot_23-2149198715.jpg?w=740',
     airPurification: {
       score: 7,
       description: 'Good air purifier that removes xylene and toluene. Large leaves provide excellent surface area for filtering toxins.',
@@ -1045,7 +1045,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Every 3-4 days',
     difficulty: 'Moderate',
     description: 'Plant with decorative leaves that fold up at night',
-    imageUrl: 'https://img.freepik.com/free-photo/prayer-plant-maranta-leuconeura-pot_53876-133168.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/maranta-leuconeura-prayer-plant-pot_23-2149198720.jpg?w=740',
     airPurification: {
       score: 6,
       description: 'Moderate air purifier that helps filter indoor pollutants. Adds humidity through leaf transpiration.',
@@ -1080,7 +1080,7 @@ export const COMMON_PLANTS: Plant[] = [
     wateringSchedule: 'Weekly',
     difficulty: 'Easy',
     description: 'Compact plant with thick, decorative leaves',
-    imageUrl: 'https://img.freepik.com/free-photo/peperomia-plant-pot_53876-133169.jpg?w=740',
+    imageUrl: 'https://img.freepik.com/free-photo/peperomia-obtusifolia-baby-rubber-plant-pot_23-2149198725.jpg?w=740',
     airPurification: {
       score: 5,
       description: 'Moderate air purifier. Compact size limits filtration capacity but still adds oxygen to small spaces.',

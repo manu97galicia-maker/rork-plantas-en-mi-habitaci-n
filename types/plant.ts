@@ -24,21 +24,31 @@ export interface SafetyInfo {
 export interface Plant {
   id: string;
   name: string;
+  nameEs?: string;
   scientificName: string;
   lightRequirement: string;
+  lightRequirementEs?: string;
   wateringSchedule: string;
+  wateringScheduleEs?: string;
   difficulty: 'Easy' | 'Moderate' | 'Advanced';
   description: string;
+  descriptionEs?: string;
   airPurification?: AirPurification;
   wellnessBenefits?: WellnessBenefits;
   safetyInfo?: SafetyInfo;
   careInstructions: {
     light: string;
+    lightEs?: string;
     water: string;
+    waterEs?: string;
     temperature: string;
+    temperatureEs?: string;
     humidity: string;
+    humidityEs?: string;
     fertilizer: string;
+    fertilizerEs?: string;
     tips: string[];
+    tipsEs?: string[];
   };
   imageUrl?: string;
   position?: {

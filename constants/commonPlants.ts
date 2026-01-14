@@ -4,11 +4,15 @@ export const COMMON_PLANTS: Plant[] = [
   {
     id: 'monstera-deliciosa',
     name: 'Monstera',
+    nameEs: 'Monstera',
     scientificName: 'Monstera deliciosa',
     lightRequirement: 'Bright indirect light',
+    lightRequirementEs: 'Luz indirecta brillante',
     wateringSchedule: 'Weekly',
+    wateringScheduleEs: 'Semanal',
     difficulty: 'Easy',
     description: 'Popular tropical plant with large, split leaves',
+    descriptionEs: 'Planta tropical popular con grandes hojas divididas',
     imageUrl: '',
     airPurification: {
       score: 7,
@@ -25,14 +29,24 @@ export const COMMON_PLANTS: Plant[] = [
     },
     careInstructions: {
       light: 'Bright, indirect light. Avoid direct sunlight.',
+      lightEs: 'Luz brillante e indirecta. Evitar luz solar directa.',
       water: 'Water when top 2-3 inches of soil is dry, typically once a week.',
+      waterEs: 'Regar cuando los 5-7 cm superiores del suelo estén secos, típicamente una vez por semana.',
       temperature: '65-85°F (18-29°C)',
+      temperatureEs: '18-29°C',
       humidity: 'Prefers high humidity (60%+)',
+      humidityEs: 'Prefiere alta humedad (60%+)',
       fertilizer: 'Feed monthly during growing season',
+      fertilizerEs: 'Abonar mensualmente durante la temporada de crecimiento',
       tips: [
         'Wipe leaves regularly to remove dust',
         'Provide a moss pole for support',
         'Rotate plant for even growth'
+      ],
+      tipsEs: [
+        'Limpiar las hojas regularmente para quitar el polvo',
+        'Proporcionar un poste de musgo para soporte',
+        'Rotar la planta para un crecimiento uniforme'
       ]
     },
     safetyInfo: {
@@ -46,11 +60,15 @@ export const COMMON_PLANTS: Plant[] = [
   {
     id: 'pothos',
     name: 'Pothos',
+    nameEs: 'Pothos',
     scientificName: 'Epipremnum aureum',
     lightRequirement: 'Low to bright indirect light',
+    lightRequirementEs: 'Luz baja a indirecta brillante',
     wateringSchedule: 'Weekly',
+    wateringScheduleEs: 'Semanal',
     difficulty: 'Easy',
     description: 'Hardy trailing plant, perfect for beginners',
+    descriptionEs: 'Planta colgante resistente, perfecta para principiantes',
     imageUrl: '',
     airPurification: {
       score: 8,
@@ -67,14 +85,24 @@ export const COMMON_PLANTS: Plant[] = [
     },
     careInstructions: {
       light: 'Tolerates low light but prefers bright, indirect light',
+      lightEs: 'Tolera poca luz pero prefiere luz brillante e indirecta',
       water: 'Water when soil is dry. About once a week.',
+      waterEs: 'Regar cuando el suelo esté seco. Aproximadamente una vez por semana.',
       temperature: '60-85°F (15-29°C)',
+      temperatureEs: '15-29°C',
       humidity: 'Average household humidity',
+      humidityEs: 'Humedad doméstica promedio',
       fertilizer: 'Feed every 2-3 months',
+      fertilizerEs: 'Abonar cada 2-3 meses',
       tips: [
         'Very forgiving and hard to kill',
         'Trim to encourage bushier growth',
         'Can be propagated easily in water'
+      ],
+      tipsEs: [
+        'Muy tolerante y difícil de matar',
+        'Podar para fomentar crecimiento más frondoso',
+        'Se puede propagar fácilmente en agua'
       ]
     },
     safetyInfo: {
@@ -88,11 +116,15 @@ export const COMMON_PLANTS: Plant[] = [
   {
     id: 'snake-plant',
     name: 'Snake Plant',
+    nameEs: 'Lengua de Suegra',
     scientificName: 'Sansevieria trifasciata',
     lightRequirement: 'Low to bright indirect light',
+    lightRequirementEs: 'Luz baja a indirecta brillante',
     wateringSchedule: 'Bi-weekly',
+    wateringScheduleEs: 'Quincenal',
     difficulty: 'Easy',
     description: 'Drought-tolerant plant with upright, sword-like leaves',
+    descriptionEs: 'Planta tolerante a la sequía con hojas erectas en forma de espada',
     imageUrl: '',
     airPurification: {
       score: 9,
@@ -109,14 +141,24 @@ export const COMMON_PLANTS: Plant[] = [
     },
     careInstructions: {
       light: 'Adapts to most light conditions',
+      lightEs: 'Se adapta a la mayoría de condiciones de luz',
       water: 'Water every 2-3 weeks. Allow soil to dry completely between waterings.',
+      waterEs: 'Regar cada 2-3 semanas. Dejar que el suelo se seque completamente entre riegos.',
       temperature: '60-85°F (15-29°C)',
+      temperatureEs: '15-29°C',
       humidity: 'Average household humidity',
+      humidityEs: 'Humedad doméstica promedio',
       fertilizer: 'Feed 2-3 times during growing season',
+      fertilizerEs: 'Abonar 2-3 veces durante la temporada de crecimiento',
       tips: [
         'Overwatering is the most common problem',
         'Great air purifier',
         'Very low maintenance'
+      ],
+      tipsEs: [
+        'El exceso de riego es el problema más común',
+        'Gran purificador de aire',
+        'Muy bajo mantenimiento'
       ]
     },
     safetyInfo: {
@@ -130,11 +172,15 @@ export const COMMON_PLANTS: Plant[] = [
   {
     id: 'spider-plant',
     name: 'Spider Plant',
+    nameEs: 'Planta Araña',
     scientificName: 'Chlorophytum comosum',
     lightRequirement: 'Bright indirect light',
+    lightRequirementEs: 'Luz indirecta brillante',
     wateringSchedule: 'Weekly',
+    wateringScheduleEs: 'Semanal',
     difficulty: 'Easy',
     description: 'Fast-growing plant with arching leaves and baby plantlets',
+    descriptionEs: 'Planta de rápido crecimiento con hojas arqueadas y plántulas bebé',
     imageUrl: '',
     airPurification: {
       score: 9,
@@ -151,14 +197,24 @@ export const COMMON_PLANTS: Plant[] = [
     },
     careInstructions: {
       light: 'Bright, indirect light. Tolerates some shade.',
+      lightEs: 'Luz brillante e indirecta. Tolera algo de sombra.',
       water: 'Keep soil lightly moist. Water about once a week.',
+      waterEs: 'Mantener el suelo ligeramente húmedo. Regar aproximadamente una vez por semana.',
       temperature: '60-75°F (15-24°C)',
+      temperatureEs: '15-24°C',
       humidity: 'Average to high humidity',
+      humidityEs: 'Humedad promedio a alta',
       fertilizer: 'Feed every 2 weeks during growing season',
+      fertilizerEs: 'Abonar cada 2 semanas durante la temporada de crecimiento',
       tips: [
         'Brown tips indicate fluoride in water',
         'Easy to propagate from plantlets',
         'Safe for pets'
+      ],
+      tipsEs: [
+        'Las puntas marrones indican flúor en el agua',
+        'Fácil de propagar a partir de plántulas',
+        'Segura para mascotas'
       ]
     },
     safetyInfo: {
@@ -172,11 +228,15 @@ export const COMMON_PLANTS: Plant[] = [
   {
     id: 'peace-lily',
     name: 'Peace Lily',
+    nameEs: 'Lirio de la Paz',
     scientificName: 'Spathiphyllum',
     lightRequirement: 'Low to medium indirect light',
+    lightRequirementEs: 'Luz baja a media indirecta',
     wateringSchedule: 'Weekly',
+    wateringScheduleEs: 'Semanal',
     difficulty: 'Easy',
     description: 'Elegant plant with white flowers and glossy leaves',
+    descriptionEs: 'Planta elegante con flores blancas y hojas brillantes',
     imageUrl: '',
     airPurification: {
       score: 10,
@@ -193,14 +253,24 @@ export const COMMON_PLANTS: Plant[] = [
     },
     careInstructions: {
       light: 'Low to medium indirect light',
+      lightEs: 'Luz baja a media indirecta',
       water: 'Keep soil moist but not soggy. Water when top inch is dry.',
+      waterEs: 'Mantener el suelo húmedo pero no encharcado. Regar cuando el primer centímetro esté seco.',
       temperature: '65-80°F (18-27°C)',
+      temperatureEs: '18-27°C',
       humidity: 'Prefers high humidity',
+      humidityEs: 'Prefiere alta humedad',
       fertilizer: 'Feed every 6 weeks during growing season',
+      fertilizerEs: 'Abonar cada 6 semanas durante la temporada de crecimiento',
       tips: [
         'Droops when thirsty, perks up after watering',
         'Remove spent flowers',
         'Toxic to pets'
+      ],
+      tipsEs: [
+        'Se marchita cuando tiene sed, se recupera después de regar',
+        'Eliminar las flores marchitas',
+        'Tóxica para mascotas'
       ]
     },
     safetyInfo: {

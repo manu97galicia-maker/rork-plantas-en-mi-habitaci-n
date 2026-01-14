@@ -93,6 +93,54 @@ export default function AddPlantScreen() {
     }
   };
 
+  const getDifficultyText = (difficulty: string) => {
+    if (language === 'es') {
+      switch (difficulty) {
+        case "Easy":
+          return "Fácil";
+        case "Moderate":
+          return "Moderada";
+        case "Advanced":
+          return "Avanzada";
+        default:
+          return difficulty;
+      }
+    }
+    return difficulty;
+  };
+
+  const getPlantName = (plant: Plant) => {
+    return language === 'es' && plant.nameEs ? plant.nameEs : plant.name;
+  };
+
+  const getPlantDescription = (plant: Plant) => {
+    return language === 'es' && plant.descriptionEs ? plant.descriptionEs : plant.description;
+  };
+
+  const getLightRequirement = (plant: Plant) => {
+    return language === 'es' && plant.lightRequirementEs ? plant.lightRequirementEs : plant.lightRequirement;
+  };
+
+  const getWateringSchedule = (plant: Plant) => {
+    return language === 'es' && plant.wateringScheduleEs ? plant.wateringScheduleEs : plant.wateringSchedule;
+  };
+
+  const getCareLight = (plant: Plant) => {
+    return language === 'es' && plant.careInstructions?.lightEs ? plant.careInstructions.lightEs : plant.careInstructions?.light;
+  };
+
+  const getCareWater = (plant: Plant) => {
+    return language === 'es' && plant.careInstructions?.waterEs ? plant.careInstructions.waterEs : plant.careInstructions?.water;
+  };
+
+  const getCareTemperature = (plant: Plant) => {
+    return language === 'es' && plant.careInstructions?.temperatureEs ? plant.careInstructions.temperatureEs : plant.careInstructions?.temperature;
+  };
+
+  const getCareHumidity = (plant: Plant) => {
+    return language === 'es' && plant.careInstructions?.humidityEs ? plant.careInstructions.humidityEs : plant.careInstructions?.humidity;
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -160,12 +208,12 @@ export default function AddPlantScreen() {
                       >
                         <View style={styles.plantCardContent}>
                           <View style={styles.plantInfo}>
-                            <Text style={styles.plantName}>{plant.name}</Text>
+                            <Text style={styles.plantName}>{getPlantName(plant)}</Text>
                             <Text style={styles.plantScientificName}>
                               {plant.scientificName}
                             </Text>
                             <Text style={styles.plantDescription} numberOfLines={2}>
-                              {plant.description}
+                              {getPlantDescription(plant)}
                             </Text>
                             
                             {/* Wellness Benefits Row */}
@@ -197,17 +245,17 @@ export default function AddPlantScreen() {
                                   { backgroundColor: getDifficultyColor(plant.difficulty) },
                                 ]}
                               >
-                                <Text style={styles.tagText}>{plant.difficulty}</Text>
+                                <Text style={styles.tagText}>{getDifficultyText(plant.difficulty)}</Text>
                               </View>
                               
                               <View style={styles.tag}>
                                 <Sun size={12} color="#ffffff" strokeWidth={2} />
-                                <Text style={styles.tagText}>{plant.lightRequirement}</Text>
+                                <Text style={styles.tagText}>{getLightRequirement(plant)}</Text>
                               </View>
                               
                               <View style={styles.tag}>
                                 <Droplets size={12} color="#ffffff" strokeWidth={2} />
-                                <Text style={styles.tagText}>{plant.wateringSchedule}</Text>
+                                <Text style={styles.tagText}>{getWateringSchedule(plant)}</Text>
                               </View>
                             </View>
                           </View>
@@ -232,7 +280,7 @@ export default function AddPlantScreen() {
           <View style={styles.modalContent}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <Text style={styles.modalTitle}>
-                {selectedPlant?.name}
+                {selectedPlant ? getPlantName(selectedPlant) : ''}
               </Text>
               <Text style={styles.modalScientificName}>
                 {selectedPlant?.scientificName}
@@ -241,13 +289,13 @@ export default function AddPlantScreen() {
               {/* Wellness Benefits Section */}
               {(selectedPlant?.wellnessBenefits || selectedPlant?.airPurification) && (
                 <View style={styles.modalSection}>
-                  <Text style={styles.sectionTitle}>🌿 Wellness Benefits</Text>
+                  <Text style={styles.sectionTitle}>🌿 {language === 'es' ? 'Beneficios de Bienestar' : 'Wellness Benefits'}</Text>
                   
                   {selectedPlant?.wellnessBenefits?.sleepScore && selectedPlant.wellnessBenefits.sleepScore > 0 && (
                     <View style={styles.wellnessBenefitItem}>
                       <View style={styles.wellnessBenefitHeader}>
                         <Moon size={16} color="#a78bfa" strokeWidth={2} />
-                        <Text style={styles.wellnessBenefitTitle}>Sleep Quality</Text>
+                        <Text style={styles.wellnessBenefitTitle}>{language === 'es' ? 'Calidad del Sueño' : 'Sleep Quality'}</Text>
                         <View style={styles.scoreContainer}>
                           <Text style={styles.scoreText}>{selectedPlant.wellnessBenefits.sleepScore}/10</Text>
                         </View>
@@ -264,7 +312,7 @@ export default function AddPlantScreen() {
                     <View style={styles.wellnessBenefitItem}>
                       <View style={styles.wellnessBenefitHeader}>
                         <Heart size={16} color="#f472b6" strokeWidth={2} />
-                        <Text style={styles.wellnessBenefitTitle}>Stress Relief</Text>
+                        <Text style={styles.wellnessBenefitTitle}>{language === 'es' ? 'Reducción del Estrés' : 'Stress Relief'}</Text>
                         <View style={styles.scoreContainer}>
                           <Text style={styles.scoreText}>{selectedPlant.wellnessBenefits.stressScore}/10</Text>
                         </View>
@@ -281,7 +329,7 @@ export default function AddPlantScreen() {
                     <View style={styles.wellnessBenefitItem}>
                       <View style={styles.wellnessBenefitHeader}>
                         <Wind size={16} color="#34d399" strokeWidth={2} />
-                        <Text style={styles.wellnessBenefitTitle}>Air Purification</Text>
+                        <Text style={styles.wellnessBenefitTitle}>{language === 'es' ? 'Purificación del Aire' : 'Air Purification'}</Text>
                         <View style={styles.scoreContainer}>
                           <Text style={styles.scoreText}>{selectedPlant.airPurification.score}/10</Text>
                         </View>
@@ -302,22 +350,22 @@ export default function AddPlantScreen() {
                   
                   <View style={styles.careItem}>
                     <Text style={styles.careLabel}>{t.addPlant.light}:</Text>
-                    <Text style={styles.careText}>{selectedPlant.careInstructions?.light || selectedPlant.lightRequirement || 'N/A'}</Text>
+                    <Text style={styles.careText}>{getCareLight(selectedPlant) || getLightRequirement(selectedPlant) || 'N/A'}</Text>
                   </View>
                   
                   <View style={styles.careItem}>
                     <Text style={styles.careLabel}>{t.addPlant.water}:</Text>
-                    <Text style={styles.careText}>{selectedPlant.careInstructions?.water || selectedPlant.wateringSchedule || 'N/A'}</Text>
+                    <Text style={styles.careText}>{getCareWater(selectedPlant) || getWateringSchedule(selectedPlant) || 'N/A'}</Text>
                   </View>
                   
                   <View style={styles.careItem}>
                     <Text style={styles.careLabel}>{t.addPlant.temperature}:</Text>
-                    <Text style={styles.careText}>{selectedPlant.careInstructions?.temperature || 'N/A'}</Text>
+                    <Text style={styles.careText}>{getCareTemperature(selectedPlant) || 'N/A'}</Text>
                   </View>
                   
                   <View style={styles.careItem}>
                     <Text style={styles.careLabel}>{t.addPlant.humidity}:</Text>
-                    <Text style={styles.careText}>{selectedPlant.careInstructions?.humidity || 'N/A'}</Text>
+                    <Text style={styles.careText}>{getCareHumidity(selectedPlant) || 'N/A'}</Text>
                   </View>
                 </View>
               )}

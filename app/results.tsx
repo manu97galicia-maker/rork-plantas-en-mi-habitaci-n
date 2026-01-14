@@ -508,6 +508,13 @@ export default function ResultsScreen() {
         y: z.number(),
         size: z.enum(["small", "medium", "large"]),
       }),
+      safetyInfo: z.object({
+        petSafe: z.boolean(),
+        petSafeDescription: z.string(),
+        petSafeDescriptionEs: z.string(),
+        allergenInfo: z.string(),
+        allergenInfoEs: z.string(),
+      }).optional(),
     });
 
     const schema = z.object({
@@ -547,6 +554,12 @@ For each plant:
 - difficulty: Easy/Moderate/Advanced
 - description: 1 sentence
 - position: {x: 10-90, y: 10-90, size: small/medium/large}
+- safetyInfo (CRITICAL - ALWAYS include):
+  * petSafe: boolean (true if safe for pets, false if toxic)
+  * petSafeDescription: explain in English if safe/toxic to cats and dogs
+  * petSafeDescriptionEs: same explanation in Spanish
+  * allergenInfo: warn in English about allergies, children, and pregnant women
+  * allergenInfoEs: same warning in Spanish about allergies, children, and pregnant women
 
 Also: lightLevel (Low/Medium/Bright), spaceSize (Small/Medium/Large)`;
 
@@ -683,7 +696,16 @@ Also: lightLevel (Low/Medium/Bright), spaceSize (Small/Medium/Large)`;
       const safeResult: RoomAnalysis = {
         lightLevel: ['Low', 'Medium', 'Bright'].includes(result.lightLevel) ? result.lightLevel : 'Medium',
         spaceSize: ['Small', 'Medium', 'Large'].includes(result.spaceSize) ? result.spaceSize : 'Medium',
-        suggestions: safeSuggestions,
+        suggestions: safeSuggestions.map((plant: any) => ({
+          ...plant,
+          safetyInfo: plant.safetyInfo || {
+            petSafe: false,
+            petSafeDescription: 'No specific safety information available. Please consult a veterinarian before exposing pets to this plant.',
+            petSafeDescriptionEs: 'No hay información específica de seguridad. Consulte a un veterinario antes de exponer mascotas a esta planta.',
+            allergenInfo: '⚠️ WARNING: Keep away from children and pets. May cause allergic reactions. Consult a specialist if you have concerns.',
+            allergenInfoEs: '⚠️ ADVERTENCIA: Mantener alejado de niños y mascotas. Puede causar reacciones alérgicas. Consulte a un especialista si tiene dudas.',
+          }
+        })),
       };
 
       console.log(`✅ Analysis successful: ${safeResult.suggestions.length} plants suggested`);
@@ -729,6 +751,15 @@ Plant placement instructions:
           const safeImageData = params.imageData || '';
           if (!safeImageData || safeImageData.length < 100) {
             console.log('⚠️ Invalid image data for editing');
+            await addScan({
+              analysis: safeResult,
+              originalImage: safeImageData,
+              location: locationInfo ? {
+                latitude: locationInfo.latitude,
+                longitude: locationInfo.longitude,
+                altitude: locationInfo.altitude,
+              } : undefined,
+            });
             return;
           }
           

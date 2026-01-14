@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { Shield, Moon, Sparkles, ChevronRight, Check, Leaf, Heart, Baby, Globe } from "lucide-react-native";
+import { Shield, Moon, Sparkles, ChevronRight, Check, Leaf, Heart, Baby, Globe, Home, Briefcase, Bed, Sofa, Wind, Droplets, Sun, AlertCircle } from "lucide-react-native";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -23,7 +23,7 @@ const { width } = Dimensions.get("window");
 
 interface OnboardingSlide {
   id: string;
-  type: "welcome" | "feature" | "profile";
+  type: "welcome" | "question" | "profile";
   icon: React.ReactNode;
   badge?: string;
   bgStyle: "light" | "dark" | "sage";
@@ -39,27 +39,41 @@ const getSlides = (language: Language): OnboardingSlide[] => {
     },
     {
       id: "1",
-      type: "feature",
+      type: "question",
       icon: <Shield size={32} color="#FFFFFF" strokeWidth={1.5} />,
       badge: "safety",
       bgStyle: "dark",
     },
     {
       id: "2",
-      type: "feature",
+      type: "question",
       icon: <Moon size={32} color={Colors.oxysafe.charcoal} strokeWidth={1.5} />,
-      badge: "oxygen",
+      badge: "goals",
       bgStyle: "sage",
     },
     {
       id: "3",
-      type: "feature",
-      icon: <Sparkles size={32} color="#FFFFFF" strokeWidth={1.5} />,
-      badge: "style",
+      type: "question",
+      icon: <Home size={32} color="#FFFFFF" strokeWidth={1.5} />,
+      badge: "location",
       bgStyle: "dark",
     },
     {
       id: "4",
+      type: "question",
+      icon: <AlertCircle size={32} color={Colors.oxysafe.charcoal} strokeWidth={1.5} />,
+      badge: "challenges",
+      bgStyle: "sage",
+    },
+    {
+      id: "5",
+      type: "question",
+      icon: <Wind size={32} color="#FFFFFF" strokeWidth={1.5} />,
+      badge: "allergies",
+      bgStyle: "dark",
+    },
+    {
+      id: "6",
       type: "profile",
       icon: <Leaf size={32} color={Colors.oxysafe.charcoal} strokeWidth={1.5} />,
       bgStyle: "light",
@@ -73,6 +87,11 @@ export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [selectedCareLevel, setSelectedCareLevel] = useState<CareLevel | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(language);
+  const [selectedSafety, setSelectedSafety] = useState<string[]>([]);
+  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
+  const [selectedChallenges, setSelectedChallenges] = useState<string[]>([]);
+  const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
   const scrollX = useRef(new Animated.Value(0)).current;
   const slidesRef = useRef<FlatList<OnboardingSlide>>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -127,7 +146,7 @@ export default function OnboardingScreen() {
       } else {
         if (selectedCareLevel) {
           await setCareLevel(selectedCareLevel);
-          router.push("/paywall");
+          router.replace("/paywall");
         }
       }
     } finally {
@@ -148,7 +167,7 @@ export default function OnboardingScreen() {
     try {
       await setLanguage(selectedLanguage);
       await setCareLevel("intermediate");
-      router.push("/paywall");
+      router.replace("/paywall");
     } finally {
       setTimeout(() => {
         isProcessingRef.current = false;
@@ -169,7 +188,19 @@ export default function OnboardingScreen() {
   }
 
   const isLastSlide = currentIndex === slides.length - 1;
-  const canProceed = !isLastSlide || selectedCareLevel !== null;
+  const getCurrentSlide = () => slides[currentIndex];
+  const canProceed = () => {
+    if (isLastSlide) return selectedCareLevel !== null;
+    const slide = getCurrentSlide();
+    if (!slide) return false;
+    if (currentIndex === 0) return true;
+    if (slide.badge === "safety") return selectedSafety.length > 0;
+    if (slide.badge === "goals") return selectedGoals.length > 0;
+    if (slide.badge === "location") return selectedRooms.length > 0;
+    if (slide.badge === "challenges") return selectedChallenges.length > 0;
+    if (slide.badge === "allergies") return true;
+    return true;
+  };
 
   return (
     <View style={styles.container}>
@@ -201,11 +232,21 @@ export default function OnboardingScreen() {
               );
             }
             return (
-              <FeatureSlide
+              <QuestionSlide
                 item={item}
                 index={index}
                 scrollX={scrollX}
                 t={t}
+                selectedSafety={selectedSafety}
+                onSelectSafety={setSelectedSafety}
+                selectedGoals={selectedGoals}
+                onSelectGoals={setSelectedGoals}
+                selectedRooms={selectedRooms}
+                onSelectRooms={setSelectedRooms}
+                selectedChallenges={selectedChallenges}
+                onSelectChallenges={setSelectedChallenges}
+                selectedAllergies={selectedAllergies}
+                onSelectAllergies={setSelectedAllergies}
               />
             );
           }}
@@ -278,12 +319,12 @@ export default function OnboardingScreen() {
             style={[
               styles.nextButton,
               isLastSlide && styles.nextButtonLarge,
-              !canProceed && styles.nextButtonDisabled,
+              !canProceed() && styles.nextButtonDisabled,
               slides[currentIndex]?.bgStyle === "dark" && styles.nextButtonLight,
             ]}
             onPress={scrollTo}
             activeOpacity={0.8}
-            disabled={!canProceed}
+            disabled={!canProceed()}
           >
             {isLastSlide ? (
               <>
@@ -392,14 +433,24 @@ function WelcomeSlide({ scrollX, index, selectedLanguage, onSelectLanguage, t }:
   );
 }
 
-interface FeatureSlideProps {
+interface QuestionSlideProps {
   item: OnboardingSlide;
   index: number;
   scrollX: Animated.Value;
   t: ReturnType<typeof getTranslations>;
+  selectedSafety: string[];
+  onSelectSafety: (value: string[]) => void;
+  selectedGoals: string[];
+  onSelectGoals: (value: string[]) => void;
+  selectedRooms: string[];
+  onSelectRooms: (value: string[]) => void;
+  selectedChallenges: string[];
+  onSelectChallenges: (value: string[]) => void;
+  selectedAllergies: string[];
+  onSelectAllergies: (value: string[]) => void;
 }
 
-function FeatureSlide({ item, index, scrollX, t }: FeatureSlideProps) {
+function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety, selectedGoals, onSelectGoals, selectedRooms, onSelectRooms, selectedChallenges, onSelectChallenges, selectedAllergies, onSelectAllergies }: QuestionSlideProps) {
   const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
 
   const translateY = scrollX.interpolate({
@@ -420,40 +471,87 @@ function FeatureSlide({ item, index, scrollX, t }: FeatureSlideProps) {
     extrapolate: 'clamp',
   });
 
-  const getContent = () => {
-    switch (item.badge) {
-      case "safety":
-        return {
-          title: t.onboarding.slide1Title,
-          description: t.onboarding.slide1Description,
-          badge: t.onboarding.safetyBadge,
-          icons: [
-            <Heart key="heart" size={28} color="rgba(255,255,255,0.9)" strokeWidth={1.5} />,
-            <Baby key="baby" size={28} color="rgba(255,255,255,0.9)" strokeWidth={1.5} />,
-          ],
-        };
-      case "oxygen":
-        return {
-          title: t.onboarding.slide2Title,
-          description: t.onboarding.slide2Description,
-          badge: t.onboarding.oxygenBadge,
-          icons: [],
-        };
-      case "style":
-        return {
-          title: t.onboarding.slide3Title,
-          description: t.onboarding.slide3Description,
-          badge: t.onboarding.styleBadge,
-          icons: [],
-        };
-      default:
-        return { title: "", description: "", badge: "", icons: [] };
+  const isDark = item.bgStyle === "dark";
+  const isSage = item.bgStyle === "sage";
+
+  const handleToggle = (value: string, current: string[], setter: (val: string[]) => void) => {
+    if (current.includes(value)) {
+      setter(current.filter(v => v !== value));
+    } else {
+      setter([...current, value]);
     }
   };
 
-  const content = getContent();
-  const isDark = item.bgStyle === "dark";
-  const isSage = item.bgStyle === "sage";
+  const getOptions = () => {
+    switch (item.badge) {
+      case "safety":
+        return {
+          title: t.onboarding.q1Title,
+          description: t.onboarding.q1Description,
+          options: [
+            { id: "pets", label: t.onboarding.q1Pets, icon: <Heart size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "children", label: t.onboarding.q1Children, icon: <Baby size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "none", label: t.onboarding.q1None, icon: <Shield size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+          ],
+          selected: selectedSafety,
+          onToggle: (val: string) => handleToggle(val, selectedSafety, onSelectSafety),
+        };
+      case "goals":
+        return {
+          title: t.onboarding.q2Title,
+          description: t.onboarding.q2Description,
+          options: [
+            { id: "sleep", label: t.onboarding.q2Sleep, icon: <Moon size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "air", label: t.onboarding.q2Air, icon: <Wind size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "decor", label: t.onboarding.q2Decor, icon: <Sparkles size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "stress", label: t.onboarding.q2Stress, icon: <Heart size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+          ],
+          selected: selectedGoals,
+          onToggle: (val: string) => handleToggle(val, selectedGoals, onSelectGoals),
+        };
+      case "location":
+        return {
+          title: t.onboarding.q3Title,
+          description: t.onboarding.q3Description,
+          options: [
+            { id: "bedroom", label: t.onboarding.q3Bedroom, icon: <Bed size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "living", label: t.onboarding.q3Living, icon: <Sofa size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "office", label: t.onboarding.q3Office, icon: <Briefcase size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "all", label: t.onboarding.q3All, icon: <Home size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+          ],
+          selected: selectedRooms,
+          onToggle: (val: string) => handleToggle(val, selectedRooms, onSelectRooms),
+        };
+      case "challenges":
+        return {
+          title: t.onboarding.q4Title,
+          description: t.onboarding.q4Description,
+          options: [
+            { id: "watering", label: t.onboarding.q4Watering, icon: <Droplets size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "choosing", label: t.onboarding.q4Choosing, icon: <AlertCircle size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "light", label: t.onboarding.q4Light, icon: <Sun size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "care", label: t.onboarding.q4Care, icon: <Leaf size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+          ],
+          selected: selectedChallenges,
+          onToggle: (val: string) => handleToggle(val, selectedChallenges, onSelectChallenges),
+        };
+      case "allergies":
+        return {
+          title: t.onboarding.q5Title,
+          description: t.onboarding.q5Description,
+          options: [
+            { id: "pollen", label: t.onboarding.q5Pollen, icon: <Wind size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "none", label: t.onboarding.q5None, icon: <Check size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+          ],
+          selected: selectedAllergies,
+          onToggle: (val: string) => handleToggle(val, selectedAllergies, onSelectAllergies),
+        };
+      default:
+        return { title: "", description: "", options: [], selected: [], onToggle: () => {} };
+    }
+  };
+
+  const content = getOptions();
 
   const bgColors: [string, string] = isDark 
     ? [Colors.oxysafe.charcoal, "#252A2E"]
@@ -464,50 +562,70 @@ function FeatureSlide({ item, index, scrollX, t }: FeatureSlideProps) {
   return (
     <View style={styles.slideContainer}>
       <LinearGradient colors={bgColors} style={styles.slideGradient}>
-        <SafeAreaView edges={["top"]} style={styles.slideInner}>
+        <SafeAreaView edges={["top", "bottom"]} style={styles.slideInner}>
           <Animated.View 
             style={[
-              styles.featureContent, 
+              styles.questionContent, 
               { transform: [{ translateY }, { scale }], opacity }
             ]}
           >
-            <View style={[
-              styles.featureIconContainer,
-              isDark && styles.featureIconContainerDark,
-              isSage && styles.featureIconContainerSage,
-            ]}>
-              {item.icon}
-            </View>
+            <View style={styles.questionHeader}>
+              <View style={[
+                styles.questionIconContainer,
+                isDark && styles.questionIconContainerDark,
+                isSage && styles.questionIconContainerSage,
+              ]}>
+                {item.icon}
+              </View>
 
-            <View style={[
-              styles.badgeContainer,
-              isDark && styles.badgeContainerDark,
-            ]}>
-              <Text style={[styles.badgeText, isDark && styles.badgeTextDark]}>
-                {content.badge}
+              <Text style={[styles.questionTitle, isDark && styles.questionTitleDark]}>
+                {content.title}
+              </Text>
+
+              <Text style={[styles.questionDescription, isDark && styles.questionDescriptionDark]}>
+                {content.description}
               </Text>
             </View>
 
-            <Text style={[styles.featureTitle, isDark && styles.featureTitleDark]}>
-              {content.title}
-            </Text>
-
-            <Text style={[styles.featureDescription, isDark && styles.featureDescriptionDark]}>
-              {content.description}
-            </Text>
-
-            {content.icons.length > 0 && (
-              <View style={styles.featureIcons}>
-                {content.icons.map((icon, i) => (
-                  <View key={i} style={[
-                    styles.featureIconBadge,
-                    isDark && styles.featureIconBadgeDark,
-                  ]}>
-                    {icon}
-                  </View>
-                ))}
-              </View>
-            )}
+            <View style={styles.optionsContainer}>
+              {content.options.map((option) => {
+                const isSelected = content.selected.includes(option.id);
+                return (
+                  <TouchableOpacity
+                    key={option.id}
+                    style={[
+                      styles.optionCard,
+                      isDark && styles.optionCardDark,
+                      isSelected && styles.optionCardSelected,
+                      isDark && isSelected && styles.optionCardSelectedDark,
+                    ]}
+                    onPress={() => content.onToggle(option.id)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.optionContent}>
+                      <View style={[
+                        styles.optionIcon,
+                        isSelected && styles.optionIconSelected,
+                      ]}>
+                        {option.icon}
+                      </View>
+                      <Text style={[
+                        styles.optionLabel,
+                        isDark && styles.optionLabelDark,
+                        isSelected && styles.optionLabelSelected,
+                      ]}>
+                        {option.label}
+                      </Text>
+                    </View>
+                    {isSelected && (
+                      <View style={styles.optionCheck}>
+                        <Check size={16} color="#FFFFFF" strokeWidth={3} />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </Animated.View>
         </SafeAreaView>
       </LinearGradient>
@@ -638,6 +756,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: "center",
+    paddingBottom: 120,
   },
   logoContainer: {
     alignItems: "center",
@@ -729,11 +848,117 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  featureContent: {
+  questionContent: {
     flex: 1,
-    paddingHorizontal: 32,
+    paddingHorizontal: 24,
     justifyContent: "center",
+    paddingBottom: 120,
+  },
+  questionHeader: {
     alignItems: "center",
+    marginBottom: 32,
+  },
+  questionIconContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    backgroundColor: Colors.oxysafe.mist,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
+  },
+  questionIconContainerDark: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  questionIconContainerSage: {
+    backgroundColor: Colors.oxysafe.sage,
+  },
+  questionTitle: {
+    fontSize: 26,
+    fontWeight: "700" as const,
+    color: Colors.oxysafe.charcoal,
+    textAlign: "center",
+    marginBottom: 12,
+    letterSpacing: -0.5,
+  },
+  questionTitleDark: {
+    color: "#FFFFFF",
+  },
+  questionDescription: {
+    fontSize: 16,
+    color: Colors.text.secondary,
+    textAlign: "center",
+    lineHeight: 24,
+    paddingHorizontal: 8,
+  },
+  questionDescriptionDark: {
+    color: "rgba(255,255,255,0.7)",
+  },
+  optionsContainer: {
+    gap: 12,
+  },
+  optionCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 2,
+    borderColor: "transparent",
+    shadowColor: Colors.shadow.dark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  optionCardDark: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  optionCardSelected: {
+    borderColor: Colors.oxysafe.sage,
+    backgroundColor: Colors.oxysafe.mist,
+  },
+  optionCardSelectedDark: {
+    borderColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "rgba(255,255,255,0.15)",
+  },
+  optionContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  optionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: Colors.oxysafe.mist,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+  optionIconSelected: {
+    backgroundColor: Colors.oxysafe.sage,
+  },
+  optionLabel: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.oxysafe.charcoal,
+    flex: 1,
+  },
+  optionLabelDark: {
+    color: "#FFFFFF",
+  },
+  optionLabelSelected: {
+    color: Colors.oxysafe.deepSage,
+  },
+  optionCheck: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.oxysafe.sage,
+    alignItems: "center",
+    justifyContent: "center",
   },
   featureIconContainer: {
     width: 80,
@@ -811,6 +1036,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: "center",
+    paddingBottom: 120,
   },
   profileHeader: {
     alignItems: "center",

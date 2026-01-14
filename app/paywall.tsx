@@ -33,17 +33,17 @@ export default function PaywallScreen() {
 
   const handleContinueFree = async () => {
     await completeOnboarding();
-    router.replace("/");
+    router.replace("/gallery");
   };
 
   const handleSubscribe = async () => {
     await completeOnboarding();
-    router.replace("/");
+    router.replace("/gallery");
   };
 
   const handleClose = async () => {
     await completeOnboarding();
-    router.replace("/");
+    router.replace("/gallery");
   };
 
   return (

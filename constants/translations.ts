@@ -33,6 +33,33 @@ interface Translations {
     sleepBadge: string;
     styleBadge: string;
     successMessage: string;
+    q1Title: string;
+    q1Description: string;
+    q1Pets: string;
+    q1Children: string;
+    q1None: string;
+    q2Title: string;
+    q2Description: string;
+    q2Sleep: string;
+    q2Air: string;
+    q2Decor: string;
+    q2Stress: string;
+    q3Title: string;
+    q3Description: string;
+    q3Bedroom: string;
+    q3Living: string;
+    q3Office: string;
+    q3All: string;
+    q4Title: string;
+    q4Description: string;
+    q4Watering: string;
+    q4Choosing: string;
+    q4Light: string;
+    q4Care: string;
+    q5Title: string;
+    q5Description: string;
+    q5Pollen: string;
+    q5None: string;
   };
   gallery: {
     title: string;
@@ -216,6 +243,33 @@ const translations: Record<Language, Translations> = {
       sleepBadge: "Sleep Enhancement",
       styleBadge: "Interior Design",
       successMessage: "Perfect! Your profile is ready",
+      q1Title: "Who lives in your home?",
+      q1Description: "Help us recommend safe plants for your family",
+      q1Pets: "Pets (Dogs, Cats, etc.)",
+      q1Children: "Young Children",
+      q1None: "Just Adults",
+      q2Title: "What's your main goal?",
+      q2Description: "We'll personalize your plant recommendations",
+      q2Sleep: "Better Sleep Quality",
+      q2Air: "Purify Indoor Air",
+      q2Decor: "Beautiful Home Decor",
+      q2Stress: "Reduce Stress & Anxiety",
+      q3Title: "Where will you place plants?",
+      q3Description: "We'll suggest plants ideal for each space",
+      q3Bedroom: "Bedroom",
+      q3Living: "Living Room",
+      q3Office: "Home Office",
+      q3All: "Multiple Rooms",
+      q4Title: "What's your biggest challenge?",
+      q4Description: "We'll provide solutions and expert guidance",
+      q4Watering: "Remembering to Water",
+      q4Choosing: "Choosing the Right Plant",
+      q4Light: "Finding Adequate Light",
+      q4Care: "Keeping Plants Healthy",
+      q5Title: "Any allergies to consider?",
+      q5Description: "We'll filter recommendations accordingly",
+      q5Pollen: "Pollen Allergies",
+      q5None: "No Allergies",
     },
     gallery: {
       title: "My Gallery",
@@ -397,6 +451,33 @@ const translations: Record<Language, Translations> = {
       sleepBadge: "Mejora el Sueño",
       styleBadge: "Diseño Interior",
       successMessage: "¡Perfecto! Tu perfil está listo",
+      q1Title: "¿Quién vive en tu hogar?",
+      q1Description: "Ayúdanos a recomendar plantas seguras para tu familia",
+      q1Pets: "Mascotas (Perros, Gatos, etc.)",
+      q1Children: "Niños Pequeños",
+      q1None: "Solo Adultos",
+      q2Title: "¿Cuál es tu objetivo principal?",
+      q2Description: "Personalizaremos tus recomendaciones de plantas",
+      q2Sleep: "Mejor Calidad de Sueño",
+      q2Air: "Purificar el Aire Interior",
+      q2Decor: "Hermosa Decoración del Hogar",
+      q2Stress: "Reducir Estrés y Ansiedad",
+      q3Title: "¿Dónde colocarás las plantas?",
+      q3Description: "Sugeriremos plantas ideales para cada espacio",
+      q3Bedroom: "Dormitorio",
+      q3Living: "Sala de Estar",
+      q3Office: "Oficina en Casa",
+      q3All: "Múltiples Habitaciones",
+      q4Title: "¿Cuál es tu mayor desafío?",
+      q4Description: "Te proporcionaremos soluciones y orientación experta",
+      q4Watering: "Recordar Regar",
+      q4Choosing: "Elegir la Planta Correcta",
+      q4Light: "Encontrar Luz Adecuada",
+      q4Care: "Mantener las Plantas Saludables",
+      q5Title: "¿Alguna alergia a considerar?",
+      q5Description: "Filtraremos las recomendaciones en consecuencia",
+      q5Pollen: "Alergias al Polen",
+      q5None: "Sin Alergias",
     },
     gallery: {
       title: "Mi Galería",

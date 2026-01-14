@@ -109,6 +109,12 @@ interface Translations {
     wateringFrequency: string;
     cancel: string;
     addToMyPlants: string;
+    filters: string;
+    petSafe: string;
+    allergyFriendly: string;
+    easyCare: string;
+    allPlants: string;
+    clearFilters: string;
   };
   results: {
     title: string;
@@ -161,9 +167,16 @@ interface Translations {
     safetyInfo: string;
     petSafe: string;
     notPetSafe: string;
+    childSafe: string;
+    notChildSafe: string;
     allergens: string;
     safeForPets: string;
     toxicToPets: string;
+    oxygenBenefits: string;
+    oxygenDescription: string;
+    sleepBenefitsDetail: string;
+    sleepDescription: string;
+    safetyWarning: string;
     disclaimer: string;
   };
 }
@@ -278,6 +291,12 @@ const translations: Record<Language, Translations> = {
       wateringFrequency: "Watering Frequency (days)",
       cancel: "Cancel",
       addToMyPlants: "Add to My Plants",
+      filters: "Filters",
+      petSafe: "Pet Safe",
+      allergyFriendly: "Allergy Friendly",
+      easyCare: "Easy Care",
+      allPlants: "All Plants",
+      clearFilters: "Clear Filters",
     },
     results: {
       title: "Your Ideal Plants",
@@ -330,9 +349,16 @@ const translations: Record<Language, Translations> = {
     safetyInfo: "Safety Information",
     petSafe: "Pet Safe",
     notPetSafe: "Not Pet Safe",
-    allergens: "Allergens",
+    childSafe: "Child Safe",
+    notChildSafe: "Not Child Safe",
+    allergens: "Allergens & Allergies",
     safeForPets: "Safe for pets",
     toxicToPets: "Toxic to pets",
+    oxygenBenefits: "Oxygen & Air Quality",
+    oxygenDescription: "This plant helps improve indoor air quality by filtering toxins and producing oxygen. Plants with higher scores are more effective at purifying the air you breathe.",
+    sleepBenefitsDetail: "Sleep Quality Impact",
+    sleepDescription: "Certain plants can improve sleep quality by releasing oxygen at night, increasing humidity, or through calming aromatherapy effects. Higher scores indicate greater sleep benefits.",
+    safetyWarning: "Safety Warning",
     disclaimer: "This information is for educational purposes only. We are not responsible for any harm to people, pets, or plants. Always consult a veterinarian or specialist before exposing pets or people with allergies to new plants.",
     },
   },
@@ -445,6 +471,12 @@ const translations: Record<Language, Translations> = {
       wateringFrequency: "Frecuencia de Riego (días)",
       cancel: "Cancelar",
       addToMyPlants: "Añadir a Mis Plantas",
+      filters: "Filtros",
+      petSafe: "Seguro para Mascotas",
+      allergyFriendly: "Apto para Alérgicos",
+      easyCare: "Fácil Cuidado",
+      allPlants: "Todas las Plantas",
+      clearFilters: "Limpiar Filtros",
     },
     results: {
       title: "Tus Plantas Ideales",
@@ -497,9 +529,16 @@ const translations: Record<Language, Translations> = {
     safetyInfo: "Información de Seguridad",
     petSafe: "Seguro para mascotas",
     notPetSafe: "No seguro para mascotas",
-    allergens: "Alérgenos",
+    childSafe: "Seguro para niños",
+    notChildSafe: "No seguro para niños",
+    allergens: "Alérgenos y Alergias",
     safeForPets: "Seguro para mascotas",
     toxicToPets: "Tóxico para mascotas",
+    oxygenBenefits: "Oxígeno y Calidad del Aire",
+    oxygenDescription: "Esta planta ayuda a mejorar la calidad del aire interior filtrando toxinas y produciendo oxígeno. Las plantas con puntuaciones más altas son más efectivas purificando el aire que respiras.",
+    sleepBenefitsDetail: "Impacto en la Calidad del Sueño",
+    sleepDescription: "Ciertas plantas pueden mejorar la calidad del sueño liberando oxígeno por la noche, aumentando la humedad o mediante efectos de aromaterapia calmante. Puntuaciones más altas indican mayores beneficios para el sueño.",
+    safetyWarning: "Advertencia de Seguridad",
     disclaimer: "Esta información es solo con fines educativos. No nos hacemos responsables de ningún daño a personas, mascotas o plantas. Consulte siempre a un veterinario o especialista antes de exponer a mascotas o personas con alergias a nuevas plantas.",
     },
   },

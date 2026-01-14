@@ -17,8 +17,12 @@ export interface SafetyInfo {
   petSafe: boolean;
   petSafeDescription: string;
   petSafeDescriptionEs: string;
+  childSafe?: boolean;
+  childSafeDescription?: string;
+  childSafeDescriptionEs?: string;
   allergenInfo: string;
   allergenInfoEs: string;
+  allergyFriendly?: boolean;
 }
 
 export interface Plant {

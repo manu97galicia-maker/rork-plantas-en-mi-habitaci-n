@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
-import { ChevronLeft, Search, Droplets, Sun, X, Moon, Heart, Wind } from "lucide-react-native";
-import React, { useState, useMemo } from "react";
+import { ChevronLeft, Search, Droplets, Sun, X, Moon, Heart, Wind, PawPrint, Sparkles, Filter } from "lucide-react-native";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -30,19 +30,54 @@ export default function AddPlantScreen() {
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
   const [nickname, setNickname] = useState<string>("");
   const [wateringDays, setWateringDays] = useState<string>("7");
+  
+  const [filterPetSafe, setFilterPetSafe] = useState<boolean>(false);
+  const [filterAllergyFriendly, setFilterAllergyFriendly] = useState<boolean>(false);
+  const [filterEasyCare, setFilterEasyCare] = useState<boolean>(false);
+  
+  const hasActiveFilters = filterPetSafe || filterAllergyFriendly || filterEasyCare;
+  
+  const clearFilters = useCallback(() => {
+    setFilterPetSafe(false);
+    setFilterAllergyFriendly(false);
+    setFilterEasyCare(false);
+  }, []);
 
   const filteredPlants = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return COMMON_PLANTS;
+    let plants = COMMON_PLANTS;
+    
+    if (filterPetSafe) {
+      plants = plants.filter((plant) => plant.safetyInfo?.petSafe === true);
     }
-    const query = searchQuery.toLowerCase();
-    return COMMON_PLANTS.filter(
-      (plant) =>
-        plant.name.toLowerCase().includes(query) ||
-        plant.scientificName.toLowerCase().includes(query) ||
-        plant.description.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
+    
+    if (filterAllergyFriendly) {
+      plants = plants.filter((plant) => {
+        const allergenInfo = plant.safetyInfo?.allergenInfo?.toLowerCase() || '';
+        return allergenInfo.includes('safe') || 
+               allergenInfo.includes('hypoallergenic') || 
+               plant.safetyInfo?.allergyFriendly === true ||
+               !allergenInfo.includes('allergic') && !allergenInfo.includes('irritation');
+      });
+    }
+    
+    if (filterEasyCare) {
+      plants = plants.filter((plant) => plant.difficulty === 'Easy');
+    }
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      plants = plants.filter(
+        (plant) =>
+          plant.name.toLowerCase().includes(query) ||
+          plant.scientificName.toLowerCase().includes(query) ||
+          plant.description.toLowerCase().includes(query) ||
+          (plant.nameEs && plant.nameEs.toLowerCase().includes(query)) ||
+          (plant.descriptionEs && plant.descriptionEs.toLowerCase().includes(query))
+      );
+    }
+    
+    return plants;
+  }, [searchQuery, filterPetSafe, filterAllergyFriendly, filterEasyCare]);
 
 
 
@@ -174,6 +209,66 @@ export default function AddPlantScreen() {
               {searchQuery.length > 0 && (
                 <TouchableOpacity onPress={() => setSearchQuery("")}>
                   <X size={20} color="rgba(255,255,255,0.6)" strokeWidth={2} />
+                </TouchableOpacity>
+              )}
+            </View>
+            
+            <View style={styles.filtersContainer}>
+              <View style={styles.filtersRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    filterPetSafe && styles.filterChipActive
+                  ]}
+                  onPress={() => setFilterPetSafe(!filterPetSafe)}
+                  activeOpacity={0.7}
+                >
+                  <PawPrint size={14} color={filterPetSafe ? "#ffffff" : "rgba(255,255,255,0.8)"} strokeWidth={2} />
+                  <Text style={[
+                    styles.filterChipText,
+                    filterPetSafe && styles.filterChipTextActive
+                  ]}>{t.addPlant.petSafe}</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    filterAllergyFriendly && styles.filterChipActive
+                  ]}
+                  onPress={() => setFilterAllergyFriendly(!filterAllergyFriendly)}
+                  activeOpacity={0.7}
+                >
+                  <Sparkles size={14} color={filterAllergyFriendly ? "#ffffff" : "rgba(255,255,255,0.8)"} strokeWidth={2} />
+                  <Text style={[
+                    styles.filterChipText,
+                    filterAllergyFriendly && styles.filterChipTextActive
+                  ]}>{t.addPlant.allergyFriendly}</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    filterEasyCare && styles.filterChipActive
+                  ]}
+                  onPress={() => setFilterEasyCare(!filterEasyCare)}
+                  activeOpacity={0.7}
+                >
+                  <Filter size={14} color={filterEasyCare ? "#ffffff" : "rgba(255,255,255,0.8)"} strokeWidth={2} />
+                  <Text style={[
+                    styles.filterChipText,
+                    filterEasyCare && styles.filterChipTextActive
+                  ]}>{t.addPlant.easyCare}</Text>
+                </TouchableOpacity>
+              </View>
+              
+              {hasActiveFilters && (
+                <TouchableOpacity
+                  style={styles.clearFiltersButton}
+                  onPress={clearFilters}
+                  activeOpacity={0.7}
+                >
+                  <X size={14} color="#f87171" strokeWidth={2} />
+                  <Text style={styles.clearFiltersText}>{t.addPlant.clearFilters}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -459,7 +554,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingBottom: 8,
   },
   searchBar: {
     flexDirection: "row",
@@ -475,6 +570,49 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#ffffff",
     fontWeight: "500" as const,
+  },
+  filtersContainer: {
+    marginTop: 12,
+  },
+  filtersRow: {
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    gap: 8,
+  },
+  filterChip: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  filterChipActive: {
+    backgroundColor: "#10b981",
+    borderColor: "#10b981",
+  },
+  filterChipText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: "rgba(255, 255, 255, 0.8)",
+  },
+  filterChipTextActive: {
+    color: "#ffffff",
+  },
+  clearFiltersButton: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    alignSelf: "flex-start" as const,
+    marginTop: 8,
+    gap: 4,
+  },
+  clearFiltersText: {
+    fontSize: 13,
+    fontWeight: "500" as const,
+    color: "#f87171",
   },
   scrollView: {
     flex: 1,

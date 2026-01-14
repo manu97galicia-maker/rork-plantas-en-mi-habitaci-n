@@ -16,6 +16,9 @@ import {
   AlertTriangle,
   ShieldCheck,
   ShieldAlert,
+  Baby,
+  Sparkles,
+  Info,
 } from "lucide-react-native";
 import React, { useState, useCallback } from "react";
 import {
@@ -221,7 +224,16 @@ export default function PlantDetailScreen() {
             <>
               <View style={styles.divider} />
 
-              <Text style={styles.sectionTitle}>{t.plantDetail.airPurification}</Text>
+              <Text style={styles.sectionTitle}>{t.plantDetail.oxygenBenefits}</Text>
+              
+              <View style={styles.oxygenInfoCard}>
+                <View style={styles.oxygenInfoHeader}>
+                  <Info size={16} color="#0ea5e9" />
+                  <Text style={styles.oxygenInfoText}>
+                    {t.plantDetail.oxygenDescription}
+                  </Text>
+                </View>
+              </View>
 
               <View style={styles.airPurificationCard}>
                 <View style={styles.airPurificationHeader}>
@@ -249,6 +261,15 @@ export default function PlantDetailScreen() {
           <View style={styles.divider} />
 
           <Text style={styles.sectionTitle}>{t.plantDetail.wellnessBenefits}</Text>
+          
+          <View style={styles.oxygenInfoCard}>
+            <View style={styles.oxygenInfoHeader}>
+              <Info size={16} color="#8b5cf6" />
+              <Text style={styles.oxygenInfoText}>
+                {t.plantDetail.sleepDescription}
+              </Text>
+            </View>
+          </View>
 
           <View style={styles.wellnessCard}>
             <View style={styles.wellnessItem}>
@@ -398,6 +419,15 @@ export default function PlantDetailScreen() {
               <View style={styles.divider} />
 
               <Text style={styles.sectionTitle}>{t.plantDetail.safetyInfo}</Text>
+              
+              <View style={styles.safetyWarningBanner}>
+                <AlertTriangle size={20} color="#f59e0b" />
+                <Text style={styles.safetyWarningText}>
+                  {t.plantDetail.safetyWarning}: {language === 'es' 
+                    ? 'Siempre supervise a niños y mascotas cerca de las plantas. Consulte a un profesional si sospecha de ingestión.' 
+                    : 'Always supervise children and pets around plants. Consult a professional if ingestion is suspected.'}
+                </Text>
+              </View>
 
               <View style={styles.safetyCard}>
                 <View style={styles.safetyItem}>
@@ -430,8 +460,45 @@ export default function PlantDetailScreen() {
                 <View style={styles.safetyDivider} />
 
                 <View style={styles.safetyItem}>
+                  <View style={[
+                    styles.safetyIconContainer,
+                    (plant.safetyInfo.childSafe !== undefined ? plant.safetyInfo.childSafe : plant.safetyInfo.petSafe) ? styles.safetyIconSafe : styles.safetyIconDanger
+                  ]}>
+                    <Baby size={24} color="#ffffff" />
+                  </View>
+                  <View style={styles.safetyContent}>
+                    <View style={styles.safetyHeader}>
+                      {(plant.safetyInfo.childSafe !== undefined ? plant.safetyInfo.childSafe : plant.safetyInfo.petSafe) ? (
+                        <ShieldCheck size={18} color="#16a34a" />
+                      ) : (
+                        <ShieldAlert size={18} color="#dc2626" />
+                      )}
+                      <Text style={[
+                        styles.safetyTitle,
+                        (plant.safetyInfo.childSafe !== undefined ? plant.safetyInfo.childSafe : plant.safetyInfo.petSafe) ? styles.safetyTitleSafe : styles.safetyTitleDanger
+                      ]}>
+                        {(plant.safetyInfo.childSafe !== undefined ? plant.safetyInfo.childSafe : plant.safetyInfo.petSafe) ? t.plantDetail.childSafe : t.plantDetail.notChildSafe}
+                      </Text>
+                    </View>
+                    <Text style={styles.safetyDescription}>
+                      {plant.safetyInfo.childSafeDescription 
+                        ? (language === 'es' ? plant.safetyInfo.childSafeDescriptionEs : plant.safetyInfo.childSafeDescription)
+                        : (language === 'es' 
+                            ? (plant.safetyInfo.petSafe 
+                                ? 'Esta planta es generalmente segura para niños, pero siempre supervise a los niños pequeños alrededor de las plantas.' 
+                                : 'Esta planta puede ser peligrosa para los niños si se ingiere. Manténgala fuera del alcance de los niños pequeños.')
+                            : (plant.safetyInfo.petSafe 
+                                ? 'This plant is generally safe for children, but always supervise young children around plants.' 
+                                : 'This plant may be harmful to children if ingested. Keep out of reach of young children.'))}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.safetyDivider} />
+
+                <View style={styles.safetyItem}>
                   <View style={[styles.safetyIconContainer, styles.safetyIconAllergen]}>
-                    <AlertTriangle size={24} color="#ffffff" />
+                    <Sparkles size={24} color="#ffffff" />
                   </View>
                   <View style={styles.safetyContent}>
                     <Text style={styles.safetyTitleAllergen}>{t.plantDetail.allergens}</Text>
@@ -714,6 +781,25 @@ const styles = StyleSheet.create({
     color: "#374151",
     lineHeight: 24,
   },
+  oxygenInfoCard: {
+    backgroundColor: "#f0f9ff",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#bae6fd",
+  },
+  oxygenInfoHeader: {
+    flexDirection: "row" as const,
+    gap: 10,
+    alignItems: "flex-start" as const,
+  },
+  oxygenInfoText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#0369a1",
+    lineHeight: 20,
+  },
   wellnessCard: {
     backgroundColor: "#faf5ff",
     borderRadius: 16,
@@ -792,6 +878,24 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#e9d5ff",
     marginVertical: 16,
+  },
+  safetyWarningBanner: {
+    flexDirection: "row" as const,
+    backgroundColor: "#fffbeb",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+    gap: 12,
+    alignItems: "flex-start" as const,
+    borderWidth: 1,
+    borderColor: "#fcd34d",
+  },
+  safetyWarningText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#92400e",
+    lineHeight: 20,
+    fontWeight: "500" as const,
   },
   safetyCard: {
     backgroundColor: "#fefce8",

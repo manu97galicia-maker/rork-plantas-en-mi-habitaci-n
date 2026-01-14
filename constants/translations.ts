@@ -8,6 +8,8 @@ interface Translations {
     spanish: string;
     skip: string;
     getStarted: string;
+    welcomeTitle: string;
+    welcomeSubtitle: string;
     slide1Title: string;
     slide1Description: string;
     slide2Title: string;
@@ -26,6 +28,11 @@ interface Translations {
     intermediateDescription: string;
     expert: string;
     expertDescription: string;
+    safetyBadge: string;
+    oxygenBadge: string;
+    sleepBadge: string;
+    styleBadge: string;
+    successMessage: string;
   };
   gallery: {
     title: string;
@@ -165,29 +172,36 @@ const translations: Record<Language, Translations> = {
   en: {
     onboarding: {
       selectLanguage: "Choose Your Language",
-      languageDescription: "Select your preferred language to get started",
+      languageDescription: "Select your preferred language to begin your wellness journey",
       english: "English",
       spanish: "Español",
       skip: "Skip",
-      getStarted: "Get Started",
-      slide1Title: "Capture Your Space",
-      slide1Description: "Take a photo of your room and let AI decorate it with the perfect plants. You can also upload a photo from your Google or Apple gallery",
-      slide2Title: "Identify Any Plant",
-      slide2Description: "Take a photo or upload from your gallery to analyze and identify what plant you're seeing. Perfect for learning about any plant!",
-      slide3Title: "Manage Your Plants",
-      slide3Description: "Track your plants and get watering reminders. We'll help you know when to water and how to care for them",
+      getStarted: "Begin Journey",
+      welcomeTitle: "Welcome to OxySafe",
+      welcomeSubtitle: "Your Premium Plant Wellness Companion",
+      slide1Title: "Safe for Everyone",
+      slide1Description: "Instantly identify plants toxic to pets and children. Our Safety Shield protects your loved ones with real-time alerts",
+      slide2Title: "Breathe Better, Sleep Deeper",
+      slide2Description: "Discover oxygen-boosting plants that enhance air quality and promote restful sleep. Transform your bedroom into a sanctuary",
+      slide3Title: "Design Your Sanctuary",
+      slide3Description: "Visualize plants in your space before you buy. Our AI stylist helps you create the perfect green atmosphere",
       slide4Title: "Air Purification",
       slide4Description: "Discover plants that purify the air and increase oxygen levels in your home. Each plant has a purification score from 1 to 10",
       slide5Title: "Better Sleep & Less Stress",
       slide5Description: "Some plants help you sleep better and reduce stress. We show you their relaxation and wellness scores",
-      slide6Title: "Your Experience Level",
-      slide6Description: "Select your level to get appropriate plant recommendations",
-      beginner: "Beginner",
-      beginnerDescription: "Easy plants that require minimal care",
-      intermediate: "Intermediate",
-      intermediateDescription: "I have some experience caring for plants",
-      expert: "Expert",
-      expertDescription: "I love challenges and exotic plants",
+      slide6Title: "Your Wellness Profile",
+      slide6Description: "Tell us about your space so we can personalize your experience",
+      beginner: "New to Plants",
+      beginnerDescription: "Low-maintenance greenery that thrives with minimal attention",
+      intermediate: "Growing Enthusiast",
+      intermediateDescription: "Ready for plants that need a bit more love",
+      expert: "Plant Parent Pro",
+      expertDescription: "Bring on the rare and exotic specimens",
+      safetyBadge: "Pet & Child Safe",
+      oxygenBadge: "Oxygen Boost",
+      sleepBadge: "Sleep Enhancement",
+      styleBadge: "Interior Design",
+      successMessage: "Perfect! Your profile is ready",
     },
     gallery: {
       title: "My Gallery",
@@ -325,29 +339,36 @@ const translations: Record<Language, Translations> = {
   es: {
     onboarding: {
       selectLanguage: "Elige tu idioma",
-      languageDescription: "Selecciona tu idioma preferido para comenzar",
+      languageDescription: "Selecciona tu idioma preferido para comenzar tu viaje de bienestar",
       english: "English",
       spanish: "Español",
       skip: "Omitir",
       getStarted: "Comenzar",
-      slide1Title: "Captura tu espacio",
-      slide1Description: "Toma una foto de tu habitación y la IA la decorará con las plantas perfectas. También puedes subir una foto desde tu galería de Google o Apple",
-      slide2Title: "Identifica cualquier planta",
-      slide2Description: "Toma una foto o súbela desde tu galería para analizar e identificar qué planta estás viendo. ¡Perfecto para conocer cualquier planta!",
-      slide3Title: "Gestiona tus plantas",
-      slide3Description: "Rastrea tus plantas y recibe recordatorios de riego. Te ayudaremos a saber cuándo regar y cómo cuidarlas",
+      welcomeTitle: "Bienvenido a OxySafe",
+      welcomeSubtitle: "Tu Compañero Premium de Bienestar Vegetal",
+      slide1Title: "Seguro para Todos",
+      slide1Description: "Identifica al instante plantas tóxicas para mascotas y niños. Nuestro Escudo de Seguridad protege a tus seres queridos con alertas en tiempo real",
+      slide2Title: "Respira Mejor, Duerme Profundo",
+      slide2Description: "Descubre plantas que aumentan el oxígeno y mejoran la calidad del aire para un sueño reparador. Transforma tu dormitorio en un santuario",
+      slide3Title: "Diseña tu Santuario",
+      slide3Description: "Visualiza las plantas en tu espacio antes de comprar. Nuestro estilista IA te ayuda a crear la atmósfera verde perfecta",
       slide4Title: "Purificación del Aire",
       slide4Description: "Descubre plantas que purifican el aire y aumentan los niveles de oxígeno en tu hogar. Cada planta tiene una puntuación de purificación del 1 al 10",
       slide5Title: "Mejor Sueño y Menos Estrés",
       slide5Description: "Algunas plantas te ayudan a dormir mejor y reducen el estrés. Te mostramos sus puntuaciones de relajación y bienestar",
-      slide6Title: "Tu nivel de experiencia",
-      slide6Description: "Selecciona tu nivel para obtener recomendaciones apropiadas",
-      beginner: "Principiante",
-      beginnerDescription: "Plantas fáciles que requieren cuidado mínimo",
-      intermediate: "Intermedio",
-      intermediateDescription: "Tengo algo de experiencia cuidando plantas",
-      expert: "Experto",
-      expertDescription: "Me encantan los desafíos y las plantas exóticas",
+      slide6Title: "Tu Perfil de Bienestar",
+      slide6Description: "Cuéntanos sobre tu espacio para personalizar tu experiencia",
+      beginner: "Nuevo en Plantas",
+      beginnerDescription: "Plantas de bajo mantenimiento que prosperan con mínima atención",
+      intermediate: "Entusiasta en Crecimiento",
+      intermediateDescription: "Listo para plantas que necesitan un poco más de cuidado",
+      expert: "Experto en Plantas",
+      expertDescription: "Trae los especímenes raros y exóticos",
+      safetyBadge: "Seguro para Mascotas y Niños",
+      oxygenBadge: "Aumenta Oxígeno",
+      sleepBadge: "Mejora el Sueño",
+      styleBadge: "Diseño Interior",
+      successMessage: "¡Perfecto! Tu perfil está listo",
     },
     gallery: {
       title: "Mi Galería",

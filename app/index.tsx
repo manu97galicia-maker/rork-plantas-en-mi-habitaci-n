@@ -341,7 +341,10 @@ export default function OnboardingScreen() {
               !canProceed() && styles.nextButtonDisabled,
               slides[currentIndex]?.bgStyle === "dark" && styles.nextButtonLight,
             ]}
-            onPress={scrollTo}
+            onPress={() => {
+              console.log('🔘 Next button pressed');
+              scrollTo();
+            }}
             activeOpacity={0.8}
             disabled={!canProceed()}
           >
@@ -356,14 +359,14 @@ export default function OnboardingScreen() {
                 <ChevronRight 
                   size={20} 
                   color={slides[currentIndex]?.bgStyle === "dark" ? Colors.oxysafe.charcoal : "#FFFFFF"} 
-                  strokeWidth={2.5} 
+                  strokeWidth={3} 
                 />
               </>
             ) : (
               <ChevronRight 
                 size={24} 
                 color={slides[currentIndex]?.bgStyle === "dark" ? Colors.oxysafe.charcoal : "#FFFFFF"} 
-                strokeWidth={2.5} 
+                strokeWidth={3} 
               />
             )}
           </TouchableOpacity>
@@ -572,27 +575,27 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
     }
   };
 
-  const renderIcon = (iconName: string) => {
+  const renderIcon = (iconName: string, isSelected: boolean) => {
     const size = 24;
-    const color = iconColor;
+    const finalColor = isSelected ? "#FFFFFF" : iconColor;
     
     switch (iconName) {
-      case "Heart": return <Heart size={size} color={color} strokeWidth={2} />;
-      case "Baby": return <Baby size={size} color={color} strokeWidth={2} />;
-      case "Shield": return <Shield size={size} color={color} strokeWidth={2} />;
-      case "Moon": return <Moon size={size} color={color} strokeWidth={2} />;
-      case "Wind": return <Wind size={size} color={color} strokeWidth={2} />;
-      case "Sparkles": return <Sparkles size={size} color={color} strokeWidth={2} />;
-      case "Bed": return <Bed size={size} color={color} strokeWidth={2} />;
-      case "Sofa": return <Sofa size={size} color={color} strokeWidth={2} />;
-      case "Briefcase": return <Briefcase size={size} color={color} strokeWidth={2} />;
-      case "Home": return <Home size={size} color={color} strokeWidth={2} />;
-      case "Droplets": return <Droplets size={size} color={color} strokeWidth={2} />;
-      case "AlertCircle": return <AlertCircle size={size} color={color} strokeWidth={2} />;
-      case "Sun": return <Sun size={size} color={color} strokeWidth={2} />;
-      case "Leaf": return <Leaf size={size} color={color} strokeWidth={2} />;
-      case "Check": return <Check size={size} color={color} strokeWidth={2} />;
-      default: return <Leaf size={size} color={color} strokeWidth={2} />;
+      case "Heart": return <Heart size={size} color={finalColor} strokeWidth={2} />;
+      case "Baby": return <Baby size={size} color={finalColor} strokeWidth={2} />;
+      case "Shield": return <Shield size={size} color={finalColor} strokeWidth={2} />;
+      case "Moon": return <Moon size={size} color={finalColor} strokeWidth={2} />;
+      case "Wind": return <Wind size={size} color={finalColor} strokeWidth={2} />;
+      case "Sparkles": return <Sparkles size={size} color={finalColor} strokeWidth={2} />;
+      case "Bed": return <Bed size={size} color={finalColor} strokeWidth={2} />;
+      case "Sofa": return <Sofa size={size} color={finalColor} strokeWidth={2} />;
+      case "Briefcase": return <Briefcase size={size} color={finalColor} strokeWidth={2} />;
+      case "Home": return <Home size={size} color={finalColor} strokeWidth={2} />;
+      case "Droplets": return <Droplets size={size} color={finalColor} strokeWidth={2} />;
+      case "AlertCircle": return <AlertCircle size={size} color={finalColor} strokeWidth={2} />;
+      case "Sun": return <Sun size={size} color={finalColor} strokeWidth={2} />;
+      case "Leaf": return <Leaf size={size} color={finalColor} strokeWidth={2} />;
+      case "Check": return <Check size={size} color={finalColor} strokeWidth={2} />;
+      default: return <Leaf size={size} color={finalColor} strokeWidth={2} />;
     }
   };
 
@@ -652,7 +655,7 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
                         styles.optionIcon,
                         isSelected && styles.optionIconSelected,
                       ]}>
-                        {renderIcon(option.iconName)}
+                        {renderIcon(option.iconName, isSelected)}
                       </View>
                       <Text style={[
                         styles.optionLabel,
@@ -983,7 +986,7 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
   optionIconSelected: {
-    backgroundColor: Colors.oxysafe.sage,
+    backgroundColor: Colors.oxysafe.deepSage,
   },
   optionLabel: {
     fontSize: 16,

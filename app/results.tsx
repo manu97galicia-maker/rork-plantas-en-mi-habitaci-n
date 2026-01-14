@@ -264,12 +264,16 @@ export default function ResultsScreen() {
     if (!analysis?.suggestions || !Array.isArray(analysis.suggestions)) return [];
     try {
       return analysis.suggestions.map(plant => {
-        if (!plant) return plant;
-        return enrichPlantData(plant);
-      });
+        if (!plant || typeof plant !== 'object') return null;
+        try {
+          return enrichPlantData(plant);
+        } catch {
+          return plant;
+        }
+      }).filter(Boolean);
     } catch (e) {
       console.log('Error enriching plants:', e);
-      return analysis.suggestions;
+      return analysis.suggestions.filter(Boolean);
     }
   }, [analysis?.suggestions, enrichPlantData]);
 
@@ -554,7 +558,7 @@ Also: lightLevel (Low/Medium/Bright), spaceSize (Small/Medium/Large)`;
         careLevel: careLevel
       });
       
-      let result;
+      let result: any = null;
       const maxRetries = 2;
       let lastError: any = null;
       
@@ -582,34 +586,44 @@ Also: lightLevel (Low/Medium/Bright), spaceSize (Small/Medium/Large)`;
           console.log(`📤 Sending analysis request (attempt ${attempt + 1})...`);
           console.log(`📝 Prompt length: ${prompt.length} chars`);
           
-          const generatePromise = generateObject({
-            messages: [
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: prompt },
-                  { type: "image", image: params.imageData },
-                ],
-              },
-            ],
-            schema,
-          });
+          let generatePromise;
+          try {
+            generatePromise = generateObject({
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: prompt },
+                    { type: "image", image: params.imageData },
+                  ],
+                },
+              ],
+              schema,
+            });
+          } catch (createError: any) {
+            console.error('❌ Error creating generateObject:', createError?.message);
+            throw new Error('Failed to create analysis request');
+          }
           
           result = await generatePromise;
           
           console.log('📥 Response received:', {
             hasResult: !!result,
+            resultType: typeof result,
             hasSuggestions: !!(result && result.suggestions),
             suggestionsCount: result?.suggestions?.length || 0
           });
           
-          if (result && result.suggestions && Array.isArray(result.suggestions) && result.suggestions.length > 0) {
-            console.log(`✅ Success on attempt ${attempt + 1}`);
-            break;
-          } else {
-            console.log('⚠️ Invalid or empty result, retrying...');
-            lastError = new Error('Empty or invalid response');
+          if (result && typeof result === 'object' && result.suggestions && Array.isArray(result.suggestions) && result.suggestions.length > 0) {
+            const validSuggestions = result.suggestions.filter((s: any) => s && typeof s === 'object' && s.name);
+            if (validSuggestions.length > 0) {
+              result.suggestions = validSuggestions;
+              console.log(`✅ Success on attempt ${attempt + 1} with ${validSuggestions.length} valid plants`);
+              break;
+            }
           }
+          console.log('⚠️ Invalid or empty result, retrying...');
+          lastError = new Error('Empty or invalid response');
         } catch (genError: any) {
           const errorMsg = String(genError?.message || genError || 'Unknown error');
           console.error(`❌ generateObject error (attempt ${attempt + 1}):`, errorMsg);
@@ -629,7 +643,7 @@ Also: lightLevel (Low/Medium/Bright), spaceSize (Small/Medium/Large)`;
         }
       }
       
-      if (!result || !result.suggestions || !Array.isArray(result.suggestions)) {
+      if (!result || typeof result !== 'object' || !result.suggestions || !Array.isArray(result.suggestions) || result.suggestions.length === 0) {
         console.log('❌ No valid result after all attempts');
         throw new Error(lastError?.message || "No results");
       }
@@ -642,13 +656,43 @@ Also: lightLevel (Low/Medium/Bright), spaceSize (Small/Medium/Large)`;
         throw new Error("The response does not contain plant suggestions");
       }
 
-      console.log(`✅ Analysis successful: ${result.suggestions.length} plants suggested`);
+      const safeSuggestions = result.suggestions.map((plant: any, idx: number) => {
+        if (!plant || typeof plant !== 'object') {
+          return null;
+        }
+        return {
+          id: String(plant.id || `plant-${idx}`),
+          name: String(plant.name || 'Unknown Plant'),
+          scientificName: String(plant.scientificName || ''),
+          lightRequirement: String(plant.lightRequirement || 'Medium light'),
+          wateringSchedule: String(plant.wateringSchedule || 'Weekly'),
+          difficulty: ['Easy', 'Moderate', 'Advanced'].includes(plant.difficulty) ? plant.difficulty : 'Easy',
+          description: String(plant.description || ''),
+          position: plant.position && typeof plant.position === 'object' ? {
+            x: Number(plant.position.x) || 50,
+            y: Number(plant.position.y) || 50,
+            size: ['small', 'medium', 'large'].includes(plant.position.size) ? plant.position.size : 'medium'
+          } : { x: 50, y: 50, size: 'medium' as const },
+        };
+      }).filter(Boolean);
+
+      if (safeSuggestions.length === 0) {
+        throw new Error("No valid plant suggestions in response");
+      }
+
+      const safeResult: RoomAnalysis = {
+        lightLevel: ['Low', 'Medium', 'Bright'].includes(result.lightLevel) ? result.lightLevel : 'Medium',
+        spaceSize: ['Small', 'Medium', 'Large'].includes(result.spaceSize) ? result.spaceSize : 'Medium',
+        suggestions: safeSuggestions,
+      };
+
+      console.log(`✅ Analysis successful: ${safeResult.suggestions.length} plants suggested`);
       
       if (!isMountedRef.current) return;
-      setAnalysis(result as RoomAnalysis);
+      setAnalysis(safeResult);
       setIsLoading(false);
 
-      const plantNamesWithNumbers = result.suggestions.map((p, i) => `${i + 1}. ${p.name}`).join(", ");
+      const plantNamesWithNumbers = safeResult.suggestions.map((p: any, i: number) => `${i + 1}. ${p?.name || 'Plant'}`).join(", ");
       
       const editPrompt = `Add these beautiful plants to this space with VISIBLE NUMBER LABELS: ${plantNamesWithNumbers}
 
@@ -701,7 +745,7 @@ Plant placement instructions:
             
             try {
               await addScan({
-                analysis: result as RoomAnalysis,
+                analysis: safeResult,
                 originalImage: safeImageData,
                 editedImage: editResult.imageBase64,
                 location: locationInfo ? {
@@ -718,7 +762,7 @@ Plant placement instructions:
             console.log("⚠️ Image edit failed:", editResult?.error || 'Unknown error');
             try {
               await addScan({
-                analysis: result as RoomAnalysis,
+                analysis: safeResult,
                 originalImage: safeImageData,
                 location: locationInfo ? {
                   latitude: locationInfo.latitude,
@@ -736,7 +780,7 @@ Plant placement instructions:
             try {
               const safeImageData = params.imageData || '';
               await addScan({
-                analysis: result as RoomAnalysis,
+                analysis: safeResult,
                 originalImage: safeImageData,
                 location: locationInfo ? {
                   latitude: locationInfo.latitude,
@@ -1041,21 +1085,25 @@ Plant placement instructions:
               t={t}
             />
 
-            {analysis.suggestions.map((plant, idx) => {
-              if (!plant) return null;
-              return (
-                <PlantCard
-                  key={plant?.id || `plant-${idx}`}
-                  plant={plant}
-                  index={idx}
-                  getDifficultyColor={getDifficultyColor}
-                  getDifficultyText={getDifficultyText}
-                  enrichedPlant={enrichedPlants[idx]}
-                  safeNavigate={safeNavigate}
-                  language={language}
-                  allPlantsJson={allPlantsJson}
-                />
-              );
+            {(analysis?.suggestions || []).map((plant, idx) => {
+              if (!plant || typeof plant !== 'object') return null;
+              try {
+                return (
+                  <PlantCard
+                    key={plant?.id || `plant-${idx}`}
+                    plant={plant}
+                    index={idx}
+                    getDifficultyColor={getDifficultyColor}
+                    getDifficultyText={getDifficultyText}
+                    enrichedPlant={enrichedPlants[idx] || plant}
+                    safeNavigate={safeNavigate}
+                    language={language}
+                    allPlantsJson={allPlantsJson}
+                  />
+                );
+              } catch {
+                return null;
+              }
             })}
 
             <View style={{ height: 40 }} />

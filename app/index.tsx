@@ -129,32 +129,64 @@ export default function OnboardingScreen() {
     }
   }, [fadeAnim, isLoading, hasCompletedOnboarding]);
 
+  const canProceed = useCallback(() => {
+    if (currentIndex === slides.length - 1) return selectedCareLevel !== null;
+    const slide = slides[currentIndex];
+    if (!slide) return false;
+    if (currentIndex === 0) return true;
+    if (slide.badge === "safety") return selectedSafety.length > 0;
+    if (slide.badge === "goals") return selectedGoals.length > 0;
+    if (slide.badge === "location") return selectedRooms.length > 0;
+    if (slide.badge === "challenges") return selectedChallenges.length > 0;
+    if (slide.badge === "allergies") return true;
+    return true;
+  }, [currentIndex, slides, selectedCareLevel, selectedSafety, selectedGoals, selectedRooms, selectedChallenges]);
+
   const scrollTo = useCallback(async () => {
     const now = Date.now();
     if (isProcessingRef.current || now - lastClickRef.current < 500) {
+      console.log('⏭️ Prevented duplicate scroll/navigation');
       return;
     }
+    
+    if (!canProceed()) {
+      console.log('❌ Cannot proceed - requirements not met');
+      return;
+    }
+    
     isProcessingRef.current = true;
     lastClickRef.current = now;
     
     try {
+      console.log('🎯 Scrolling to next slide. Current index:', currentIndex, 'Total slides:', slides.length);
+      
       if (currentIndex === 0) {
+        console.log('💬 Setting language to:', selectedLanguage);
         await setLanguage(selectedLanguage);
+        console.log('✅ Language set, scrolling to next slide');
         slidesRef.current?.scrollToIndex({ index: currentIndex + 1 });
       } else if (currentIndex < slides.length - 1) {
+        console.log('📄 Moving to slide', currentIndex + 1);
         slidesRef.current?.scrollToIndex({ index: currentIndex + 1 });
       } else {
+        console.log('🏁 Last slide reached');
         if (selectedCareLevel) {
+          console.log('🌱 Setting care level to:', selectedCareLevel);
           await setCareLevel(selectedCareLevel);
+          console.log('✅ Care level set, navigating to paywall');
           router.replace("/paywall");
+        } else {
+          console.log('⚠️ No care level selected');
         }
       }
+    } catch (error) {
+      console.error('❌ Error in scrollTo:', error);
     } finally {
       setTimeout(() => {
         isProcessingRef.current = false;
       }, 500);
     }
-  }, [currentIndex, selectedLanguage, selectedCareLevel, setLanguage, setCareLevel, router, slides.length]);
+  }, [currentIndex, selectedLanguage, selectedCareLevel, setLanguage, setCareLevel, router, slides.length, canProceed]);
 
   const skip = useCallback(async () => {
     const now = Date.now();
@@ -188,19 +220,6 @@ export default function OnboardingScreen() {
   }
 
   const isLastSlide = currentIndex === slides.length - 1;
-  const getCurrentSlide = () => slides[currentIndex];
-  const canProceed = () => {
-    if (isLastSlide) return selectedCareLevel !== null;
-    const slide = getCurrentSlide();
-    if (!slide) return false;
-    if (currentIndex === 0) return true;
-    if (slide.badge === "safety") return selectedSafety.length > 0;
-    if (slide.badge === "goals") return selectedGoals.length > 0;
-    if (slide.badge === "location") return selectedRooms.length > 0;
-    if (slide.badge === "challenges") return selectedChallenges.length > 0;
-    if (slide.badge === "allergies") return true;
-    return true;
-  };
 
   return (
     <View style={styles.container}>
@@ -482,6 +501,8 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
     }
   };
 
+  const iconColor = isDark ? "#FFFFFF" : Colors.oxysafe.charcoal;
+  
   const getOptions = () => {
     switch (item.badge) {
       case "safety":
@@ -489,9 +510,9 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
           title: t.onboarding.q1Title,
           description: t.onboarding.q1Description,
           options: [
-            { id: "pets", label: t.onboarding.q1Pets, icon: <Heart size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "children", label: t.onboarding.q1Children, icon: <Baby size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "none", label: t.onboarding.q1None, icon: <Shield size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "pets", label: t.onboarding.q1Pets, iconName: "Heart" },
+            { id: "children", label: t.onboarding.q1Children, iconName: "Baby" },
+            { id: "none", label: t.onboarding.q1None, iconName: "Shield" },
           ],
           selected: selectedSafety,
           onToggle: (val: string) => handleToggle(val, selectedSafety, onSelectSafety),
@@ -501,10 +522,10 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
           title: t.onboarding.q2Title,
           description: t.onboarding.q2Description,
           options: [
-            { id: "sleep", label: t.onboarding.q2Sleep, icon: <Moon size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "air", label: t.onboarding.q2Air, icon: <Wind size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "decor", label: t.onboarding.q2Decor, icon: <Sparkles size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "stress", label: t.onboarding.q2Stress, icon: <Heart size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "sleep", label: t.onboarding.q2Sleep, iconName: "Moon" },
+            { id: "air", label: t.onboarding.q2Air, iconName: "Wind" },
+            { id: "decor", label: t.onboarding.q2Decor, iconName: "Sparkles" },
+            { id: "stress", label: t.onboarding.q2Stress, iconName: "Heart" },
           ],
           selected: selectedGoals,
           onToggle: (val: string) => handleToggle(val, selectedGoals, onSelectGoals),
@@ -514,10 +535,10 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
           title: t.onboarding.q3Title,
           description: t.onboarding.q3Description,
           options: [
-            { id: "bedroom", label: t.onboarding.q3Bedroom, icon: <Bed size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "living", label: t.onboarding.q3Living, icon: <Sofa size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "office", label: t.onboarding.q3Office, icon: <Briefcase size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "all", label: t.onboarding.q3All, icon: <Home size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "bedroom", label: t.onboarding.q3Bedroom, iconName: "Bed" },
+            { id: "living", label: t.onboarding.q3Living, iconName: "Sofa" },
+            { id: "office", label: t.onboarding.q3Office, iconName: "Briefcase" },
+            { id: "all", label: t.onboarding.q3All, iconName: "Home" },
           ],
           selected: selectedRooms,
           onToggle: (val: string) => handleToggle(val, selectedRooms, onSelectRooms),
@@ -527,10 +548,10 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
           title: t.onboarding.q4Title,
           description: t.onboarding.q4Description,
           options: [
-            { id: "watering", label: t.onboarding.q4Watering, icon: <Droplets size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "choosing", label: t.onboarding.q4Choosing, icon: <AlertCircle size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "light", label: t.onboarding.q4Light, icon: <Sun size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "care", label: t.onboarding.q4Care, icon: <Leaf size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "watering", label: t.onboarding.q4Watering, iconName: "Droplets" },
+            { id: "choosing", label: t.onboarding.q4Choosing, iconName: "AlertCircle" },
+            { id: "light", label: t.onboarding.q4Light, iconName: "Sun" },
+            { id: "care", label: t.onboarding.q4Care, iconName: "Leaf" },
           ],
           selected: selectedChallenges,
           onToggle: (val: string) => handleToggle(val, selectedChallenges, onSelectChallenges),
@@ -540,14 +561,38 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
           title: t.onboarding.q5Title,
           description: t.onboarding.q5Description,
           options: [
-            { id: "pollen", label: t.onboarding.q5Pollen, icon: <Wind size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
-            { id: "none", label: t.onboarding.q5None, icon: <Check size={24} color={isDark ? "#FFFFFF" : Colors.oxysafe.charcoal} /> },
+            { id: "pollen", label: t.onboarding.q5Pollen, iconName: "Wind" },
+            { id: "none", label: t.onboarding.q5None, iconName: "Check" },
           ],
           selected: selectedAllergies,
           onToggle: (val: string) => handleToggle(val, selectedAllergies, onSelectAllergies),
         };
       default:
         return { title: "", description: "", options: [], selected: [], onToggle: () => {} };
+    }
+  };
+
+  const renderIcon = (iconName: string) => {
+    const size = 24;
+    const color = iconColor;
+    
+    switch (iconName) {
+      case "Heart": return <Heart size={size} color={color} strokeWidth={2} />;
+      case "Baby": return <Baby size={size} color={color} strokeWidth={2} />;
+      case "Shield": return <Shield size={size} color={color} strokeWidth={2} />;
+      case "Moon": return <Moon size={size} color={color} strokeWidth={2} />;
+      case "Wind": return <Wind size={size} color={color} strokeWidth={2} />;
+      case "Sparkles": return <Sparkles size={size} color={color} strokeWidth={2} />;
+      case "Bed": return <Bed size={size} color={color} strokeWidth={2} />;
+      case "Sofa": return <Sofa size={size} color={color} strokeWidth={2} />;
+      case "Briefcase": return <Briefcase size={size} color={color} strokeWidth={2} />;
+      case "Home": return <Home size={size} color={color} strokeWidth={2} />;
+      case "Droplets": return <Droplets size={size} color={color} strokeWidth={2} />;
+      case "AlertCircle": return <AlertCircle size={size} color={color} strokeWidth={2} />;
+      case "Sun": return <Sun size={size} color={color} strokeWidth={2} />;
+      case "Leaf": return <Leaf size={size} color={color} strokeWidth={2} />;
+      case "Check": return <Check size={size} color={color} strokeWidth={2} />;
+      default: return <Leaf size={size} color={color} strokeWidth={2} />;
     }
   };
 
@@ -588,7 +633,7 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
             </View>
 
             <View style={styles.optionsContainer}>
-              {content.options.map((option) => {
+              {content.options.map((option: any) => {
                 const isSelected = content.selected.includes(option.id);
                 return (
                   <TouchableOpacity
@@ -607,7 +652,7 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
                         styles.optionIcon,
                         isSelected && styles.optionIconSelected,
                       ]}>
-                        {option.icon}
+                        {renderIcon(option.iconName)}
                       </View>
                       <Text style={[
                         styles.optionLabel,

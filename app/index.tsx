@@ -83,7 +83,7 @@ const getSlides = (language: Language): OnboardingSlide[] => {
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const { language, setLanguage, setCareLevel, hasCompletedOnboarding, isLoading } = useUserPreferences();
+  const { language, setLanguage, setCareLevel, completeOnboarding, hasCompletedOnboarding, isLoading } = useUserPreferences();
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [selectedCareLevel, setSelectedCareLevel] = useState<CareLevel | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(language);
@@ -173,8 +173,10 @@ export default function OnboardingScreen() {
         if (selectedCareLevel) {
           console.log('🌱 Setting care level to:', selectedCareLevel);
           await setCareLevel(selectedCareLevel);
-          console.log('✅ Care level set, navigating to paywall');
-          router.replace("/paywall");
+          console.log('✅ Care level set, marking onboarding as completed');
+          await completeOnboarding();
+          console.log('✅ Onboarding completed, navigating to app');
+          router.replace("/gallery");
         } else {
           console.log('⚠️ No care level selected');
         }
@@ -186,7 +188,7 @@ export default function OnboardingScreen() {
         isProcessingRef.current = false;
       }, 500);
     }
-  }, [currentIndex, selectedLanguage, selectedCareLevel, setLanguage, setCareLevel, router, slides.length, canProceed]);
+  }, [currentIndex, selectedLanguage, selectedCareLevel, setLanguage, setCareLevel, completeOnboarding, router, slides.length, canProceed]);
 
   const skip = useCallback(async () => {
     const now = Date.now();
@@ -199,13 +201,14 @@ export default function OnboardingScreen() {
     try {
       await setLanguage(selectedLanguage);
       await setCareLevel("intermediate");
-      router.replace("/paywall");
+      await completeOnboarding();
+      router.replace("/gallery");
     } finally {
       setTimeout(() => {
         isProcessingRef.current = false;
       }, 500);
     }
-  }, [selectedLanguage, setLanguage, setCareLevel, router]);
+  }, [selectedLanguage, setLanguage, setCareLevel, completeOnboarding, router]);
 
   if (isLoading) {
     return (

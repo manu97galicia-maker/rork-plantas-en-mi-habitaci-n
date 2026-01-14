@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { ChevronLeft, Search, Droplets, Sun, X, Moon, Heart, Wind, PawPrint, Sparkles, Filter, Baby } from "lucide-react-native";
+import { ChevronLeft, Search, Droplets, Sun, X, Moon, Heart, Wind, PawPrint, Sparkles, Filter, Baby, AlertTriangle } from "lucide-react-native";
 import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
@@ -337,6 +337,34 @@ export default function AddPlantScreen() {
                               {getPlantDescription(plant)}
                             </Text>
                             
+                            {/* Safety Badges Row */}
+                            <View style={styles.safetyBadgesRow}>
+                              {plant.safetyInfo?.petSafe && (
+                                <View style={styles.safeBadge}>
+                                  <PawPrint size={10} color="#16a34a" strokeWidth={2.5} />
+                                  <Text style={styles.safeBadgeText}>{language === 'es' ? 'Mascotas' : 'Pets'}</Text>
+                                </View>
+                              )}
+                              {(plant.safetyInfo?.childSafe || (plant.safetyInfo?.childSafe === undefined && plant.safetyInfo?.petSafe)) && (
+                                <View style={styles.safeBadge}>
+                                  <Baby size={10} color="#16a34a" strokeWidth={2.5} />
+                                  <Text style={styles.safeBadgeText}>{language === 'es' ? 'Niños' : 'Kids'}</Text>
+                                </View>
+                              )}
+                              {plant.safetyInfo?.allergyFriendly && (
+                                <View style={styles.safeBadge}>
+                                  <Sparkles size={10} color="#16a34a" strokeWidth={2.5} />
+                                  <Text style={styles.safeBadgeText}>{language === 'es' ? 'Alérgicos' : 'Allergies'}</Text>
+                                </View>
+                              )}
+                              {!plant.safetyInfo?.petSafe && plant.safetyInfo && (
+                                <View style={styles.unsafeBadge}>
+                                  <AlertTriangle size={10} color="#dc2626" strokeWidth={2.5} />
+                                  <Text style={styles.unsafeBadgeText}>{language === 'es' ? 'Tóxica' : 'Toxic'}</Text>
+                                </View>
+                              )}
+                            </View>
+                            
                             {/* Wellness Benefits Row */}
                             <View style={styles.wellnessRow}>
                               {sleepScore > 0 && (
@@ -406,6 +434,66 @@ export default function AddPlantScreen() {
               <Text style={styles.modalScientificName}>
                 {selectedPlant?.scientificName}
               </Text>
+
+              {/* Safety Information Section */}
+              {selectedPlant?.safetyInfo && (
+                <View style={styles.modalSection}>
+                  <Text style={styles.sectionTitle}>🛡️ {language === 'es' ? 'Información de Seguridad' : 'Safety Information'}</Text>
+                  
+                  {!selectedPlant.safetyInfo.petSafe && (
+                    <View style={styles.dangerWarningBox}>
+                      <AlertTriangle size={18} color="#dc2626" strokeWidth={2} />
+                      <Text style={styles.dangerWarningText}>
+                        {language === 'es' 
+                          ? '⚠️ Esta planta puede ser TÓXICA para mascotas y niños si se ingiere.' 
+                          : '⚠️ This plant may be TOXIC to pets and children if ingested.'}
+                      </Text>
+                    </View>
+                  )}
+                  
+                  <View style={styles.safetyInfoRow}>
+                    <View style={[
+                      styles.safetyInfoItem,
+                      selectedPlant.safetyInfo.petSafe ? styles.safetyInfoItemSafe : styles.safetyInfoItemDanger
+                    ]}>
+                      <PawPrint size={16} color={selectedPlant.safetyInfo.petSafe ? "#16a34a" : "#dc2626"} strokeWidth={2} />
+                      <Text style={[
+                        styles.safetyInfoText,
+                        selectedPlant.safetyInfo.petSafe ? styles.safetyInfoTextSafe : styles.safetyInfoTextDanger
+                      ]}>
+                        {selectedPlant.safetyInfo.petSafe 
+                          ? (language === 'es' ? 'Seguro para mascotas' : 'Pet Safe')
+                          : (language === 'es' ? 'No seguro para mascotas' : 'Not Pet Safe')}
+                      </Text>
+                    </View>
+                    
+                    <View style={[
+                      styles.safetyInfoItem,
+                      (selectedPlant.safetyInfo.childSafe ?? selectedPlant.safetyInfo.petSafe) ? styles.safetyInfoItemSafe : styles.safetyInfoItemDanger
+                    ]}>
+                      <Baby size={16} color={(selectedPlant.safetyInfo.childSafe ?? selectedPlant.safetyInfo.petSafe) ? "#16a34a" : "#dc2626"} strokeWidth={2} />
+                      <Text style={[
+                        styles.safetyInfoText,
+                        (selectedPlant.safetyInfo.childSafe ?? selectedPlant.safetyInfo.petSafe) ? styles.safetyInfoTextSafe : styles.safetyInfoTextDanger
+                      ]}>
+                        {(selectedPlant.safetyInfo.childSafe ?? selectedPlant.safetyInfo.petSafe)
+                          ? (language === 'es' ? 'Seguro para niños' : 'Child Safe')
+                          : (language === 'es' ? 'No seguro para niños' : 'Not Child Safe')}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.allergenInfoBox}>
+                    <Sparkles size={16} color="#f59e0b" strokeWidth={2} />
+                    <View style={styles.allergenInfoContent}>
+                      <Text style={styles.allergenInfoTitle}>{language === 'es' ? 'Información de Alergias' : 'Allergy Information'}</Text>
+                      <Text style={styles.allergenInfoText}>
+                        {language === 'es' ? selectedPlant.safetyInfo.allergenInfoEs : selectedPlant.safetyInfo.allergenInfo}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              )}
 
               {/* Wellness Benefits Section */}
               {(selectedPlant?.wellnessBenefits || selectedPlant?.airPurification) && (
@@ -871,5 +959,119 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700" as const,
     color: "#ffffff",
+  },
+  safetyBadgesRow: {
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    gap: 6,
+    marginBottom: 6,
+  },
+  safeBadge: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: "rgba(22, 163, 74, 0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: "rgba(22, 163, 74, 0.3)",
+  },
+  safeBadgeText: {
+    fontSize: 10,
+    fontWeight: "600" as const,
+    color: "#22c55e",
+  },
+  unsafeBadge: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: "rgba(220, 38, 38, 0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: "rgba(220, 38, 38, 0.3)",
+  },
+  unsafeBadgeText: {
+    fontSize: 10,
+    fontWeight: "600" as const,
+    color: "#f87171",
+  },
+  dangerWarningBox: {
+    flexDirection: "row" as const,
+    backgroundColor: "#fef2f2",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+    gap: 10,
+    alignItems: "flex-start" as const,
+    borderWidth: 1,
+    borderColor: "#fecaca",
+  },
+  dangerWarningText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#991b1b",
+    lineHeight: 19,
+    fontWeight: "500" as const,
+  },
+  safetyInfoRow: {
+    flexDirection: "row" as const,
+    gap: 10,
+    marginBottom: 12,
+  },
+  safetyInfoItem: {
+    flex: 1,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    padding: 10,
+    borderRadius: 10,
+    gap: 8,
+  },
+  safetyInfoItemSafe: {
+    backgroundColor: "#f0fdf4",
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
+  },
+  safetyInfoItemDanger: {
+    backgroundColor: "#fef2f2",
+    borderWidth: 1,
+    borderColor: "#fecaca",
+  },
+  safetyInfoText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "600" as const,
+  },
+  safetyInfoTextSafe: {
+    color: "#16a34a",
+  },
+  safetyInfoTextDanger: {
+    color: "#dc2626",
+  },
+  allergenInfoBox: {
+    flexDirection: "row" as const,
+    backgroundColor: "#fffbeb",
+    borderRadius: 10,
+    padding: 12,
+    gap: 10,
+    alignItems: "flex-start" as const,
+    borderWidth: 1,
+    borderColor: "#fcd34d",
+  },
+  allergenInfoContent: {
+    flex: 1,
+  },
+  allergenInfoTitle: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: "#92400e",
+    marginBottom: 4,
+  },
+  allergenInfoText: {
+    fontSize: 12,
+    color: "#a16207",
+    lineHeight: 18,
   },
 });

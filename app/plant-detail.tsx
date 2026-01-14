@@ -19,6 +19,10 @@ import {
   Baby,
   Sparkles,
   Info,
+  Clock,
+  Zap,
+  Brain,
+  Activity,
 } from "lucide-react-native";
 import React, { useState, useCallback } from "react";
 import {
@@ -280,6 +284,33 @@ export default function PlantDetailScreen() {
                         : 'Naturally regulates ambient humidity'}
                     </Text>
                   </View>
+                  <View style={styles.airBenefitItem}>
+                    <Zap size={16} color="#22c55e" />
+                    <Text style={styles.airBenefitText}>
+                      {language === 'es' 
+                        ? 'Reduce los compuestos orgánicos volátiles (COV) de muebles y pinturas' 
+                        : 'Reduces volatile organic compounds (VOCs) from furniture and paints'}
+                    </Text>
+                  </View>
+                  <View style={styles.airBenefitItem}>
+                    <Activity size={16} color="#22c55e" />
+                    <Text style={styles.airBenefitText}>
+                      {language === 'es' 
+                        ? 'Mejora la concentración y productividad al aumentar el oxígeno disponible' 
+                        : 'Improves concentration and productivity by increasing available oxygen'}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.oxygenTipCard}>
+                  <Text style={styles.oxygenTipTitle}>
+                    {language === 'es' ? '💡 Consejo de Oxigenación' : '💡 Oxygen Tip'}
+                  </Text>
+                  <Text style={styles.oxygenTipText}>
+                    {language === 'es' 
+                      ? `Para maximizar la purificación del aire, coloca 1 planta por cada 10m² de espacio. Esta planta con puntuación ${plant.airPurification.score}/10 es ${plant.airPurification.score >= 8 ? 'excelente' : plant.airPurification.score >= 6 ? 'muy buena' : 'buena'} para mejorar la calidad del aire en tu hogar.`
+                      : `To maximize air purification, place 1 plant per 100 sq ft of space. This plant with a ${plant.airPurification.score}/10 score is ${plant.airPurification.score >= 8 ? 'excellent' : plant.airPurification.score >= 6 ? 'very good' : 'good'} for improving air quality in your home.`}
+                  </Text>
                 </View>
               </View>
             </>
@@ -346,6 +377,33 @@ export default function PlantDetailScreen() {
                       : 'Reduces CO2 levels in the bedroom'}
                   </Text>
                 </View>
+                <View style={styles.sleepBenefitItem}>
+                  <Clock size={14} color="#6366f1" />
+                  <Text style={styles.sleepBenefitText}>
+                    {language === 'es' 
+                      ? 'Mejora la calidad del sueño REM y el descanso profundo' 
+                      : 'Improves REM sleep quality and deep rest'}
+                  </Text>
+                </View>
+                <View style={styles.sleepBenefitItem}>
+                  <Brain size={14} color="#6366f1" />
+                  <Text style={styles.sleepBenefitText}>
+                    {language === 'es' 
+                      ? 'Reduce el insomnio y facilita conciliar el sueño más rápido' 
+                      : 'Reduces insomnia and helps fall asleep faster'}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.sleepTipCard}>
+                <Text style={styles.sleepTipTitle}>
+                  {language === 'es' ? '🌙 Consejo para Mejor Sueño' : '🌙 Better Sleep Tip'}
+                </Text>
+                <Text style={styles.sleepTipText}>
+                  {language === 'es' 
+                    ? 'Coloca esta planta en tu mesita de noche o cerca de la cama para maximizar sus beneficios. Evita regarla en exceso para prevenir humedad excesiva en el dormitorio.'
+                    : 'Place this plant on your nightstand or near your bed to maximize its benefits. Avoid overwatering to prevent excess humidity in the bedroom.'}
+                </Text>
               </View>
             </View>
 
@@ -509,6 +567,27 @@ export default function PlantDetailScreen() {
                     : 'Always supervise children and pets around plants. Consult a professional if ingestion is suspected.'}
                 </Text>
               </View>
+
+              {(!plant.safetyInfo.petSafe || (plant.safetyInfo.childSafe !== undefined && !plant.safetyInfo.childSafe)) && (
+                <View style={styles.dangerAlertBanner}>
+                  <ShieldAlert size={22} color="#ffffff" />
+                  <View style={styles.dangerAlertContent}>
+                    <Text style={styles.dangerAlertTitle}>
+                      {language === 'es' ? '⚠️ ADVERTENCIA IMPORTANTE' : '⚠️ IMPORTANT WARNING'}
+                    </Text>
+                    <Text style={styles.dangerAlertText}>
+                      {language === 'es' 
+                        ? 'Esta planta puede ser TÓXICA si se ingiere. Manténgala fuera del alcance de niños pequeños y mascotas. En caso de ingestión accidental, contacte inmediatamente con un centro de control de intoxicaciones o veterinario.'
+                        : 'This plant can be TOXIC if ingested. Keep out of reach of young children and pets. In case of accidental ingestion, immediately contact a poison control center or veterinarian.'}
+                    </Text>
+                    <Text style={styles.emergencyText}>
+                      {language === 'es' 
+                        ? '📞 Emergencias: Llame al servicio de emergencias local'
+                        : '📞 Emergency: Call your local emergency services'}
+                    </Text>
+                  </View>
+                </View>
+              )}
 
               <View style={styles.safetyCard}>
                 <View style={styles.safetyItem}>
@@ -1085,5 +1164,72 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     textAlign: "center" as const,
     fontStyle: "italic" as const,
+  },
+  oxygenTipCard: {
+    backgroundColor: "#ecfdf5",
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: "#a7f3d0",
+  },
+  oxygenTipTitle: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: "#065f46",
+    marginBottom: 6,
+  },
+  oxygenTipText: {
+    fontSize: 13,
+    color: "#047857",
+    lineHeight: 20,
+  },
+  sleepTipCard: {
+    backgroundColor: "#eef2ff",
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: "#c7d2fe",
+  },
+  sleepTipTitle: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: "#3730a3",
+    marginBottom: 6,
+  },
+  sleepTipText: {
+    fontSize: 13,
+    color: "#4338ca",
+    lineHeight: 20,
+  },
+  dangerAlertBanner: {
+    flexDirection: "row" as const,
+    backgroundColor: "#dc2626",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    gap: 12,
+    alignItems: "flex-start" as const,
+  },
+  dangerAlertContent: {
+    flex: 1,
+  },
+  dangerAlertTitle: {
+    fontSize: 15,
+    fontWeight: "800" as const,
+    color: "#ffffff",
+    marginBottom: 6,
+  },
+  dangerAlertText: {
+    fontSize: 13,
+    color: "#fef2f2",
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  emergencyText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#fecaca",
   },
 });

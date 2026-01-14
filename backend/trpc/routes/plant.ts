@@ -87,7 +87,12 @@ export const plantRouter = createTRPCRouter({
           controller.abort();
         }, 90000);
 
-        const response = await fetch("https://toolkit.rork.com/images/edit/", {
+        const toolkitUrl = process.env.EXPO_PUBLIC_TOOLKIT_URL || "https://toolkit.rork.com";
+        const editUrl = `${toolkitUrl}/images/edit/`;
+        
+        console.log(`[PlantAPI] Calling image edit API: ${editUrl}`);
+        
+        const response = await fetch(editUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -104,10 +109,22 @@ export const plantRouter = createTRPCRouter({
         clearTimeout(timeoutId);
 
         const contentType = response.headers.get("content-type") || "";
-        const responseText = await response.text();
+        console.log(`[PlantAPI] Response status: ${response.status}, content-type: ${contentType}`);
+        
+        let responseText = "";
+        try {
+          responseText = await response.text();
+        } catch (textError: any) {
+          console.error(`[PlantAPI] Failed to read response text:`, textError?.message);
+          return { 
+            success: false, 
+            error: "Failed to read server response",
+            imageBase64: null 
+          };
+        }
         
         if (!response.ok) {
-          console.error(`[PlantAPI] Image edit API error ${response.status}:`, responseText.substring(0, 200));
+          console.error(`[PlantAPI] Image edit API error ${response.status}:`, responseText.substring(0, 300));
           return { 
             success: false, 
             error: `API error: ${response.status}`,
@@ -116,7 +133,8 @@ export const plantRouter = createTRPCRouter({
         }
 
         if (!contentType.includes("application/json")) {
-          console.error(`[PlantAPI] Unexpected content-type: ${contentType}, response: ${responseText.substring(0, 200)}`);
+          console.error(`[PlantAPI] Unexpected content-type: ${contentType}`);
+          console.error(`[PlantAPI] Response preview:`, responseText.substring(0, 300));
           return { 
             success: false, 
             error: "Invalid response format from server",
@@ -127,8 +145,9 @@ export const plantRouter = createTRPCRouter({
         let data;
         try {
           data = JSON.parse(responseText);
-        } catch {
-          console.error(`[PlantAPI] JSON parse error:`, responseText.substring(0, 200));
+        } catch (parseError: any) {
+          console.error(`[PlantAPI] JSON parse error:`, parseError?.message);
+          console.error(`[PlantAPI] Response was:`, responseText.substring(0, 300));
           return { 
             success: false, 
             error: "Failed to parse server response",

@@ -254,6 +254,33 @@ export default function PlantDetailScreen() {
                 <Text style={styles.airPurificationDescription}>
                   {language === 'es' ? plant.airPurification.descriptionEs : plant.airPurification.description}
                 </Text>
+                
+                <View style={styles.airBenefitsList}>
+                  <View style={styles.airBenefitItem}>
+                    <Wind size={16} color="#22c55e" />
+                    <Text style={styles.airBenefitText}>
+                      {language === 'es' 
+                        ? 'Elimina toxinas del aire como formaldehído, benceno y tricloroetileno' 
+                        : 'Removes air toxins like formaldehyde, benzene, and trichloroethylene'}
+                    </Text>
+                  </View>
+                  <View style={styles.airBenefitItem}>
+                    <Sparkles size={16} color="#22c55e" />
+                    <Text style={styles.airBenefitText}>
+                      {language === 'es' 
+                        ? 'Aumenta los niveles de oxígeno, especialmente durante la fotosíntesis' 
+                        : 'Increases oxygen levels, especially during photosynthesis'}
+                    </Text>
+                  </View>
+                  <View style={styles.airBenefitItem}>
+                    <Droplets size={16} color="#22c55e" />
+                    <Text style={styles.airBenefitText}>
+                      {language === 'es' 
+                        ? 'Regula la humedad ambiental de forma natural' 
+                        : 'Naturally regulates ambient humidity'}
+                    </Text>
+                  </View>
+                </View>
               </View>
             </>
           )}
@@ -293,6 +320,33 @@ export default function PlantDetailScreen() {
                   (language === 'es' ? plant.wellnessBenefits.sleepDescriptionEs : plant.wellnessBenefits.sleepDescription) :
                   (language === 'es' ? 'Esta planta ayuda a mejorar la calidad del sueño purificando el aire y creando un ambiente más relajante.' : 'This plant helps improve sleep quality by purifying the air and creating a more relaxing environment.')}
               </Text>
+              
+              <View style={styles.sleepBenefitsList}>
+                <View style={styles.sleepBenefitItem}>
+                  <CheckCircle2 size={14} color="#6366f1" />
+                  <Text style={styles.sleepBenefitText}>
+                    {language === 'es' 
+                      ? 'Libera oxígeno durante la noche para un mejor descanso' 
+                      : 'Releases oxygen at night for better rest'}
+                  </Text>
+                </View>
+                <View style={styles.sleepBenefitItem}>
+                  <CheckCircle2 size={14} color="#6366f1" />
+                  <Text style={styles.sleepBenefitText}>
+                    {language === 'es' 
+                      ? 'Ayuda a regular los ciclos circadianos' 
+                      : 'Helps regulate circadian cycles'}
+                  </Text>
+                </View>
+                <View style={styles.sleepBenefitItem}>
+                  <CheckCircle2 size={14} color="#6366f1" />
+                  <Text style={styles.sleepBenefitText}>
+                    {language === 'es' 
+                      ? 'Reduce los niveles de CO2 en el dormitorio' 
+                      : 'Reduces CO2 levels in the bedroom'}
+                  </Text>
+                </View>
+              </View>
             </View>
 
             <View style={styles.wellnessDivider} />
@@ -318,6 +372,33 @@ export default function PlantDetailScreen() {
                   (language === 'es' ? plant.wellnessBenefits.stressDescriptionEs : plant.wellnessBenefits.stressDescription) :
                   (language === 'es' ? 'Ayuda a reducir el estrés y la ansiedad mejorando la calidad del aire interior y proporcionando una conexión visual con la naturaleza.' : 'Helps reduce stress and anxiety by improving indoor air quality and providing a visual connection to nature.')}
               </Text>
+              
+              <View style={styles.sleepBenefitsList}>
+                <View style={styles.sleepBenefitItem}>
+                  <CheckCircle2 size={14} color="#ec4899" />
+                  <Text style={styles.sleepBenefitText}>
+                    {language === 'es' 
+                      ? 'Reduce la ansiedad y promueve la calma mental' 
+                      : 'Reduces anxiety and promotes mental calm'}
+                  </Text>
+                </View>
+                <View style={styles.sleepBenefitItem}>
+                  <CheckCircle2 size={14} color="#ec4899" />
+                  <Text style={styles.sleepBenefitText}>
+                    {language === 'es' 
+                      ? 'Mejora la concentración y productividad' 
+                      : 'Improves focus and productivity'}
+                  </Text>
+                </View>
+                <View style={styles.sleepBenefitItem}>
+                  <CheckCircle2 size={14} color="#ec4899" />
+                  <Text style={styles.sleepBenefitText}>
+                    {language === 'es' 
+                      ? 'Conexión con la naturaleza que reduce el cortisol' 
+                      : 'Nature connection that reduces cortisol'}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
 
@@ -878,6 +959,39 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#e9d5ff",
     marginVertical: 16,
+  },
+  sleepBenefitsList: {
+    marginTop: 12,
+    gap: 8,
+  },
+  sleepBenefitItem: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  },
+  sleepBenefitText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#6b7280",
+    lineHeight: 18,
+  },
+  airBenefitsList: {
+    marginTop: 16,
+    gap: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#dcfce7",
+    paddingTop: 16,
+  },
+  airBenefitItem: {
+    flexDirection: "row" as const,
+    alignItems: "flex-start" as const,
+    gap: 10,
+  },
+  airBenefitText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#374151",
+    lineHeight: 19,
   },
   safetyWarningBanner: {
     flexDirection: "row" as const,

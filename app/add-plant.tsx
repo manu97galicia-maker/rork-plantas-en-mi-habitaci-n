@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { ChevronLeft, Search, Droplets, Sun, X, Moon, Heart, Wind, PawPrint, Sparkles, Filter } from "lucide-react-native";
+import { ChevronLeft, Search, Droplets, Sun, X, Moon, Heart, Wind, PawPrint, Sparkles, Filter, Baby } from "lucide-react-native";
 import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
@@ -32,13 +32,15 @@ export default function AddPlantScreen() {
   const [wateringDays, setWateringDays] = useState<string>("7");
   
   const [filterPetSafe, setFilterPetSafe] = useState<boolean>(false);
+  const [filterChildSafe, setFilterChildSafe] = useState<boolean>(false);
   const [filterAllergyFriendly, setFilterAllergyFriendly] = useState<boolean>(false);
   const [filterEasyCare, setFilterEasyCare] = useState<boolean>(false);
   
-  const hasActiveFilters = filterPetSafe || filterAllergyFriendly || filterEasyCare;
+  const hasActiveFilters = filterPetSafe || filterChildSafe || filterAllergyFriendly || filterEasyCare;
   
   const clearFilters = useCallback(() => {
     setFilterPetSafe(false);
+    setFilterChildSafe(false);
     setFilterAllergyFriendly(false);
     setFilterEasyCare(false);
   }, []);
@@ -48,6 +50,15 @@ export default function AddPlantScreen() {
     
     if (filterPetSafe) {
       plants = plants.filter((plant) => plant.safetyInfo?.petSafe === true);
+    }
+    
+    if (filterChildSafe) {
+      plants = plants.filter((plant) => {
+        if (plant.safetyInfo?.childSafe !== undefined) {
+          return plant.safetyInfo.childSafe === true;
+        }
+        return plant.safetyInfo?.petSafe === true;
+      });
     }
     
     if (filterAllergyFriendly) {
@@ -77,7 +88,7 @@ export default function AddPlantScreen() {
     }
     
     return plants;
-  }, [searchQuery, filterPetSafe, filterAllergyFriendly, filterEasyCare]);
+  }, [searchQuery, filterPetSafe, filterChildSafe, filterAllergyFriendly, filterEasyCare]);
 
 
 
@@ -228,6 +239,21 @@ export default function AddPlantScreen() {
                     styles.filterChipText,
                     filterPetSafe && styles.filterChipTextActive
                   ]}>{t.addPlant.petSafe}</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    filterChildSafe && styles.filterChipActive
+                  ]}
+                  onPress={() => setFilterChildSafe(!filterChildSafe)}
+                  activeOpacity={0.7}
+                >
+                  <Baby size={14} color={filterChildSafe ? "#ffffff" : "rgba(255,255,255,0.8)"} strokeWidth={2} />
+                  <Text style={[
+                    styles.filterChipText,
+                    filterChildSafe && styles.filterChipTextActive
+                  ]}>{t.addPlant.childSafe}</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity

@@ -111,6 +111,7 @@ interface Translations {
     addToMyPlants: string;
     filters: string;
     petSafe: string;
+    childSafe: string;
     allergyFriendly: string;
     easyCare: string;
     allPlants: string;
@@ -293,6 +294,7 @@ const translations: Record<Language, Translations> = {
       addToMyPlants: "Add to My Plants",
       filters: "Filters",
       petSafe: "Pet Safe",
+      childSafe: "Child Safe",
       allergyFriendly: "Allergy Friendly",
       easyCare: "Easy Care",
       allPlants: "All Plants",
@@ -473,6 +475,7 @@ const translations: Record<Language, Translations> = {
       addToMyPlants: "Añadir a Mis Plantas",
       filters: "Filtros",
       petSafe: "Seguro para Mascotas",
+      childSafe: "Seguro para Niños",
       allergyFriendly: "Apto para Alérgicos",
       easyCare: "Fácil Cuidado",
       allPlants: "Todas las Plantas",

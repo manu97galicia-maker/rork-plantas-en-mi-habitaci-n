@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { Shield, Moon, Sparkles, ChevronRight, Check, Leaf, Heart, Baby, Globe, Home, Briefcase, Bed, Sofa, Wind, Droplets, Sun, AlertCircle } from "lucide-react-native";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
@@ -84,6 +84,7 @@ const getSlides = (language: Language): OnboardingSlide[] => {
 export default function OnboardingScreen() {
   const router = useRouter();
   const { language, setLanguage, setCareLevel, completeOnboarding, hasCompletedOnboarding, isLoading } = useUserPreferences();
+
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [selectedCareLevel, setSelectedCareLevel] = useState<CareLevel | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(language);
@@ -114,10 +115,9 @@ export default function OnboardingScreen() {
   useEffect(() => {
     if (!isLoading && hasCompletedOnboarding && !hasRedirectedRef.current) {
       hasRedirectedRef.current = true;
-      console.log('🔄 Onboarding already completed, redirecting to gallery');
-      router.replace("/gallery");
+      console.log("🔄 Onboarding already completed (effect). Redirecting to /gallery");
     }
-  }, [isLoading, hasCompletedOnboarding, router]);
+  }, [isLoading, hasCompletedOnboarding]);
 
   useEffect(() => {
     if (!isLoading && !hasCompletedOnboarding) {
@@ -219,7 +219,8 @@ export default function OnboardingScreen() {
   }
 
   if (hasCompletedOnboarding) {
-    return null;
+    console.log("✅ Onboarding completed. Redirecting to /gallery");
+    return <Redirect href="/gallery" />;
   }
 
   const isLastSlide = currentIndex === slides.length - 1;
@@ -285,11 +286,18 @@ export default function OnboardingScreen() {
           viewabilityConfig={viewConfig}
           ref={slidesRef}
           scrollEventThrottle={16}
+          getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
+          onScrollToIndexFailed={(info) => {
+            console.log("⚠️ onScrollToIndexFailed", info);
+            setTimeout(() => {
+              slidesRef.current?.scrollToOffset({ offset: info.averageItemLength * info.index, animated: true });
+            }, 50);
+          }}
         />
 
         <SafeAreaView edges={["bottom"]} style={styles.footer}>
           {currentIndex > 0 && currentIndex < slides.length - 1 && (
-            <TouchableOpacity style={styles.skipButton} onPress={skip} activeOpacity={0.7}>
+            <TouchableOpacity testID="onboarding-skip" style={styles.skipButton} onPress={skip} activeOpacity={0.7}>
               <Text style={[
                 styles.skipText,
                 slides[currentIndex]?.bgStyle === "dark" && styles.skipTextLight
@@ -338,6 +346,7 @@ export default function OnboardingScreen() {
           </View>
 
           <TouchableOpacity
+            testID="onboarding-next"
             style={[
               styles.nextButton,
               isLastSlide && styles.nextButtonLarge,
@@ -345,7 +354,7 @@ export default function OnboardingScreen() {
               slides[currentIndex]?.bgStyle === "dark" && styles.nextButtonLight,
             ]}
             onPress={() => {
-              console.log('🔘 Next button pressed');
+              console.log("🔘 Next button pressed");
               scrollTo();
             }}
             activeOpacity={0.8}
@@ -413,7 +422,7 @@ function WelcomeSlide({ scrollX, index, selectedLanguage, onSelectLanguage, t }:
         colors={[Colors.oxysafe.softWhite, Colors.oxysafe.mist]}
         style={styles.slideGradient}
       >
-        <SafeAreaView edges={["top"]} style={styles.slideInner}>
+        <SafeAreaView edges={["top", "bottom"]} style={styles.slideInner}>
           <Animated.View style={[styles.welcomeContent, { transform: [{ translateY }], opacity }]}>
             <View style={styles.logoContainer}>
               <View style={styles.logoIcon}>
@@ -734,7 +743,7 @@ function ProfileSlide({ scrollX, index, selectedLevel, onSelectLevel, t }: Profi
         colors={[Colors.oxysafe.softWhite, Colors.oxysafe.mist]}
         style={styles.slideGradient}
       >
-        <SafeAreaView edges={["top"]} style={styles.slideInner}>
+        <SafeAreaView edges={["top", "bottom"]} style={styles.slideInner}>
           <Animated.View style={[styles.profileContent, { transform: [{ translateY }], opacity }]}>
             <View style={styles.profileHeader}>
               <View style={styles.profileIconContainer}>

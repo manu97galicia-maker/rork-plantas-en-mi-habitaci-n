@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { ChevronLeft, Search, Droplets, Sun, X, Moon, Heart, Wind, PawPrint, Sparkles, Filter, Baby, AlertTriangle } from "lucide-react-native";
+import { ChevronLeft, Search, Droplets, Sun, X, Moon, Heart, Wind, PawPrint, Sparkles, Baby, AlertTriangle, Gauge } from "lucide-react-native";
 import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
@@ -31,35 +31,18 @@ export default function AddPlantScreen() {
   const [nickname, setNickname] = useState<string>("");
   const [wateringDays, setWateringDays] = useState<string>("7");
   
-  const [filterPetSafe, setFilterPetSafe] = useState<boolean>(false);
-  const [filterChildSafe, setFilterChildSafe] = useState<boolean>(false);
   const [filterAllergyFriendly, setFilterAllergyFriendly] = useState<boolean>(false);
-  const [filterEasyCare, setFilterEasyCare] = useState<boolean>(false);
+  const [filterDifficulty, setFilterDifficulty] = useState<string | null>(null);
   
-  const hasActiveFilters = filterPetSafe || filterChildSafe || filterAllergyFriendly || filterEasyCare;
+  const hasActiveFilters = filterAllergyFriendly || filterDifficulty !== null;
   
   const clearFilters = useCallback(() => {
-    setFilterPetSafe(false);
-    setFilterChildSafe(false);
     setFilterAllergyFriendly(false);
-    setFilterEasyCare(false);
+    setFilterDifficulty(null);
   }, []);
 
   const filteredPlants = useMemo(() => {
     let plants = COMMON_PLANTS;
-    
-    if (filterPetSafe) {
-      plants = plants.filter((plant) => plant.safetyInfo?.petSafe === true);
-    }
-    
-    if (filterChildSafe) {
-      plants = plants.filter((plant) => {
-        if (plant.safetyInfo?.childSafe !== undefined) {
-          return plant.safetyInfo.childSafe === true;
-        }
-        return plant.safetyInfo?.petSafe === true;
-      });
-    }
     
     if (filterAllergyFriendly) {
       plants = plants.filter((plant) => {
@@ -71,8 +54,8 @@ export default function AddPlantScreen() {
       });
     }
     
-    if (filterEasyCare) {
-      plants = plants.filter((plant) => plant.difficulty === 'Easy');
+    if (filterDifficulty) {
+      plants = plants.filter((plant) => plant.difficulty === filterDifficulty);
     }
     
     if (searchQuery.trim()) {
@@ -88,7 +71,7 @@ export default function AddPlantScreen() {
     }
     
     return plants;
-  }, [searchQuery, filterPetSafe, filterChildSafe, filterAllergyFriendly, filterEasyCare]);
+  }, [searchQuery, filterAllergyFriendly, filterDifficulty]);
 
 
 
@@ -225,37 +208,60 @@ export default function AddPlantScreen() {
             </View>
             
             <View style={styles.filtersContainer}>
+              <Text style={styles.filterSectionLabel}>
+                {language === 'es' ? 'Dificultad' : 'Difficulty'}
+              </Text>
               <View style={styles.filtersRow}>
                 <TouchableOpacity
                   style={[
                     styles.filterChip,
-                    filterPetSafe && styles.filterChipActive
+                    filterDifficulty === 'Easy' && styles.filterChipEasy
                   ]}
-                  onPress={() => setFilterPetSafe(!filterPetSafe)}
+                  onPress={() => setFilterDifficulty(filterDifficulty === 'Easy' ? null : 'Easy')}
                   activeOpacity={0.7}
                 >
-                  <PawPrint size={14} color={filterPetSafe ? "#ffffff" : "rgba(255,255,255,0.8)"} strokeWidth={2} />
+                  <Gauge size={14} color={filterDifficulty === 'Easy' ? "#ffffff" : "#10b981"} strokeWidth={2} />
                   <Text style={[
                     styles.filterChipText,
-                    filterPetSafe && styles.filterChipTextActive
-                  ]}>{t.addPlant.petSafe}</Text>
+                    filterDifficulty === 'Easy' && styles.filterChipTextActive
+                  ]}>{language === 'es' ? 'Fácil' : 'Easy'}</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity
                   style={[
                     styles.filterChip,
-                    filterChildSafe && styles.filterChipActive
+                    filterDifficulty === 'Moderate' && styles.filterChipModerate
                   ]}
-                  onPress={() => setFilterChildSafe(!filterChildSafe)}
+                  onPress={() => setFilterDifficulty(filterDifficulty === 'Moderate' ? null : 'Moderate')}
                   activeOpacity={0.7}
                 >
-                  <Baby size={14} color={filterChildSafe ? "#ffffff" : "rgba(255,255,255,0.8)"} strokeWidth={2} />
+                  <Gauge size={14} color={filterDifficulty === 'Moderate' ? "#ffffff" : "#f59e0b"} strokeWidth={2} />
                   <Text style={[
                     styles.filterChipText,
-                    filterChildSafe && styles.filterChipTextActive
-                  ]}>{t.addPlant.childSafe}</Text>
+                    filterDifficulty === 'Moderate' && styles.filterChipTextActive
+                  ]}>{language === 'es' ? 'Moderada' : 'Moderate'}</Text>
                 </TouchableOpacity>
                 
+                <TouchableOpacity
+                  style={[
+                    styles.filterChip,
+                    filterDifficulty === 'Advanced' && styles.filterChipAdvanced
+                  ]}
+                  onPress={() => setFilterDifficulty(filterDifficulty === 'Advanced' ? null : 'Advanced')}
+                  activeOpacity={0.7}
+                >
+                  <Gauge size={14} color={filterDifficulty === 'Advanced' ? "#ffffff" : "#ef4444"} strokeWidth={2} />
+                  <Text style={[
+                    styles.filterChipText,
+                    filterDifficulty === 'Advanced' && styles.filterChipTextActive
+                  ]}>{language === 'es' ? 'Avanzada' : 'Advanced'}</Text>
+                </TouchableOpacity>
+              </View>
+              
+              <Text style={[styles.filterSectionLabel, { marginTop: 12 }]}>
+                {language === 'es' ? 'Alergias' : 'Allergies'}
+              </Text>
+              <View style={styles.filtersRow}>
                 <TouchableOpacity
                   style={[
                     styles.filterChip,
@@ -269,21 +275,6 @@ export default function AddPlantScreen() {
                     styles.filterChipText,
                     filterAllergyFriendly && styles.filterChipTextActive
                   ]}>{t.addPlant.allergyFriendly}</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[
-                    styles.filterChip,
-                    filterEasyCare && styles.filterChipActive
-                  ]}
-                  onPress={() => setFilterEasyCare(!filterEasyCare)}
-                  activeOpacity={0.7}
-                >
-                  <Filter size={14} color={filterEasyCare ? "#ffffff" : "rgba(255,255,255,0.8)"} strokeWidth={2} />
-                  <Text style={[
-                    styles.filterChipText,
-                    filterEasyCare && styles.filterChipTextActive
-                  ]}>{t.addPlant.easyCare}</Text>
                 </TouchableOpacity>
               </View>
               
@@ -688,6 +679,14 @@ const styles = StyleSheet.create({
   filtersContainer: {
     marginTop: 12,
   },
+  filterSectionLabel: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "rgba(255, 255, 255, 0.7)",
+    marginBottom: 8,
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
+  },
   filtersRow: {
     flexDirection: "row" as const,
     flexWrap: "wrap" as const,
@@ -707,6 +706,18 @@ const styles = StyleSheet.create({
   filterChipActive: {
     backgroundColor: "#10b981",
     borderColor: "#10b981",
+  },
+  filterChipEasy: {
+    backgroundColor: "#10b981",
+    borderColor: "#10b981",
+  },
+  filterChipModerate: {
+    backgroundColor: "#f59e0b",
+    borderColor: "#f59e0b",
+  },
+  filterChipAdvanced: {
+    backgroundColor: "#ef4444",
+    borderColor: "#ef4444",
   },
   filterChipText: {
     fontSize: 13,

@@ -78,6 +78,11 @@ export interface RoomAnalysis {
   location?: LocationData;
 }
 
+export interface WateringRecord {
+  date: string;
+  note?: string;
+}
+
 export interface UserPlant {
   id: string;
   plantInfo: Plant;
@@ -88,4 +93,5 @@ export interface UserPlant {
   nickname?: string;
   notes?: string;
   notificationId?: string;
+  wateringHistory?: WateringRecord[];
 }

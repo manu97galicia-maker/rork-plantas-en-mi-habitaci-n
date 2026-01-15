@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { Droplets, Calendar, Clock, Edit2, Trash2, ChevronLeft, AlertCircle, Plus, X } from "lucide-react-native";
+import { Droplets, Calendar, Clock, Edit2, Trash2, ChevronLeft, AlertCircle, Plus, X, Check, History } from "lucide-react-native";
 import React, { useState, useMemo } from "react";
 import {
   View,
@@ -28,6 +28,9 @@ export default function MyPlantsScreen() {
   const { language } = useUserPreferences();
   const t = getTranslations(language);
   const [editingPlant, setEditingPlant] = useState<UserPlant | null>(null);
+  const [wateringPlantId, setWateringPlantId] = useState<string | null>(null);
+  const [showWateringSuccess, setShowWateringSuccess] = useState<string | null>(null);
+  const [viewingHistoryPlant, setViewingHistoryPlant] = useState<UserPlant | null>(null);
   const [nickname, setNickname] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [wateringFrequency, setWateringFrequency] = useState<string>("7");
@@ -35,8 +38,33 @@ export default function MyPlantsScreen() {
   const plantsNeedingWater = useMemo(() => getPlantsNeedingWater(), [getPlantsNeedingWater]);
 
   const handleWaterPlant = async (plantId: string) => {
+    setWateringPlantId(plantId);
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    await waterPlant(plantId);
+    
+    const success = await waterPlant(plantId);
+    
+    setWateringPlantId(null);
+    
+    if (success) {
+      setShowWateringSuccess(plantId);
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      
+      const plant = plants.find(p => p.id === plantId);
+      const plantName = plant?.nickname || plant?.plantInfo.name || '';
+      const nextDays = plant?.wateringFrequencyDays || 7;
+      
+      Alert.alert(
+        language === "es" ? "💧 ¡Planta Regada!" : "💧 Plant Watered!",
+        language === "es" 
+          ? `${plantName} ha sido regada. Próximo riego en ${nextDays} días. Te enviaremos un recordatorio.`
+          : `${plantName} has been watered. Next watering in ${nextDays} days. We'll send you a reminder.`,
+        [{ text: "OK" }]
+      );
+      
+      setTimeout(() => {
+        setShowWateringSuccess(null);
+      }, 2000);
+    }
   };
 
   const handleRemovePlant = (plantId: string) => {
@@ -238,15 +266,40 @@ export default function MyPlantsScreen() {
 
                         <View style={styles.plantActions}>
                           <TouchableOpacity
-                            style={styles.actionButton}
+                            style={[styles.actionButton, wateringPlantId === plant.id && styles.actionButtonDisabled]}
                             onPress={() => handleWaterPlant(plant.id)}
                             activeOpacity={0.7}
+                            disabled={wateringPlantId === plant.id}
                           >
-                            <LinearGradient colors={["#4ECDC4", "#44A3B8"]} style={styles.actionButtonGradient}>
-                              <Droplets size={18} color={Colors.light} strokeWidth={2} />
-                              <Text style={styles.actionButtonText}>{language === "es" ? "Regar" : "Water"}</Text>
+                            <LinearGradient 
+                              colors={showWateringSuccess === plant.id ? ["#22c55e", "#16a34a"] : ["#4ECDC4", "#44A3B8"]} 
+                              style={styles.actionButtonGradient}
+                            >
+                              {wateringPlantId === plant.id ? (
+                                <Text style={styles.actionButtonText}>{language === "es" ? "Regando..." : "Watering..."}</Text>
+                              ) : showWateringSuccess === plant.id ? (
+                                <>
+                                  <Check size={18} color={Colors.light} strokeWidth={2.5} />
+                                  <Text style={styles.actionButtonText}>{language === "es" ? "¡Regada!" : "Done!"}</Text>
+                                </>
+                              ) : (
+                                <>
+                                  <Droplets size={18} color={Colors.light} strokeWidth={2} />
+                                  <Text style={styles.actionButtonText}>{language === "es" ? "Regar" : "Water"}</Text>
+                                </>
+                              )}
                             </LinearGradient>
                           </TouchableOpacity>
+                          
+                          {plant.wateringHistory && plant.wateringHistory.length > 0 && (
+                            <TouchableOpacity
+                              style={[styles.iconButton, styles.iconButtonHistory]}
+                              onPress={() => setViewingHistoryPlant(plant)}
+                              activeOpacity={0.7}
+                            >
+                              <History size={18} color="#3b82f6" strokeWidth={2} />
+                            </TouchableOpacity>
+                          )}
                           
                           <TouchableOpacity
                             style={styles.iconButton}
@@ -358,6 +411,74 @@ export default function MyPlantsScreen() {
                 </LinearGradient>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={viewingHistoryPlant !== null}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setViewingHistoryPlant(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <BlurView intensity={40} tint="dark" style={styles.modalBlur}>
+            <TouchableOpacity
+              style={styles.modalOverlayTouch}
+              activeOpacity={1}
+              onPress={() => setViewingHistoryPlant(null)}
+            />
+          </BlurView>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHandle} />
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {language === "es" ? "Historial de Riego" : "Watering History"}
+              </Text>
+              <TouchableOpacity 
+                style={styles.modalClose}
+                onPress={() => setViewingHistoryPlant(null)}
+              >
+                <X size={20} color={Colors.text.secondary} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.historyPlantName}>
+              {viewingHistoryPlant?.nickname || viewingHistoryPlant?.plantInfo.name}
+            </Text>
+
+            <ScrollView style={styles.historyList} showsVerticalScrollIndicator={false}>
+              {viewingHistoryPlant?.wateringHistory?.map((record, index) => {
+                const date = new Date(record.date);
+                return (
+                  <View key={index} style={styles.historyItem}>
+                    <View style={styles.historyIconBg}>
+                      <Droplets size={16} color="#4ECDC4" />
+                    </View>
+                    <View style={styles.historyContent}>
+                      <Text style={styles.historyDate}>
+                        {date.toLocaleDateString(language === "es" ? "es-ES" : "en-US", {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "long",
+                        })}
+                      </Text>
+                      <Text style={styles.historyTime}>
+                        {date.toLocaleTimeString(language === "es" ? "es-ES" : "en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+              {(!viewingHistoryPlant?.wateringHistory || viewingHistoryPlant.wateringHistory.length === 0) && (
+                <Text style={styles.noHistoryText}>
+                  {language === "es" ? "No hay historial de riego todavía" : "No watering history yet"}
+                </Text>
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -627,6 +748,12 @@ const styles = StyleSheet.create({
   iconButtonDanger: {
     backgroundColor: "#FEF2F2",
   },
+  iconButtonHistory: {
+    backgroundColor: "#EFF6FF",
+  },
+  actionButtonDisabled: {
+    opacity: 0.7,
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
@@ -734,5 +861,50 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700" as const,
     color: Colors.light,
+  },
+  historyPlantName: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.text.secondary,
+    marginBottom: 16,
+  },
+  historyList: {
+    maxHeight: 300,
+  },
+  historyItem: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightTertiary,
+  },
+  historyIconBg: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: "#E0F7F5",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  historyContent: {
+    flex: 1,
+  },
+  historyDate: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.text.primary,
+    textTransform: "capitalize" as const,
+  },
+  historyTime: {
+    fontSize: 13,
+    color: Colors.text.secondary,
+    marginTop: 2,
+  },
+  noHistoryText: {
+    fontSize: 15,
+    color: Colors.text.tertiary,
+    textAlign: "center" as const,
+    paddingVertical: 24,
   },
 });

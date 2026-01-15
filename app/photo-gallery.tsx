@@ -87,26 +87,39 @@ export default function PhotoGalleryScreen() {
   const openImageViewer = useCallback((scan: ScanHistory) => {
     const images: { uri: string; label: string }[] = [];
     
-    if (scan.originalImage) {
+    console.log('📷 Opening image viewer for scan:', scan.id);
+    console.log('📷 Has originalImage:', !!scan.originalImage, 'length:', scan.originalImage?.length || 0);
+    console.log('📷 Has editedImage:', !!scan.editedImage, 'length:', scan.editedImage?.length || 0);
+    
+    if (scan.originalImage && scan.originalImage.length > 100) {
+      const mimeType = scan.originalImage.startsWith('iVBOR') ? 'image/png' : 'image/jpeg';
       images.push({
-        uri: `data:image/jpeg;base64,${scan.originalImage}`,
-        label: language === "es" ? "Antes" : "Before",
+        uri: `data:${mimeType};base64,${scan.originalImage}`,
+        label: language === "es" ? "Original" : "Original",
       });
+      console.log('✅ Added original image to viewer');
+    } else {
+      console.log('⚠️ No valid original image found');
     }
     
-    if (scan.editedImage) {
+    if (scan.editedImage && scan.editedImage.length > 100) {
+      const mimeType = scan.editedImage.startsWith('iVBOR') ? 'image/png' : 'image/jpeg';
       images.push({
-        uri: `data:image/png;base64,${scan.editedImage}`,
-        label: language === "es" ? "Después" : "After",
+        uri: `data:${mimeType};base64,${scan.editedImage}`,
+        label: language === "es" ? "Con Plantas" : "With Plants",
       });
+      console.log('✅ Added edited image to viewer');
     }
     
     if (images.length > 0) {
+      console.log('📷 Opening viewer with', images.length, 'images');
       setExpandedImage({
         visible: true,
         images,
         currentIndex: 0,
       });
+    } else {
+      console.log('❌ No images to display');
     }
   }, [language]);
 

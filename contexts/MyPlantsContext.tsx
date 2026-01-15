@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-import { UserPlant, Plant } from '@/types/plant';
+import { UserPlant, Plant, WateringRecord } from '@/types/plant';
 
 const MY_PLANTS_KEY = 'my_plants';
 
@@ -137,9 +137,11 @@ export const [MyPlantsProvider, useMyPlants] = createContextHook(() => {
     await savePlants(updatedPlants);
   };
 
-  const waterPlant = async (plantId: string) => {
+  const waterPlant = async (plantId: string): Promise<boolean> => {
     const plant = plants.find(p => p.id === plantId);
-    if (!plant) return;
+    if (!plant) return false;
+
+    console.log('💧 Watering plant:', plant.nickname || plant.plantInfo.name);
 
     if (plant.notificationId) {
       await cancelNotification(plant.notificationId);
@@ -148,10 +150,18 @@ export const [MyPlantsProvider, useMyPlants] = createContextHook(() => {
     const now = new Date();
     const nextWatering = new Date(now.getTime() + plant.wateringFrequencyDays * 24 * 60 * 60 * 1000);
 
+    const newWateringRecord: WateringRecord = {
+      date: now.toISOString(),
+    };
+
+    const wateringHistory = plant.wateringHistory || [];
+    const updatedHistory = [newWateringRecord, ...wateringHistory].slice(0, 50);
+
     const updatedPlant: UserPlant = {
       ...plant,
       lastWatered: now.toISOString(),
       nextWatering: nextWatering.toISOString(),
+      wateringHistory: updatedHistory,
     };
 
     const notificationId = await scheduleWateringNotification(updatedPlant);
@@ -161,6 +171,9 @@ export const [MyPlantsProvider, useMyPlants] = createContextHook(() => {
 
     const updatedPlants = plants.map(p => p.id === plantId ? updatedPlant : p);
     await savePlants(updatedPlants);
+    
+    console.log('✅ Plant watered successfully! Next watering:', nextWatering.toLocaleDateString());
+    return true;
   };
 
   const updatePlant = async (plantId: string, updates: Partial<UserPlant>) => {

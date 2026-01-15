@@ -36,6 +36,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import type { Plant } from "@/types/plant";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { getTranslations } from "@/constants/translations";
+import { Colors } from "@/constants/colors";
 
 export default function PlantDetailScreen() {
   const params = useLocalSearchParams<{ plantData: string; allPlants?: string; currentIndex?: string }>();
@@ -106,12 +107,12 @@ export default function PlantDetailScreen() {
       return (
         <View style={styles.container}>
           <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: 18, color: '#ef4444', marginBottom: 16 }}>{t.plantDetail.errorLoading}</Text>
+            <Text style={{ fontSize: 18, color: Colors.status.error, marginBottom: 16 }}>{t.plantDetail.errorLoading}</Text>
             <TouchableOpacity
-              style={{ backgroundColor: '#52b788', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
+              style={{ backgroundColor: Colors.primary, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
               onPress={() => router.back()}
             >
-              <Text style={{ color: '#ffffff', fontWeight: '600' as const }}>{t.plantDetail.goBack}</Text>
+              <Text style={{ color: Colors.light, fontWeight: '600' as const }}>{t.plantDetail.goBack}</Text>
             </TouchableOpacity>
           </SafeAreaView>
         </View>
@@ -126,13 +127,13 @@ export default function PlantDetailScreen() {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "Easy":
-        return "#52b788";
+        return Colors.status.success;
       case "Moderate":
-        return "#f59e0b";
+        return Colors.status.warning;
       case "Advanced":
-        return "#ef4444";
+        return Colors.status.error;
       default:
-        return "#52b788";
+        return Colors.status.success;
     }
   };
 
@@ -154,7 +155,7 @@ export default function PlantDetailScreen() {
       <SafeAreaView style={styles.safeArea} edges={["top"]}>
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <ArrowLeft size={24} color="#1a4d2e" />
+            <ArrowLeft size={24} color={Colors.forest} />
           </TouchableOpacity>
           
           {hasMultiplePlants && (
@@ -175,7 +176,7 @@ export default function PlantDetailScreen() {
             activeOpacity={canGoBack ? 0.8 : 1}
             disabled={!canGoBack}
           >
-            <ChevronLeft size={32} color={canGoBack ? "#1a4d2e" : "rgba(26,77,46,0.3)"} />
+            <ChevronLeft size={32} color={canGoBack ? Colors.forest : "rgba(61,90,64,0.3)"} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.navArrow, styles.navArrowRight, !canGoForward && styles.navArrowDisabled]}
@@ -183,7 +184,7 @@ export default function PlantDetailScreen() {
             activeOpacity={canGoForward ? 0.8 : 1}
             disabled={!canGoForward}
           >
-            <ChevronRight size={32} color={canGoForward ? "#1a4d2e" : "rgba(26,77,46,0.3)"} />
+            <ChevronRight size={32} color={canGoForward ? Colors.forest : "rgba(61,90,64,0.3)"} />
           </TouchableOpacity>
         </>
       )}
@@ -524,7 +525,7 @@ export default function PlantDetailScreen() {
 
             <View style={styles.careItem}>
               <View style={styles.careIconContainer}>
-                <Sprout size={24} color="#52b788" />
+                <Sprout size={24} color={Colors.primary} />
               </View>
               <View style={styles.careContent}>
                 <Text style={styles.careTitle}>{t.plantDetail.fertilizer}</Text>
@@ -545,7 +546,7 @@ export default function PlantDetailScreen() {
               <View style={styles.tipsContainer}>
                 {plant.careInstructions.tips.map((tip, index) => (
                   <View key={index} style={styles.tipItem}>
-                    <CheckCircle2 size={20} color="#52b788" />
+                    <CheckCircle2 size={20} color={Colors.primary} />
                     <Text style={styles.tipText}>{tip || ''}</Text>
                   </View>
                 ))}
@@ -687,11 +688,10 @@ export default function PlantDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: Colors.softWhite,
   },
-
   safeArea: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: Colors.softWhite,
     zIndex: 10,
   },
   headerRow: {
@@ -705,18 +705,18 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#e5e7eb",
+    backgroundColor: Colors.warmGray,
     alignItems: "center",
     justifyContent: "center",
   },
   plantCounter: {
-    backgroundColor: "#1a4d2e",
+    backgroundColor: Colors.forest,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
   },
   plantCounterText: {
-    color: "#ffffff",
+    color: Colors.light,
     fontSize: 14,
     fontWeight: "600" as const,
   },
@@ -726,17 +726,17 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "#e5e7eb",
+    backgroundColor: Colors.warmGray,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 20,
     elevation: 8,
-    shadowColor: "#000",
+    shadowColor: Colors.charcoal,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
     borderWidth: 2,
-    borderColor: "#d1d5db",
+    borderColor: Colors.warmGray,
   },
   navArrowLeft: {
     left: 16,
@@ -745,8 +745,8 @@ const styles = StyleSheet.create({
     right: 16,
   },
   navArrowDisabled: {
-    backgroundColor: "#f3f4f6",
-    borderColor: "#e5e7eb",
+    backgroundColor: Colors.cream,
+    borderColor: Colors.warmGray,
   },
   content: {
     flex: 1,
@@ -760,7 +760,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: Colors.light,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     padding: 24,
@@ -776,12 +776,12 @@ const styles = StyleSheet.create({
   plantName: {
     fontSize: 28,
     fontWeight: "700" as const,
-    color: "#1a4d2e",
+    color: Colors.forest,
     marginBottom: 6,
   },
   plantScientific: {
     fontSize: 16,
-    color: "#6b7280",
+    color: Colors.text.secondary,
     fontStyle: "italic",
   },
   difficultyBadge: {
@@ -792,17 +792,17 @@ const styles = StyleSheet.create({
   difficultyText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#ffffff",
+    color: Colors.light,
   },
   description: {
     fontSize: 16,
-    color: "#374151",
+    color: Colors.text.primary,
     lineHeight: 26,
     marginBottom: 20,
   },
   careIntro: {
     fontSize: 15,
-    color: "#6b7280",
+    color: Colors.text.secondary,
     lineHeight: 22,
     marginBottom: 20,
     fontStyle: "italic" as const,
@@ -817,25 +817,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: Colors.cream,
     padding: 12,
     borderRadius: 12,
   },
   quickInfoText: {
     fontSize: 14,
-    color: "#374151",
+    color: Colors.text.primary,
     fontWeight: "500" as const,
     flex: 1,
   },
   divider: {
     height: 1,
-    backgroundColor: "#e5e7eb",
+    backgroundColor: Colors.warmGray,
     marginVertical: 24,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "700" as const,
-    color: "#1a4d2e",
+    color: Colors.forest,
     marginBottom: 20,
   },
   careSection: {
@@ -849,7 +849,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: Colors.cream,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -859,12 +859,12 @@ const styles = StyleSheet.create({
   careTitle: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#1a4d2e",
+    color: Colors.forest,
     marginBottom: 4,
   },
   careText: {
     fontSize: 15,
-    color: "#6b7280",
+    color: Colors.text.secondary,
     lineHeight: 22,
   },
   tipsContainer: {
@@ -878,15 +878,15 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontSize: 15,
-    color: "#374151",
+    color: Colors.text.primary,
     lineHeight: 22,
   },
   airPurificationCard: {
-    backgroundColor: "#f0fdf4",
+    backgroundColor: Colors.status.successLight,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#bbf7d0",
+    borderColor: Colors.status.success,
   },
   airPurificationHeader: {
     flexDirection: "row",
@@ -898,7 +898,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#22c55e",
+    backgroundColor: Colors.status.success,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
   },
   airPurificationScoreLabel: {
     fontSize: 14,
-    color: "#6b7280",
+    color: Colors.text.secondary,
     marginBottom: 4,
   },
   airPurificationScoreRow: {
@@ -917,37 +917,37 @@ const styles = StyleSheet.create({
   airPurificationScore: {
     fontSize: 36,
     fontWeight: "800" as const,
-    color: "#16a34a",
+    color: Colors.status.success,
   },
   airPurificationScoreMax: {
     fontSize: 18,
     fontWeight: "600" as const,
-    color: "#6b7280",
+    color: Colors.text.secondary,
   },
   airPurificationBar: {
     height: 8,
-    backgroundColor: "#dcfce7",
+    backgroundColor: Colors.primaryLight,
     borderRadius: 4,
     marginBottom: 16,
     overflow: "hidden" as const,
   },
   airPurificationBarFill: {
     height: "100%",
-    backgroundColor: "#22c55e",
+    backgroundColor: Colors.status.success,
     borderRadius: 4,
   },
   airPurificationDescription: {
     fontSize: 15,
-    color: "#374151",
+    color: Colors.text.primary,
     lineHeight: 24,
   },
   oxygenInfoCard: {
-    backgroundColor: "#f0f9ff",
+    backgroundColor: Colors.status.infoLight,
     borderRadius: 12,
     padding: 14,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#bae6fd",
+    borderColor: Colors.status.info,
   },
   oxygenInfoHeader: {
     flexDirection: "row" as const,
@@ -957,15 +957,15 @@ const styles = StyleSheet.create({
   oxygenInfoText: {
     flex: 1,
     fontSize: 13,
-    color: "#0369a1",
+    color: Colors.status.info,
     lineHeight: 20,
   },
   wellnessCard: {
-    backgroundColor: "#faf5ff",
+    backgroundColor: Colors.primaryLight,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#e9d5ff",
+    borderColor: Colors.primary,
   },
   wellnessItem: {
     marginBottom: 0,
@@ -980,19 +980,19 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#6366f1",
+    backgroundColor: Colors.moss,
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
   wellnessIconStress: {
-    backgroundColor: "#ec4899",
+    backgroundColor: Colors.primary,
   },
   wellnessScoreContainer: {
     flex: 1,
   },
   wellnessScoreLabel: {
     fontSize: 14,
-    color: "#6b7280",
+    color: Colors.text.secondary,
     marginBottom: 4,
   },
   wellnessScoreRow: {
@@ -1002,41 +1002,41 @@ const styles = StyleSheet.create({
   wellnessScore: {
     fontSize: 28,
     fontWeight: "800" as const,
-    color: "#6366f1",
+    color: Colors.moss,
   },
   wellnessScoreStress: {
-    color: "#ec4899",
+    color: Colors.primary,
   },
   wellnessScoreMax: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#6b7280",
+    color: Colors.text.secondary,
   },
   wellnessBar: {
     height: 8,
-    backgroundColor: "#f3e8ff",
+    backgroundColor: Colors.cream,
     borderRadius: 4,
     marginBottom: 12,
     overflow: "hidden" as const,
   },
   wellnessBarFillSleep: {
     height: "100%",
-    backgroundColor: "#6366f1",
+    backgroundColor: Colors.moss,
     borderRadius: 4,
   },
   wellnessBarFillStress: {
     height: "100%",
-    backgroundColor: "#ec4899",
+    backgroundColor: Colors.primary,
     borderRadius: 4,
   },
   wellnessDescription: {
     fontSize: 14,
-    color: "#374151",
+    color: Colors.text.primary,
     lineHeight: 22,
   },
   wellnessDivider: {
     height: 1,
-    backgroundColor: "#e9d5ff",
+    backgroundColor: Colors.primary,
     marginVertical: 16,
   },
   sleepBenefitsList: {
@@ -1051,14 +1051,14 @@ const styles = StyleSheet.create({
   sleepBenefitText: {
     flex: 1,
     fontSize: 13,
-    color: "#6b7280",
+    color: Colors.text.secondary,
     lineHeight: 18,
   },
   airBenefitsList: {
     marginTop: 16,
     gap: 10,
     borderTopWidth: 1,
-    borderTopColor: "#dcfce7",
+    borderTopColor: Colors.primaryLight,
     paddingTop: 16,
   },
   airBenefitItem: {
@@ -1069,33 +1069,33 @@ const styles = StyleSheet.create({
   airBenefitText: {
     flex: 1,
     fontSize: 13,
-    color: "#374151",
+    color: Colors.text.primary,
     lineHeight: 19,
   },
   safetyWarningBanner: {
     flexDirection: "row" as const,
-    backgroundColor: "#fffbeb",
+    backgroundColor: Colors.alert.warningBg,
     borderRadius: 12,
     padding: 14,
     marginBottom: 16,
     gap: 12,
     alignItems: "flex-start" as const,
     borderWidth: 1,
-    borderColor: "#fcd34d",
+    borderColor: Colors.alert.warningBorder,
   },
   safetyWarningText: {
     flex: 1,
     fontSize: 13,
-    color: "#92400e",
+    color: Colors.alert.warningText,
     lineHeight: 20,
     fontWeight: "500" as const,
   },
   safetyCard: {
-    backgroundColor: "#fefce8",
+    backgroundColor: Colors.alert.warningBg,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#fef08a",
+    borderColor: Colors.alert.warningBorder,
   },
   safetyItem: {
     flexDirection: "row" as const,
@@ -1109,13 +1109,13 @@ const styles = StyleSheet.create({
     justifyContent: "center" as const,
   },
   safetyIconSafe: {
-    backgroundColor: "#16a34a",
+    backgroundColor: Colors.status.success,
   },
   safetyIconDanger: {
-    backgroundColor: "#dc2626",
+    backgroundColor: Colors.status.error,
   },
   safetyIconAllergen: {
-    backgroundColor: "#f59e0b",
+    backgroundColor: Colors.status.warning,
   },
   safetyContent: {
     flex: 1,
@@ -1131,81 +1131,81 @@ const styles = StyleSheet.create({
     fontWeight: "600" as const,
   },
   safetyTitleSafe: {
-    color: "#16a34a",
+    color: Colors.status.success,
   },
   safetyTitleDanger: {
-    color: "#dc2626",
+    color: Colors.status.error,
   },
   safetyTitleAllergen: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#b45309",
+    color: Colors.status.warningDark,
     marginBottom: 6,
   },
   safetyDescription: {
     fontSize: 14,
-    color: "#374151",
+    color: Colors.text.primary,
     lineHeight: 22,
   },
   safetyDivider: {
     height: 1,
-    backgroundColor: "#fef08a",
+    backgroundColor: Colors.alert.warningBorder,
     marginVertical: 16,
   },
   disclaimerContainer: {
     marginTop: 24,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "#e5e7eb",
+    borderTopColor: Colors.warmGray,
   },
   disclaimerText: {
     fontSize: 11,
-    color: "#9ca3af",
+    color: Colors.text.muted,
     lineHeight: 16,
     textAlign: "center" as const,
     fontStyle: "italic" as const,
   },
   oxygenTipCard: {
-    backgroundColor: "#ecfdf5",
+    backgroundColor: Colors.status.successLight,
     borderRadius: 12,
     padding: 14,
     marginTop: 16,
     borderWidth: 1,
-    borderColor: "#a7f3d0",
+    borderColor: Colors.status.success,
   },
   oxygenTipTitle: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#065f46",
+    color: Colors.forest,
     marginBottom: 6,
   },
   oxygenTipText: {
     fontSize: 13,
-    color: "#047857",
+    color: Colors.primaryDark,
     lineHeight: 20,
   },
   sleepTipCard: {
-    backgroundColor: "#eef2ff",
+    backgroundColor: Colors.primaryLight,
     borderRadius: 12,
     padding: 14,
     marginTop: 16,
     borderWidth: 1,
-    borderColor: "#c7d2fe",
+    borderColor: Colors.primary,
   },
   sleepTipTitle: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#3730a3",
+    color: Colors.forest,
     marginBottom: 6,
   },
   sleepTipText: {
     fontSize: 13,
-    color: "#4338ca",
+    color: Colors.primaryDark,
     lineHeight: 20,
   },
   dangerAlertBanner: {
     flexDirection: "row" as const,
-    backgroundColor: "#dc2626",
+    backgroundColor: Colors.status.error,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -1218,18 +1218,18 @@ const styles = StyleSheet.create({
   dangerAlertTitle: {
     fontSize: 15,
     fontWeight: "800" as const,
-    color: "#ffffff",
+    color: Colors.light,
     marginBottom: 6,
   },
   dangerAlertText: {
     fontSize: 13,
-    color: "#fef2f2",
+    color: Colors.status.errorLight,
     lineHeight: 20,
     marginBottom: 8,
   },
   emergencyText: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#fecaca",
+    color: Colors.status.errorLight,
   },
 });

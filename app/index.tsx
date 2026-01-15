@@ -1,5 +1,5 @@
 import { Redirect, useRouter } from "expo-router";
-import { Shield, Moon, Sparkles, ChevronRight, Check, Leaf, Heart, Baby, Globe, Home, Briefcase, Bed, Sofa, Wind, Droplets, Sun, AlertCircle } from "lucide-react-native";
+import { Shield, Moon, Sparkles, ChevronRight, Check, Leaf, Heart, Baby, Home, Briefcase, Bed, Sofa, Wind, Droplets, Sun, AlertCircle } from "lucide-react-native";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useUserPreferences, type CareLevel, type Language } from "@/contexts/UserPreferencesContext";
+import { useUserPreferences, type CareLevel } from "@/contexts/UserPreferencesContext";
 import { getTranslations } from "@/constants/translations";
 import { Colors } from "@/constants/colors";
 
@@ -23,71 +23,71 @@ const { width } = Dimensions.get("window");
 
 interface OnboardingSlide {
   id: string;
-  type: "welcome" | "question" | "profile";
+  type: "question" | "profile";
   icon: React.ReactNode;
   badge?: string;
-  bgStyle: "light" | "dark" | "sage";
+  bgStyle: "light" | "sage";
+  emoji?: string;
 }
 
-const getSlides = (language: Language): OnboardingSlide[] => {
+const getSlides = (): OnboardingSlide[] => {
   return [
     {
       id: "0",
-      type: "welcome",
-      icon: <Globe size={32} color={Colors.oxysafe.charcoal} strokeWidth={1.5} />,
-      bgStyle: "light",
+      type: "question",
+      icon: <Shield size={28} color="#FFFFFF" strokeWidth={1.5} />,
+      badge: "safety",
+      bgStyle: "sage",
+      emoji: "🛡️",
     },
     {
       id: "1",
       type: "question",
-      icon: <Shield size={32} color="#FFFFFF" strokeWidth={1.5} />,
-      badge: "safety",
-      bgStyle: "dark",
+      icon: <Moon size={28} color="#FFFFFF" strokeWidth={1.5} />,
+      badge: "goals",
+      bgStyle: "light",
+      emoji: "✨",
     },
     {
       id: "2",
       type: "question",
-      icon: <Moon size={32} color={Colors.oxysafe.charcoal} strokeWidth={1.5} />,
-      badge: "goals",
+      icon: <Home size={28} color="#FFFFFF" strokeWidth={1.5} />,
+      badge: "location",
       bgStyle: "sage",
+      emoji: "🏡",
     },
     {
       id: "3",
       type: "question",
-      icon: <Home size={32} color="#FFFFFF" strokeWidth={1.5} />,
-      badge: "location",
-      bgStyle: "dark",
+      icon: <Leaf size={28} color="#FFFFFF" strokeWidth={1.5} />,
+      badge: "challenges",
+      bgStyle: "light",
+      emoji: "🌿",
     },
     {
       id: "4",
       type: "question",
-      icon: <AlertCircle size={32} color={Colors.oxysafe.charcoal} strokeWidth={1.5} />,
-      badge: "challenges",
+      icon: <Wind size={28} color="#FFFFFF" strokeWidth={1.5} />,
+      badge: "allergies",
       bgStyle: "sage",
+      emoji: "🍃",
     },
     {
       id: "5",
-      type: "question",
-      icon: <Wind size={32} color="#FFFFFF" strokeWidth={1.5} />,
-      badge: "allergies",
-      bgStyle: "dark",
-    },
-    {
-      id: "6",
       type: "profile",
-      icon: <Leaf size={32} color={Colors.oxysafe.charcoal} strokeWidth={1.5} />,
+      icon: <Leaf size={32} color={Colors.oxysafe.sage} strokeWidth={1.5} />,
       bgStyle: "light",
+      emoji: "🌱",
     },
   ];
 };
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const { language, setLanguage, setCareLevel, completeOnboarding, hasCompletedOnboarding, isLoading } = useUserPreferences();
+  const { language, setCareLevel, completeOnboarding, hasCompletedOnboarding, isLoading } = useUserPreferences();
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [selectedCareLevel, setSelectedCareLevel] = useState<CareLevel | null>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>(language);
   const [selectedSafety, setSelectedSafety] = useState<string[]>([]);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
@@ -96,8 +96,8 @@ export default function OnboardingScreen() {
   const scrollX = useRef(new Animated.Value(0)).current;
   const slidesRef = useRef<FlatList<OnboardingSlide>>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slides = getSlides(selectedLanguage);
-  const t = getTranslations(selectedLanguage);
+  const slides = getSlides();
+  const t = getTranslations(language);
   const isProcessingRef = useRef(false);
   const lastClickRef = useRef(0);
   const hasRedirectedRef = useRef(false);
@@ -115,7 +115,7 @@ export default function OnboardingScreen() {
   useEffect(() => {
     if (!isLoading && hasCompletedOnboarding && !hasRedirectedRef.current) {
       hasRedirectedRef.current = true;
-      console.log("🔄 Onboarding already completed (effect). Redirecting to /gallery");
+      console.log("🔄 Onboarding already completed (effect). Redirecting to /(tabs)/decorate");
     }
   }, [isLoading, hasCompletedOnboarding]);
 
@@ -133,7 +133,6 @@ export default function OnboardingScreen() {
     if (currentIndex === slides.length - 1) return selectedCareLevel !== null;
     const slide = slides[currentIndex];
     if (!slide) return false;
-    if (currentIndex === 0) return true;
     if (slide.badge === "safety") return selectedSafety.length > 0;
     if (slide.badge === "goals") return selectedGoals.length > 0;
     if (slide.badge === "location") return selectedRooms.length > 0;
@@ -148,24 +147,19 @@ export default function OnboardingScreen() {
       console.log('⏭️ Prevented duplicate scroll/navigation');
       return;
     }
-    
+
     if (!canProceed()) {
       console.log('❌ Cannot proceed - requirements not met');
       return;
     }
-    
+
     isProcessingRef.current = true;
     lastClickRef.current = now;
-    
+
     try {
       console.log('🎯 Scrolling to next slide. Current index:', currentIndex, 'Total slides:', slides.length);
-      
-      if (currentIndex === 0) {
-        console.log('💬 Setting language to:', selectedLanguage);
-        await setLanguage(selectedLanguage);
-        console.log('✅ Language set, scrolling to next slide');
-        slidesRef.current?.scrollToIndex({ index: currentIndex + 1 });
-      } else if (currentIndex < slides.length - 1) {
+
+      if (currentIndex < slides.length - 1) {
         console.log('📄 Moving to slide', currentIndex + 1);
         slidesRef.current?.scrollToIndex({ index: currentIndex + 1 });
       } else {
@@ -176,7 +170,7 @@ export default function OnboardingScreen() {
           console.log('✅ Care level set, marking onboarding as completed');
           await completeOnboarding();
           console.log('✅ Onboarding completed, navigating to app');
-          router.replace("/gallery");
+          router.replace("/(tabs)/decorate");
         } else {
           console.log('⚠️ No care level selected');
         }
@@ -188,7 +182,7 @@ export default function OnboardingScreen() {
         isProcessingRef.current = false;
       }, 500);
     }
-  }, [currentIndex, selectedLanguage, selectedCareLevel, setLanguage, setCareLevel, completeOnboarding, router, slides.length, canProceed]);
+  }, [currentIndex, selectedCareLevel, setCareLevel, completeOnboarding, router, slides.length, canProceed]);
 
   const skip = useCallback(async () => {
     const now = Date.now();
@@ -197,18 +191,17 @@ export default function OnboardingScreen() {
     }
     isProcessingRef.current = true;
     lastClickRef.current = now;
-    
+
     try {
-      await setLanguage(selectedLanguage);
       await setCareLevel("intermediate");
       await completeOnboarding();
-      router.replace("/gallery");
+      router.replace("/(tabs)/decorate");
     } finally {
       setTimeout(() => {
         isProcessingRef.current = false;
       }, 500);
     }
-  }, [selectedLanguage, setLanguage, setCareLevel, completeOnboarding, router]);
+  }, [setCareLevel, completeOnboarding, router]);
 
   if (isLoading) {
     return (
@@ -219,31 +212,21 @@ export default function OnboardingScreen() {
   }
 
   if (hasCompletedOnboarding) {
-    console.log("✅ Onboarding completed. Redirecting to /gallery");
-    return <Redirect href="/gallery" />;
+    console.log("✅ Onboarding completed. Redirecting to /(tabs)/decorate");
+    return <Redirect href="/(tabs)/decorate" />;
   }
 
   const isLastSlide = currentIndex === slides.length - 1;
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={slides[currentIndex]?.bgStyle === "dark" ? "light-content" : "dark-content"} />
+      <StatusBar barStyle="dark-content" />
       
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
         <FlatList
           data={slides}
           renderItem={({ item, index }) => {
-            if (item.type === "welcome") {
-              return (
-                <WelcomeSlide
-                  scrollX={scrollX}
-                  index={index}
-                  selectedLanguage={selectedLanguage}
-                  onSelectLanguage={setSelectedLanguage}
-                  t={t}
-                />
-              );
-            } else if (item.type === "profile") {
+            if (item.type === "profile") {
               return (
                 <ProfileSlide
                   scrollX={scrollX}
@@ -298,10 +281,7 @@ export default function OnboardingScreen() {
         <SafeAreaView edges={["bottom"]} style={styles.footer}>
           {currentIndex > 0 && currentIndex < slides.length - 1 && (
             <TouchableOpacity testID="onboarding-skip" style={styles.skipButton} onPress={skip} activeOpacity={0.7}>
-              <Text style={[
-                styles.skipText,
-                slides[currentIndex]?.bgStyle === "dark" && styles.skipTextLight
-              ]}>
+              <Text style={styles.skipText}>
                 {t.onboarding.skip}
               </Text>
             </TouchableOpacity>
@@ -327,16 +307,14 @@ export default function OnboardingScreen() {
                 extrapolate: "clamp",
               });
 
-              const isDark = slides[currentIndex]?.bgStyle === "dark";
-
               return (
                 <Animated.View
                   style={[
                     styles.dot,
-                    { 
-                      width: dotWidth, 
+                    {
+                      width: dotWidth,
                       opacity,
-                      backgroundColor: isDark ? "#FFFFFF" : Colors.oxysafe.charcoal,
+                      backgroundColor: Colors.oxysafe.sage,
                     },
                   ]}
                   key={index.toString()}
@@ -351,7 +329,6 @@ export default function OnboardingScreen() {
               styles.nextButton,
               isLastSlide && styles.nextButtonLarge,
               !canProceed() && styles.nextButtonDisabled,
-              slides[currentIndex]?.bgStyle === "dark" && styles.nextButtonLight,
             ]}
             onPress={() => {
               console.log("🔘 Next button pressed");
@@ -362,23 +339,20 @@ export default function OnboardingScreen() {
           >
             {isLastSlide ? (
               <>
-                <Text style={[
-                  styles.nextButtonText,
-                  slides[currentIndex]?.bgStyle === "dark" && styles.nextButtonTextDark
-                ]}>
+                <Text style={styles.nextButtonText}>
                   {t.onboarding.getStarted}
                 </Text>
-                <ChevronRight 
-                  size={20} 
-                  color={slides[currentIndex]?.bgStyle === "dark" ? Colors.oxysafe.charcoal : "#FFFFFF"} 
-                  strokeWidth={3} 
+                <ChevronRight
+                  size={20}
+                  color="#FFFFFF"
+                  strokeWidth={3}
                 />
               </>
             ) : (
-              <ChevronRight 
-                size={24} 
-                color={slides[currentIndex]?.bgStyle === "dark" ? Colors.oxysafe.charcoal : "#FFFFFF"} 
-                strokeWidth={3} 
+              <ChevronRight
+                size={24}
+                color="#FFFFFF"
+                strokeWidth={3}
               />
             )}
           </TouchableOpacity>
@@ -388,84 +362,6 @@ export default function OnboardingScreen() {
   );
 }
 
-interface WelcomeSlideProps {
-  scrollX: Animated.Value;
-  index: number;
-  selectedLanguage: Language;
-  onSelectLanguage: (lang: Language) => void;
-  t: ReturnType<typeof getTranslations>;
-}
-
-function WelcomeSlide({ scrollX, index, selectedLanguage, onSelectLanguage, t }: WelcomeSlideProps) {
-  const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
-
-  const translateY = scrollX.interpolate({
-    inputRange,
-    outputRange: [40, 0, 40],
-    extrapolate: 'clamp',
-  });
-
-  const opacity = scrollX.interpolate({
-    inputRange,
-    outputRange: [0, 1, 0],
-    extrapolate: 'clamp',
-  });
-
-  const languages: { id: Language; title: string; flag: string }[] = [
-    { id: "en", title: "English", flag: "🇺🇸" },
-    { id: "es", title: "Español", flag: "🇪🇸" },
-  ];
-
-  return (
-    <View style={styles.slideContainer}>
-      <LinearGradient
-        colors={[Colors.oxysafe.softWhite, Colors.oxysafe.mist]}
-        style={styles.slideGradient}
-      >
-        <SafeAreaView edges={["top", "bottom"]} style={styles.slideInner}>
-          <Animated.View style={[styles.welcomeContent, { transform: [{ translateY }], opacity }]}>
-            <View style={styles.logoContainer}>
-              <View style={styles.logoIcon}>
-                <Leaf size={48} color={Colors.oxysafe.sage} strokeWidth={1.5} />
-              </View>
-              <Text style={styles.logoText}>OxySafe</Text>
-              <Text style={styles.logoSubtext}>{t.onboarding.welcomeSubtitle}</Text>
-            </View>
-
-            <View style={styles.languageSection}>
-              <Text style={styles.sectionTitle}>{t.onboarding.selectLanguage}</Text>
-              <Text style={styles.sectionSubtitle}>{t.onboarding.languageDescription}</Text>
-
-              <View style={styles.languageCards}>
-                {languages.map((lang) => {
-                  const isSelected = selectedLanguage === lang.id;
-                  return (
-                    <TouchableOpacity
-                      key={lang.id}
-                      style={[styles.languageCard, isSelected && styles.languageCardSelected]}
-                      onPress={() => onSelectLanguage(lang.id)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.languageFlag}>{lang.flag}</Text>
-                      <Text style={[styles.languageTitle, isSelected && styles.languageTitleSelected]}>
-                        {lang.title}
-                      </Text>
-                      {isSelected && (
-                        <View style={styles.checkBadge}>
-                          <Check size={14} color="#FFFFFF" strokeWidth={3} />
-                        </View>
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
-          </Animated.View>
-        </SafeAreaView>
-      </LinearGradient>
-    </View>
-  );
-}
 
 interface QuestionSlideProps {
   item: OnboardingSlide;
@@ -505,7 +401,6 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
     extrapolate: 'clamp',
   });
 
-  const isDark = item.bgStyle === "dark";
   const isSage = item.bgStyle === "sage";
 
   const handleToggle = (value: string, current: string[], setter: (val: string[]) => void) => {
@@ -516,7 +411,7 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
     }
   };
 
-  const iconColor = isDark ? "#FFFFFF" : Colors.oxysafe.charcoal;
+  const iconColor = Colors.oxysafe.charcoal;
   
   const getOptions = () => {
     switch (item.badge) {
@@ -613,36 +508,33 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
 
   const content = getOptions();
 
-  const bgColors: [string, string] = isDark 
-    ? [Colors.oxysafe.charcoal, "#252A2E"]
-    : isSage 
-      ? [Colors.oxysafe.mist, Colors.oxysafe.softWhite]
-      : [Colors.oxysafe.softWhite, Colors.oxysafe.mist];
+  const bgColors: [string, string] = isSage
+    ? [Colors.oxysafe.mist, Colors.oxysafe.softWhite]
+    : [Colors.oxysafe.softWhite, Colors.oxysafe.mist];
 
   return (
     <View style={styles.slideContainer}>
       <LinearGradient colors={bgColors} style={styles.slideGradient}>
         <SafeAreaView edges={["top", "bottom"]} style={styles.slideInner}>
-          <Animated.View 
+          <Animated.View
             style={[
-              styles.questionContent, 
+              styles.questionContent,
               { transform: [{ translateY }, { scale }], opacity }
             ]}
           >
             <View style={styles.questionHeader}>
-              <View style={[
-                styles.questionIconContainer,
-                isDark && styles.questionIconContainerDark,
-                isSage && styles.questionIconContainerSage,
-              ]}>
+              {item.emoji && (
+                <Text style={styles.questionEmoji}>{item.emoji}</Text>
+              )}
+              <View style={styles.questionIconContainer}>
                 {item.icon}
               </View>
 
-              <Text style={[styles.questionTitle, isDark && styles.questionTitleDark]}>
+              <Text style={styles.questionTitle}>
                 {content.title}
               </Text>
 
-              <Text style={[styles.questionDescription, isDark && styles.questionDescriptionDark]}>
+              <Text style={styles.questionDescription}>
                 {content.description}
               </Text>
             </View>
@@ -655,9 +547,7 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
                     key={option.id}
                     style={[
                       styles.optionCard,
-                      isDark && styles.optionCardDark,
                       isSelected && styles.optionCardSelected,
-                      isDark && isSelected && styles.optionCardSelectedDark,
                     ]}
                     onPress={() => content.onToggle(option.id)}
                     activeOpacity={0.7}
@@ -671,7 +561,6 @@ function QuestionSlide({ item, index, scrollX, t, selectedSafety, onSelectSafety
                       </View>
                       <Text style={[
                         styles.optionLabel,
-                        isDark && styles.optionLabelDark,
                         isSelected && styles.optionLabelSelected,
                       ]}>
                         {option.label}
@@ -918,70 +807,60 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 32,
   },
+  questionEmoji: {
+    fontSize: 36,
+    marginBottom: 12,
+  },
   questionIconContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 22,
-    backgroundColor: Colors.oxysafe.mist,
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: Colors.oxysafe.sage,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 24,
-  },
-  questionIconContainerDark: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-  },
-  questionIconContainerSage: {
-    backgroundColor: Colors.oxysafe.sage,
+    marginBottom: 20,
+    shadowColor: Colors.oxysafe.sage,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 4,
   },
   questionTitle: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "700" as const,
     color: Colors.oxysafe.charcoal,
     textAlign: "center",
-    marginBottom: 12,
+    marginBottom: 10,
     letterSpacing: -0.5,
   },
-  questionTitleDark: {
-    color: "#FFFFFF",
-  },
   questionDescription: {
-    fontSize: 16,
+    fontSize: 15,
     color: Colors.text.secondary,
     textAlign: "center",
-    lineHeight: 24,
-    paddingHorizontal: 8,
-  },
-  questionDescriptionDark: {
-    color: "rgba(255,255,255,0.7)",
+    lineHeight: 22,
+    paddingHorizontal: 12,
   },
   optionsContainer: {
-    gap: 12,
+    gap: 10,
   },
   optionCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 18,
+    borderRadius: 16,
+    padding: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderWidth: 2,
-    borderColor: "transparent",
-    shadowColor: Colors.shadow.dark,
+    borderColor: Colors.warmGray,
+    shadowColor: Colors.shadow.light,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 3,
-  },
-  optionCardDark: {
-    backgroundColor: "rgba(255,255,255,0.1)",
+    shadowRadius: 8,
+    elevation: 2,
   },
   optionCardSelected: {
     borderColor: Colors.oxysafe.sage,
     backgroundColor: Colors.oxysafe.mist,
-  },
-  optionCardSelectedDark: {
-    borderColor: "rgba(255,255,255,0.3)",
-    backgroundColor: "rgba(255,255,255,0.15)",
   },
   optionContent: {
     flexDirection: "row",
@@ -989,108 +868,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     backgroundColor: Colors.oxysafe.mist,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 14,
+    marginRight: 12,
   },
   optionIconSelected: {
-    backgroundColor: Colors.oxysafe.deepSage,
+    backgroundColor: Colors.oxysafe.sage,
   },
   optionLabel: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600" as const,
     color: Colors.oxysafe.charcoal,
     flex: 1,
-  },
-  optionLabelDark: {
-    color: "#FFFFFF",
   },
   optionLabelSelected: {
     color: Colors.oxysafe.deepSage,
   },
   optionCheck: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: Colors.oxysafe.sage,
     alignItems: "center",
     justifyContent: "center",
-  },
-  featureIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
-    backgroundColor: Colors.oxysafe.mist,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 32,
-  },
-  featureIconContainerDark: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-  },
-  featureIconContainerSage: {
-    backgroundColor: Colors.oxysafe.sage,
-  },
-  badgeContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: Colors.oxysafe.sage,
-    marginBottom: 24,
-  },
-  badgeContainerDark: {
-    backgroundColor: "rgba(255,255,255,0.15)",
-  },
-  badgeText: {
-    fontSize: 13,
-    fontWeight: "600" as const,
-    color: "#FFFFFF",
-    textTransform: "uppercase" as const,
-    letterSpacing: 1,
-  },
-  badgeTextDark: {
-    color: "rgba(255,255,255,0.9)",
-  },
-  featureTitle: {
-    fontSize: 32,
-    fontWeight: "700" as const,
-    color: Colors.oxysafe.charcoal,
-    textAlign: "center",
-    marginBottom: 16,
-    letterSpacing: -0.5,
-  },
-  featureTitleDark: {
-    color: "#FFFFFF",
-  },
-  featureDescription: {
-    fontSize: 17,
-    color: Colors.text.secondary,
-    textAlign: "center",
-    lineHeight: 26,
-    paddingHorizontal: 8,
-  },
-  featureDescriptionDark: {
-    color: "rgba(255,255,255,0.75)",
-  },
-  featureIcons: {
-    flexDirection: "row",
-    gap: 16,
-    marginTop: 32,
-  },
-  featureIconBadge: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: Colors.oxysafe.mist,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  featureIconBadgeDark: {
-    backgroundColor: "rgba(255,255,255,0.1)",
   },
   profileContent: {
     flex: 1,
@@ -1198,9 +1002,6 @@ const styles = StyleSheet.create({
     fontWeight: "500" as const,
     color: Colors.text.secondary,
   },
-  skipTextLight: {
-    color: "rgba(255,255,255,0.7)",
-  },
   paginationContainer: {
     flexDirection: "row",
     gap: 8,
@@ -1217,18 +1018,15 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: Colors.oxysafe.charcoal,
+    backgroundColor: Colors.oxysafe.sage,
     alignItems: "center",
     justifyContent: "center",
     marginLeft: "auto",
-    shadowColor: Colors.oxysafe.charcoal,
-    shadowOffset: { width: 0, height: 6 },
+    shadowColor: Colors.oxysafe.sage,
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
-    elevation: 6,
-  },
-  nextButtonLight: {
-    backgroundColor: "#FFFFFF",
+    elevation: 4,
   },
   nextButtonLarge: {
     width: "auto",
@@ -1243,8 +1041,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600" as const,
     color: "#FFFFFF",
-  },
-  nextButtonTextDark: {
-    color: Colors.oxysafe.charcoal,
   },
 });

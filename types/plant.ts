@@ -78,9 +78,44 @@ export interface RoomAnalysis {
   location?: LocationData;
 }
 
+// Mood emoji type for watering wellness tracking
+export type MoodEmoji = "happy" | "relaxed" | "neutral" | "sad" | "stressed";
+
+export const MOOD_EMOJIS: Record<MoodEmoji, string> = {
+  happy: "😊",
+  relaxed: "😌",
+  neutral: "😐",
+  sad: "😔",
+  stressed: "😢",
+};
+
+export const MOOD_LABELS: Record<MoodEmoji, { en: string; es: string }> = {
+  happy: { en: "Happy", es: "Feliz" },
+  relaxed: { en: "Relaxed", es: "Relajado" },
+  neutral: { en: "Neutral", es: "Neutral" },
+  sad: { en: "Sad", es: "Triste" },
+  stressed: { en: "Stressed", es: "Estresado" },
+};
+
+export const MOOD_SCORES: Record<MoodEmoji, number> = {
+  happy: 5,
+  relaxed: 4,
+  neutral: 3,
+  sad: 2,
+  stressed: 1,
+};
+
 export interface WateringRecord {
   date: string;
   note?: string;
+  mood?: MoodEmoji;
+}
+
+export interface WellnessStats {
+  averageMood: number;
+  moodTrend: Array<{ date: string; mood: MoodEmoji }>;
+  totalWaterings: number;
+  plantsWateredToday: number;
 }
 
 export interface UserPlant {

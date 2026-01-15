@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, Sun, ThermometerSun, Sparkles, MapPin, History, X, Leaf } from "lucide-react-native";
+import { ArrowLeft, Sun, ThermometerSun, Sparkles, MapPin, History, X, Leaf, CheckCircle } from "lucide-react-native";
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import {
   View,
@@ -19,6 +19,7 @@ import { z } from "zod";
 import type { RoomAnalysis, LocationData } from "@/types/plant";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { getTranslations } from "@/constants/translations";
+import { Colors } from "@/constants/colors";
 import { COMMON_PLANTS } from "@/constants/commonPlants";
 import { usePlantImages } from "@/contexts/PlantImagesContext";
 import { editImageWithPlants } from "@/services/freepikService";
@@ -215,6 +216,7 @@ export default function ResultsScreen() {
   const [, setSelectedPlantIndex] = useState<number | null>(null);
   const [, setShowPlantTooltip] = useState<{ index: number; name: string } | null>(null);
   const [showMarkers, setShowMarkers] = useState(false);
+  const [savedToHistory, setSavedToHistory] = useState(false);
   const markersTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isNavigatingRef = useRef(false);
   const { getPlantImage, prefetchPlantImage } = usePlantImages();
@@ -760,6 +762,7 @@ Plant placement instructions:
                 altitude: locationInfo.altitude,
               } : undefined,
             });
+            setSavedToHistory(true);
             return;
           }
           
@@ -785,6 +788,7 @@ Plant placement instructions:
                   altitude: locationInfo.altitude,
                 } : undefined,
               });
+              setSavedToHistory(true);
               console.log("✅ Scan saved with edited image");
             } catch (saveError) {
               console.log('⚠️ Error saving scan:', saveError);
@@ -801,6 +805,7 @@ Plant placement instructions:
                   altitude: locationInfo.altitude,
                 } : undefined,
               });
+              setSavedToHistory(true);
             } catch (saveError) {
               console.log('⚠️ Error saving scan:', saveError);
             }
@@ -819,6 +824,7 @@ Plant placement instructions:
                   altitude: locationInfo.altitude,
                 } : undefined,
               });
+              setSavedToHistory(true);
             } catch (saveError) {
               console.log('⚠️ Error saving scan:', saveError);
             }
@@ -962,18 +968,36 @@ Plant placement instructions:
           <View style={styles.header}>
             <TouchableOpacity
               style={styles.backButton}
-              onPress={() => safeNavigate("/")}
+              onPress={() => router.back()}
             >
               <ArrowLeft size={24} color="#ffffff" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{t.results.title}</Text>
             <TouchableOpacity
               style={styles.backButton}
-              onPress={() => safeNavigate("/gallery")}
+              onPress={() => safeNavigate("/(tabs)/decorate")}
             >
               <History size={24} color="#ffffff" />
             </TouchableOpacity>
           </View>
+
+          {savedToHistory && (
+            <TouchableOpacity
+              style={styles.successBanner}
+              onPress={() => router.push("/(tabs)/decorate")}
+              activeOpacity={0.8}
+            >
+              <View style={styles.successBannerContent}>
+                <CheckCircle size={20} color={Colors.status.success} />
+                <Text style={styles.successBannerText}>
+                  {language === "es" ? "Guardado en tu historial" : "Saved to your history"}
+                </Text>
+              </View>
+              <Text style={styles.successBannerLink}>
+                {language === "es" ? "Ver historial →" : "View history →"}
+              </Text>
+            </TouchableOpacity>
+          )}
 
           <ScrollView
             style={styles.scrollView}
@@ -1779,5 +1803,33 @@ const styles = StyleSheet.create({
   modalImage: {
     width: "100%",
     height: "100%",
+  },
+  successBanner: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    backgroundColor: Colors.status.successLight,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.status.success,
+  },
+  successBannerContent: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  },
+  successBannerText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.status.success,
+  },
+  successBannerLink: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.primary,
   },
 });

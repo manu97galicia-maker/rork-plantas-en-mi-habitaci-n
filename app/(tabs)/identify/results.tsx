@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, MapPin, Thermometer, Droplets, Sun, Leaf, Globe, RefreshCw, Wind, Moon, Heart } from "lucide-react-native";
+import { ArrowLeft, MapPin, Thermometer, Droplets, Sun, Leaf, Globe, RefreshCw, Wind, Moon, Heart, CheckCircle, History } from "lucide-react-native";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { generateObject } from "@rork-ai/toolkit-sdk";
 import { z } from "zod";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
+import { Colors } from "@/constants/colors";
 
 interface PlantIdentification {
   name: string;
@@ -56,14 +57,16 @@ interface PlantIdentification {
 export default function IdentifyPlantScreen() {
   const params = useLocalSearchParams<{ imageData: string }>();
   const router = useRouter();
-  const { language } = useUserPreferences();
+  const { language, addIdentification } = useUserPreferences();
   const [identification, setIdentification] = useState<PlantIdentification | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [savedToHistory, setSavedToHistory] = useState(false);
   const hasStartedRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isMountedRef = useRef(true);
+  const hasSavedRef = useRef(false);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -256,6 +259,31 @@ Be specific and precise in the identification.`;
 
       console.log("✅ Plant identified successfully:", result.name);
       setIdentification(result as PlantIdentification);
+
+      // Save to history
+      if (!hasSavedRef.current) {
+        hasSavedRef.current = true;
+        try {
+          await addIdentification({
+            plantName: result.name,
+            scientificName: result.scientificName,
+            family: result.family,
+            difficulty: result.difficulty,
+            description: result.description,
+            imageData: params.imageData || '',
+            care: result.care ? {
+              light: result.care.light,
+              water: result.care.water,
+              temperature: result.care.temperature,
+              humidity: result.care.humidity,
+            } : undefined,
+          });
+          setSavedToHistory(true);
+          console.log("✅ Identification saved to history");
+        } catch (saveError) {
+          console.error("❌ Error saving identification to history:", saveError);
+        }
+      }
     } catch (err: any) {
       console.error("\n❌ ERROR identifying plant:", err?.message || 'Unknown error');
       
@@ -396,8 +424,31 @@ Be specific and precise in the identification.`;
             <Text style={styles.headerTitle}>
               {language === "es" ? "Planta Identificada" : "Plant Identified"}
             </Text>
-            <View style={{ width: 44 }} />
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.push("/(tabs)/identify")}
+            >
+              <History size={24} color="#ffffff" />
+            </TouchableOpacity>
           </View>
+
+          {savedToHistory && (
+            <TouchableOpacity
+              style={styles.successBanner}
+              onPress={() => router.push("/(tabs)/identify")}
+              activeOpacity={0.8}
+            >
+              <View style={styles.successBannerContent}>
+                <CheckCircle size={20} color={Colors.status.success} />
+                <Text style={styles.successBannerText}>
+                  {language === "es" ? "Guardado en tu historial" : "Saved to your history"}
+                </Text>
+              </View>
+              <Text style={styles.successBannerLink}>
+                {language === "es" ? "Ver historial →" : "View history →"}
+              </Text>
+            </TouchableOpacity>
+          )}
 
           <ScrollView
             style={styles.scrollView}
@@ -661,6 +712,34 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700" as const,
     color: "#ffffff",
+  },
+  successBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: Colors.status.successLight,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.status.success,
+  },
+  successBannerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  successBannerText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.status.success,
+  },
+  successBannerLink: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: Colors.status.success,
   },
   scrollView: {
     flex: 1,

@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-import { UserPlant, Plant, WateringRecord } from '@/types/plant';
+import { UserPlant, Plant, WateringRecord, MoodEmoji, WellnessStats, MOOD_SCORES } from '@/types/plant';
 
 const MY_PLANTS_KEY = 'my_plants';
 
@@ -137,11 +137,11 @@ export const [MyPlantsProvider, useMyPlants] = createContextHook(() => {
     await savePlants(updatedPlants);
   };
 
-  const waterPlant = async (plantId: string): Promise<boolean> => {
+  const waterPlant = async (plantId: string, mood?: MoodEmoji): Promise<boolean> => {
     const plant = plants.find(p => p.id === plantId);
     if (!plant) return false;
 
-    console.log('💧 Watering plant:', plant.nickname || plant.plantInfo.name);
+    console.log('💧 Watering plant:', plant.nickname || plant.plantInfo.name, mood ? `with mood: ${mood}` : '');
 
     if (plant.notificationId) {
       await cancelNotification(plant.notificationId);
@@ -152,6 +152,7 @@ export const [MyPlantsProvider, useMyPlants] = createContextHook(() => {
 
     const newWateringRecord: WateringRecord = {
       date: now.toISOString(),
+      mood: mood,
     };
 
     const wateringHistory = plant.wateringHistory || [];
@@ -171,7 +172,7 @@ export const [MyPlantsProvider, useMyPlants] = createContextHook(() => {
 
     const updatedPlants = plants.map(p => p.id === plantId ? updatedPlant : p);
     await savePlants(updatedPlants);
-    
+
     console.log('✅ Plant watered successfully! Next watering:', nextWatering.toLocaleDateString());
     return true;
   };
@@ -212,6 +213,36 @@ export const [MyPlantsProvider, useMyPlants] = createContextHook(() => {
     });
   }, [plants]);
 
+  const getWellnessStats = useCallback((): WellnessStats => {
+    const allRecords = plants.flatMap(p => p.wateringHistory || []);
+    const recordsWithMood = allRecords.filter(r => r.mood);
+
+    const averageMood = recordsWithMood.length > 0
+      ? recordsWithMood.reduce((sum, r) => sum + MOOD_SCORES[r.mood!], 0) / recordsWithMood.length
+      : 0;
+
+    // Calculate mood trend (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const moodTrend = recordsWithMood
+      .filter(r => new Date(r.date) >= thirtyDaysAgo)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map(r => ({ date: r.date, mood: r.mood! }));
+
+    const today = new Date().toDateString();
+    const plantsWateredToday = allRecords.filter(r =>
+      new Date(r.date).toDateString() === today
+    ).length;
+
+    return {
+      averageMood,
+      moodTrend,
+      totalWaterings: allRecords.length,
+      plantsWateredToday,
+    };
+  }, [plants]);
+
   return {
     plants,
     isLoading,
@@ -220,5 +251,6 @@ export const [MyPlantsProvider, useMyPlants] = createContextHook(() => {
     waterPlant,
     updatePlant,
     getPlantsNeedingWater,
+    getWellnessStats,
   };
 });

@@ -1,6 +1,6 @@
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { useRouter, useFocusEffect } from "expo-router";
-import { X, Camera as CameraIcon, RotateCcw, History, Image as ImageIcon } from "lucide-react-native";
+import { X, Camera as CameraIcon, RotateCcw, Image as ImageIcon } from "lucide-react-native";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -18,7 +18,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { getTranslations } from "@/constants/translations";
 
-export default function CameraScreen() {
+export default function DecorateCameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [locationPermission, requestLocationPermission] = Location.useForegroundPermissions();
   const [facing, setFacing] = useState<CameraType>("back");
@@ -35,34 +35,12 @@ export default function CameraScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      console.log('📷 Camera screen focused - resetting states');
       setIsCapturing(false);
       setShowStabilizing(false);
       isNavigatingRef.current = false;
-      return () => {
-        console.log('📷 Camera screen unfocused');
-      };
+      return () => {};
     }, [])
   );
-
-  const safeNavigate = useCallback((path: string | { pathname: string; params: any }) => {
-    const now = Date.now();
-    if (isNavigatingRef.current || now - lastClickRef.current < 500) {
-      console.log('⚠️ Navigation blocked - too fast');
-      return;
-    }
-    isNavigatingRef.current = true;
-    lastClickRef.current = now;
-    console.log('📱 Navigating to:', typeof path === 'string' ? path : path.pathname);
-    if (typeof path === 'string') {
-      router.push(path as any);
-    } else {
-      router.push(path as any);
-    }
-    setTimeout(() => {
-      isNavigatingRef.current = false;
-    }, 1000);
-  }, [router]);
 
   const safeBack = useCallback(() => {
     const now = Date.now();
@@ -77,7 +55,6 @@ export default function CameraScreen() {
 
   useEffect(() => {
     getLocation();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locationPermission]);
 
   const getLocation = async () => {
@@ -98,36 +75,25 @@ export default function CameraScreen() {
                 },
                 timestamp: position.timestamp,
               } as Location.LocationObject);
-              console.log("✅ Location obtained (Web):", position.coords.latitude, position.coords.longitude);
             },
-            (error) => {
-              console.log("⚠️ Could not get location (Web):", error.message);
-            }
+            () => {}
           );
         }
-      } catch (error) {
-        console.log("⚠️ Error getting location (Web):", error);
-      }
+      } catch {}
       return;
     }
 
     try {
       if (!locationPermission?.granted) {
         const { status } = await requestLocationPermission();
-        if (status !== "granted") {
-          console.log("⚠️ Location permission denied");
-          return;
-        }
+        if (status !== "granted") return;
       }
 
       const currentLocation = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
       setLocation(currentLocation);
-      console.log("✅ Location obtained:", currentLocation.coords.latitude, currentLocation.coords.longitude);
-    } catch (error) {
-      console.log("⚠️ Could not get location:", error);
-    }
+    } catch {}
   };
 
   if (!permission) {
@@ -145,17 +111,20 @@ export default function CameraScreen() {
           <View style={styles.permissionContent}>
             <CameraIcon size={64} color="#52b788" />
             <Text style={styles.permissionTitle}>
-              Camera Permission Required
+              {language === "es" ? "Se requiere permiso de cámara" : "Camera Permission Required"}
             </Text>
             <Text style={styles.permissionText}>
-              We need access to your camera to photograph your room and
-              recommend the best plants.
+              {language === "es"
+                ? "Necesitamos acceso a tu cámara para fotografiar tu habitación y recomendar las mejores plantas."
+                : "We need access to your camera to photograph your room and recommend the best plants."}
             </Text>
             <TouchableOpacity
               style={styles.permissionButton}
               onPress={requestPermission}
             >
-              <Text style={styles.permissionButtonText}>Allow Camera</Text>
+              <Text style={styles.permissionButtonText}>
+                {language === "es" ? "Permitir Cámara" : "Allow Camera"}
+              </Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -172,25 +141,23 @@ export default function CameraScreen() {
 
   const pickImage = async () => {
     const now = Date.now();
-    if (isNavigatingRef.current || now - lastClickRef.current < 800) {
-      console.log('⚠️ Pick image blocked - action in progress');
-      return;
-    }
+    if (isNavigatingRef.current || now - lastClickRef.current < 800) return;
     lastClickRef.current = now;
-    
+
     if (!canScan()) {
       Alert.alert(
-        "Limit Reached",
-        "You have reached the limit of 50 scans this month. The limit resets next month.",
+        language === "es" ? "Límite alcanzado" : "Limit Reached",
+        language === "es"
+          ? "Has alcanzado el límite de 40 escaneos este mes."
+          : "You have reached the limit of 40 scans this month.",
         [{ text: "OK" }]
       );
       return;
     }
 
     try {
-      console.log("🖼️ Opening image picker...");
       isNavigatingRef.current = true;
-      
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
@@ -198,32 +165,21 @@ export default function CameraScreen() {
         base64: true,
       });
 
-      console.log("✅ Image picker result:", { canceled: result.canceled });
-
-      if (!result.canceled && result.assets && result.assets[0] && result.assets[0].base64) {
+      if (!result.canceled && result.assets?.[0]?.base64) {
         const imageData = result.assets[0].base64;
-        console.log("📷 Image data length:", imageData.length);
-        
         const params: any = { imageData };
-        
+
         if (location) {
           params.latitude = location.coords.latitude.toString();
           params.longitude = location.coords.longitude.toString();
           if (location.coords.altitude) {
             params.altitude = location.coords.altitude.toString();
           }
-          console.log("📍 Sending location with photo:", {
-            lat: location.coords.latitude,
-            lon: location.coords.longitude,
-            alt: location.coords.altitude,
-          });
         }
-        
-        console.log("🚀 Navigating to results...");
-        
+
         setTimeout(() => {
           router.push({
-            pathname: "/results",
+            pathname: "/(tabs)/decorate/results",
             params,
           } as any);
           setTimeout(() => {
@@ -233,12 +189,13 @@ export default function CameraScreen() {
       } else {
         isNavigatingRef.current = false;
       }
-    } catch (error) {
-      console.error("❌ Error picking image:", error);
+    } catch {
       isNavigatingRef.current = false;
       Alert.alert(
-        "Error",
-        "Could not select image. Please try again.",
+        language === "es" ? "Error" : "Error",
+        language === "es"
+          ? "No se pudo seleccionar la imagen."
+          : "Could not select image. Please try again.",
         [{ text: "OK" }]
       );
     }
@@ -246,23 +203,23 @@ export default function CameraScreen() {
 
   const takePicture = async () => {
     const now = Date.now();
-    if (isCapturing || isNavigatingRef.current || now - lastClickRef.current < 500) {
-      console.log('⚠️ Take picture blocked - action in progress');
-      return;
-    }
-    
+    if (isCapturing || isNavigatingRef.current || now - lastClickRef.current < 500) return;
+
     if (!cameraRef.current) {
-      console.log('⚠️ Camera ref not ready');
-      Alert.alert("Error", "Camera is not ready. Please wait a moment and try again.");
+      Alert.alert("Error", language === "es"
+        ? "La cámara no está lista. Espera un momento."
+        : "Camera is not ready. Please wait a moment.");
       return;
     }
-    
+
     lastClickRef.current = now;
 
     if (!canScan()) {
       Alert.alert(
-        "Limit Reached",
-        "You have reached the limit of 40 scans this month. The limit resets next month.",
+        language === "es" ? "Límite alcanzado" : "Limit Reached",
+        language === "es"
+          ? "Has alcanzado el límite de 40 escaneos este mes."
+          : "You have reached the limit of 40 scans this month.",
         [{ text: "OK" }]
       );
       return;
@@ -270,76 +227,61 @@ export default function CameraScreen() {
 
     setIsCapturing(true);
     setShowStabilizing(true);
-    
+
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 
-    console.log("📸 Starting photo capture...");
-    
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    
+
     try {
       const capturePromise = cameraRef.current.takePictureAsync({
         quality: 0.6,
         base64: true,
         skipProcessing: Platform.OS === 'android',
       });
-      
-      const timeoutPromise = new Promise<null>((_, reject) => {
-        timeoutId = setTimeout(() => {
-          console.log('⏱️ Camera timeout triggered');
-          reject(new Error('Camera timeout'));
-        }, 10000);
-      });
-      
-      const photo = await Promise.race([capturePromise, timeoutPromise]);
-      
-      if (timeoutId) clearTimeout(timeoutId);
-      
-      console.log("✅ Photo captured, has base64:", !!photo?.base64);
 
-      if (photo && photo.base64) {
+      const timeoutPromise = new Promise<null>((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('Camera timeout')), 10000);
+      });
+
+      const photo = await Promise.race([capturePromise, timeoutPromise]);
+
+      if (timeoutId) clearTimeout(timeoutId);
+
+      if (photo?.base64) {
         const params: any = { imageData: photo.base64 };
-        
+
         if (location) {
           params.latitude = location.coords.latitude.toString();
           params.longitude = location.coords.longitude.toString();
           if (location.coords.altitude) {
             params.altitude = location.coords.altitude.toString();
           }
-          console.log("📍 Sending location with photo:", {
-            lat: location.coords.latitude,
-            lon: location.coords.longitude,
-            alt: location.coords.altitude,
-          });
         }
-        
-        console.log("🚀 Navigating to results...");
+
         setShowStabilizing(false);
-        
+
         router.push({
-          pathname: "/results",
+          pathname: "/(tabs)/decorate/results",
           params,
         } as any);
-        
+
         setTimeout(() => {
           setIsCapturing(false);
         }, 1000);
       } else {
-        throw new Error('No base64 data in photo');
+        throw new Error('No base64 data');
       }
     } catch (error) {
       if (timeoutId) clearTimeout(timeoutId);
-      console.error("❌ Error taking picture:", error);
       setShowStabilizing(false);
       setIsCapturing(false);
-      const errorMessage = error instanceof Error && error.message === 'Camera timeout' 
-        ? "The camera took too long to respond. Please try again."
-        : "Could not capture photo. Please try again.";
       Alert.alert(
         "Error",
-        errorMessage,
+        language === "es"
+          ? "No se pudo capturar la foto. Intenta de nuevo."
+          : "Could not capture photo. Please try again.",
         [{ text: "OK" }]
       );
     }
@@ -351,30 +293,20 @@ export default function CameraScreen() {
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.overlay}>
             <View style={styles.header}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={safeBack}
-              >
+              <TouchableOpacity style={styles.closeButton} onPress={safeBack}>
                 <X size={28} color="#ffffff" />
               </TouchableOpacity>
               <View style={styles.headerCenter}>
                 <Text style={styles.headerText}>
-                  Photograph your room
+                  {language === "es" ? "Fotografía tu habitación" : "Photograph your room"}
                 </Text>
                 <View style={styles.scansRemaining}>
                   <Text style={[styles.scansText, remainingScans <= 5 && styles.scansTextWarning]}>
-                    {remainingScans} scans remaining this month
+                    {remainingScans} {language === "es" ? "escaneos restantes" : "scans remaining"}
                   </Text>
                 </View>
               </View>
-              <View style={styles.headerRight}>
-                <TouchableOpacity
-                  style={styles.locationIndicator}
-                  onPress={() => safeNavigate("/gallery")}
-                >
-                  <History size={20} color="#ffffff" />
-                </TouchableOpacity>
-              </View>
+              <View style={styles.headerRight} />
             </View>
 
             <View style={styles.guideContainer}>
@@ -382,25 +314,22 @@ export default function CameraScreen() {
               {showStabilizing ? (
                 <View style={styles.stabilizingContainer}>
                   <ActivityIndicator size="small" color="#52b788" style={{ marginBottom: 8 }} />
-                  <Text style={styles.stabilizingText}>
-                    {t.camera.stabilizing}
-                  </Text>
+                  <Text style={styles.stabilizingText}>{t.camera.stabilizing}</Text>
                 </View>
               ) : (
                 <Text style={styles.guideText}>
-                  Capture the entire room for best results
+                  {language === "es"
+                    ? "Captura toda la habitación para mejores resultados"
+                    : "Capture the entire room for best results"}
                 </Text>
               )}
             </View>
 
             <View style={styles.controls}>
-              <TouchableOpacity
-                style={styles.galleryButton}
-                onPress={pickImage}
-              >
+              <TouchableOpacity style={styles.galleryButton} onPress={pickImage}>
                 <ImageIcon size={28} color="#ffffff" />
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={styles.captureButton}
                 onPress={takePicture}
@@ -413,10 +342,7 @@ export default function CameraScreen() {
                 )}
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.flipButton}
-                onPress={toggleCameraFacing}
-              >
+              <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
                 <RotateCcw size={28} color="#ffffff" />
               </TouchableOpacity>
             </View>
@@ -467,7 +393,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 16,
-    fontWeight: "600" as const,
+    fontWeight: "600",
     color: "#ffffff",
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 0, height: 1 },
@@ -481,19 +407,11 @@ const styles = StyleSheet.create({
   },
   scansText: {
     fontSize: 12,
-    fontWeight: "500" as const,
+    fontWeight: "500",
     color: "rgba(255, 255, 255, 0.9)",
   },
   scansTextWarning: {
     color: "#fbbf24",
-  },
-  locationIndicator: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    alignItems: "center",
-    justifyContent: "center",
   },
   guideContainer: {
     alignItems: "center",
@@ -521,13 +439,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 16,
     borderRadius: 16,
-    alignItems: "center" as const,
+    alignItems: "center",
   },
   stabilizingText: {
     fontSize: 16,
-    fontWeight: "600" as const,
+    fontWeight: "600",
     color: "#52b788",
-    textAlign: "center" as const,
+    textAlign: "center",
   },
   controls: {
     flexDirection: "row",
@@ -581,7 +499,7 @@ const styles = StyleSheet.create({
   },
   permissionTitle: {
     fontSize: 24,
-    fontWeight: "700" as const,
+    fontWeight: "700",
     color: "#1a4d2e",
     textAlign: "center",
   },
@@ -600,7 +518,7 @@ const styles = StyleSheet.create({
   },
   permissionButtonText: {
     fontSize: 16,
-    fontWeight: "600" as const,
+    fontWeight: "600",
     color: "#ffffff",
   },
 });

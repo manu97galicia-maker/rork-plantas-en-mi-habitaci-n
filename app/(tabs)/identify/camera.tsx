@@ -22,7 +22,7 @@ export default function IdentifyCameraScreen() {
   const [isCapturing, setIsCapturing] = useState(false);
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
-  const { canScan, getRemainingScans } = useUserPreferences();
+  const { canScan, getRemainingScans, language } = useUserPreferences();
 
   const toggleCameraFacing = useCallback(() => {
     if (Platform.OS !== "web") {
@@ -32,15 +32,14 @@ export default function IdentifyCameraScreen() {
   }, []);
 
   const pickImage = useCallback(async () => {
-    if (isCapturing) {
-      console.log('⚠️ Already processing');
-      return;
-    }
+    if (isCapturing) return;
 
     if (!canScan()) {
       Alert.alert(
-        "Scan Limit Reached",
-        "You have reached the limit of 30 monthly scans. The limit will reset next month.",
+        language === "es" ? "Límite alcanzado" : "Scan Limit Reached",
+        language === "es"
+          ? "Has alcanzado el límite de escaneos mensuales."
+          : "You have reached the monthly scan limit.",
         [{ text: "OK" }]
       );
       return;
@@ -48,8 +47,7 @@ export default function IdentifyCameraScreen() {
 
     try {
       setIsCapturing(true);
-      console.log("🖼️ Opening image picker for plant...");
-      
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
@@ -57,116 +55,83 @@ export default function IdentifyCameraScreen() {
         base64: true,
       });
 
-      console.log("✅ Image picker result:", { canceled: result.canceled });
-
       if (!result.canceled && result.assets[0]?.base64) {
-        console.log("🚀 Navigating to identify plant... Image size:", result.assets[0].base64.length);
-        
         router.push({
-          pathname: "/identify-plant",
+          pathname: "/(tabs)/identify/results",
           params: { imageData: result.assets[0].base64 },
-        });
-        
-        setTimeout(() => {
-          setIsCapturing(false);
-        }, 1000);
+        } as any);
+
+        setTimeout(() => setIsCapturing(false), 1000);
       } else {
         setIsCapturing(false);
       }
-    } catch (error) {
-      console.error("❌ Error picking image:", error);
+    } catch {
       Alert.alert(
         "Error",
-        "Could not select image. Please try again.",
+        language === "es" ? "No se pudo seleccionar la imagen." : "Could not select image.",
         [{ text: "OK" }]
       );
       setIsCapturing(false);
     }
-  }, [isCapturing, canScan, router]);
+  }, [isCapturing, canScan, router, language]);
 
   const takePicture = useCallback(async () => {
-    if (isCapturing) {
-      console.log('⚠️ Already capturing');
-      return;
-    }
-    
-    if (!cameraRef.current) {
-      console.log('⚠️ Camera ref not ready');
-      Alert.alert("Error", "Camera is not ready. Please wait a moment and try again.");
-      return;
-    }
+    if (isCapturing || !cameraRef.current) return;
 
     if (!canScan()) {
       Alert.alert(
-        "Scan Limit Reached",
-        "You have reached the limit of 40 monthly scans. The limit will reset next month.",
+        language === "es" ? "Límite alcanzado" : "Scan Limit Reached",
+        language === "es"
+          ? "Has alcanzado el límite de escaneos mensuales."
+          : "You have reached the monthly scan limit.",
         [{ text: "OK" }]
       );
       return;
     }
 
     setIsCapturing(true);
-    
+
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 
-    console.log("📸 Starting plant photo capture...");
-    
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    
+
     try {
       const capturePromise = cameraRef.current.takePictureAsync({
         quality: 0.4,
         base64: true,
-        skipProcessing: Platform.OS === 'android',
+        skipProcessing: Platform.OS === "android",
       });
-      
+
       const timeoutPromise = new Promise<null>((_, reject) => {
-        timeoutId = setTimeout(() => {
-          console.log('⏱️ Camera timeout triggered');
-          reject(new Error('Camera timeout'));
-        }, 10000);
+        timeoutId = setTimeout(() => reject(new Error("Camera timeout")), 10000);
       });
-      
+
       const photo = await Promise.race([capturePromise, timeoutPromise]);
-      
+
       if (timeoutId) clearTimeout(timeoutId);
 
-      console.log("✅ Plant photo captured, has base64:", !!photo?.base64);
-
-      if (photo && photo.base64) {
-        console.log("🚀 Navigating to identify plant... Image size:", photo.base64.length);
-        
+      if (photo?.base64) {
         router.push({
-          pathname: "/identify-plant",
+          pathname: "/(tabs)/identify/results",
           params: { imageData: photo.base64 },
-        });
-        
-        setTimeout(() => {
-          setIsCapturing(false);
-        }, 1000);
+        } as any);
+
+        setTimeout(() => setIsCapturing(false), 1000);
       } else {
-        throw new Error('No base64 data in photo');
+        throw new Error("No base64 data");
       }
-    } catch (error) {
+    } catch {
       if (timeoutId) clearTimeout(timeoutId);
-      console.error("❌ Error taking picture:", error);
       setIsCapturing(false);
-      const errorMessage = error instanceof Error && error.message === 'Camera timeout' 
-        ? "The camera took too long to respond. Please try again."
-        : "Could not take photo. Please try again.";
       Alert.alert(
         "Error",
-        errorMessage,
+        language === "es" ? "No se pudo tomar la foto." : "Could not take photo.",
         [{ text: "OK" }]
       );
     }
-  }, [isCapturing, canScan, router]);
-
-  const handleBack = useCallback(() => {
-    router.back();
-  }, [router]);
+  }, [isCapturing, canScan, router, language]);
 
   if (!permission) {
     return (
@@ -183,16 +148,17 @@ export default function IdentifyCameraScreen() {
           <View style={styles.permissionContent}>
             <CameraIcon size={64} color="#52b788" />
             <Text style={styles.permissionTitle}>
-              Camera Permission Required
+              {language === "es" ? "Se requiere permiso de cámara" : "Camera Permission Required"}
             </Text>
             <Text style={styles.permissionText}>
-              We need access to your camera to photograph the plant and identify it.
+              {language === "es"
+                ? "Necesitamos acceso a tu cámara para fotografiar la planta e identificarla."
+                : "We need access to your camera to photograph the plant and identify it."}
             </Text>
-            <TouchableOpacity
-              style={styles.permissionButton}
-              onPress={requestPermission}
-            >
-              <Text style={styles.permissionButtonText}>Allow Camera</Text>
+            <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+              <Text style={styles.permissionButtonText}>
+                {language === "es" ? "Permitir Cámara" : "Allow Camera"}
+              </Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -206,18 +172,15 @@ export default function IdentifyCameraScreen() {
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.overlay}>
             <View style={styles.header}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={handleBack}
-              >
+              <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
                 <X size={28} color="#ffffff" />
               </TouchableOpacity>
               <View style={styles.headerCenter}>
                 <Text style={styles.headerText}>
-                  Photograph the plant
+                  {language === "es" ? "Fotografía la planta" : "Photograph the plant"}
                 </Text>
                 <Text style={styles.headerSubtext}>
-                  Remaining scans: {getRemainingScans()}/30
+                  {language === "es" ? "Escaneos restantes" : "Remaining scans"}: {getRemainingScans()}
                 </Text>
               </View>
               <View style={{ width: 44 }} />
@@ -226,18 +189,17 @@ export default function IdentifyCameraScreen() {
             <View style={styles.guideContainer}>
               <View style={styles.guideBox} />
               <Text style={styles.guideText}>
-                Make sure the plant is well lit and focused
+                {language === "es"
+                  ? "Asegúrate de que la planta esté bien iluminada y enfocada"
+                  : "Make sure the plant is well lit and focused"}
               </Text>
             </View>
 
             <View style={styles.controls}>
-              <TouchableOpacity
-                style={styles.galleryButton}
-                onPress={pickImage}
-              >
+              <TouchableOpacity style={styles.galleryButton} onPress={pickImage}>
                 <ImageIcon size={28} color="#ffffff" />
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={styles.captureButton}
                 onPress={takePicture}
@@ -250,10 +212,7 @@ export default function IdentifyCameraScreen() {
                 )}
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.flipButton}
-                onPress={toggleCameraFacing}
-              >
+              <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
                 <RotateCcw size={28} color="#ffffff" />
               </TouchableOpacity>
             </View>
@@ -301,7 +260,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 16,
-    fontWeight: "600" as const,
+    fontWeight: "600",
     color: "#ffffff",
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 0, height: 1 },
@@ -309,7 +268,7 @@ const styles = StyleSheet.create({
   },
   headerSubtext: {
     fontSize: 13,
-    fontWeight: "500" as const,
+    fontWeight: "500",
     color: "rgba(255, 255, 255, 0.85)",
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 0, height: 1 },
@@ -388,7 +347,7 @@ const styles = StyleSheet.create({
   },
   permissionTitle: {
     fontSize: 24,
-    fontWeight: "700" as const,
+    fontWeight: "700",
     color: "#1a4d2e",
     textAlign: "center",
   },
@@ -407,7 +366,7 @@ const styles = StyleSheet.create({
   },
   permissionButtonText: {
     fontSize: 16,
-    fontWeight: "600" as const,
+    fontWeight: "600",
     color: "#ffffff",
   },
 });

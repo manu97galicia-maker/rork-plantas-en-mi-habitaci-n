@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import createContextHook from "@nkzw/create-context-hook";
 import { useEffect, useState } from "react";
+import * as Localization from "expo-localization";
 import type { RoomAnalysis } from "@/types/plant";
 
 export type CareLevel = "beginner" | "intermediate" | "expert";
@@ -20,11 +21,29 @@ export interface ScanHistory {
   };
 }
 
+export interface IdentificationHistory {
+  id: string;
+  timestamp: number;
+  plantName: string;
+  scientificName: string;
+  family: string;
+  difficulty: string;
+  description: string;
+  imageData: string;
+  care?: {
+    light: string;
+    water: string;
+    temperature: string;
+    humidity: string;
+  };
+}
+
 interface UserPreferences {
   careLevel: CareLevel | null;
   language: Language;
   hasCompletedOnboarding: boolean;
   scanHistory: ScanHistory[];
+  identificationHistory: IdentificationHistory[];
   monthlyScans: { [month: string]: number };
 }
 
@@ -32,11 +51,23 @@ const STORAGE_KEY = "@user_preferences";
 const MAX_MONTHLY_SCANS = 40;
 const MAX_SCAN_HISTORY = 500;
 
+const getDeviceLanguage = (): Language => {
+  const locales = Localization.getLocales();
+  if (locales && locales.length > 0) {
+    const languageCode = locales[0].languageCode?.toLowerCase();
+    if (languageCode === "es") {
+      return "es";
+    }
+  }
+  return "en";
+};
+
 const defaultPreferences: UserPreferences = {
   careLevel: null,
-  language: "en",
+  language: getDeviceLanguage(),
   hasCompletedOnboarding: false,
   scanHistory: [],
+  identificationHistory: [],
   monthlyScans: {},
 };
 
@@ -70,6 +101,7 @@ const [UserPreferencesProviderBase, useUserPreferencesBase] = createContextHook(
               language: parsed.language === "es" || parsed.language === "en" ? parsed.language : "en",
               hasCompletedOnboarding: parsed.hasCompletedOnboarding || false,
               scanHistory: Array.isArray(parsed.scanHistory) ? parsed.scanHistory : [],
+              identificationHistory: Array.isArray(parsed.identificationHistory) ? parsed.identificationHistory : [],
               monthlyScans: parsed.monthlyScans && typeof parsed.monthlyScans === 'object' ? parsed.monthlyScans : {},
             };
             setPreferences(validPreferences);
@@ -105,6 +137,7 @@ const [UserPreferencesProviderBase, useUserPreferencesBase] = createContextHook(
         language: newPreferences.language === "es" || newPreferences.language === "en" ? newPreferences.language : "en",
         hasCompletedOnboarding: newPreferences.hasCompletedOnboarding || false,
         scanHistory: Array.isArray(newPreferences.scanHistory) ? newPreferences.scanHistory : [],
+        identificationHistory: Array.isArray(newPreferences.identificationHistory) ? newPreferences.identificationHistory : [],
         monthlyScans: newPreferences.monthlyScans && typeof newPreferences.monthlyScans === 'object' ? newPreferences.monthlyScans : {},
       };
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(validPreferences));
@@ -121,6 +154,7 @@ const [UserPreferencesProviderBase, useUserPreferencesBase] = createContextHook(
       language: lang,
       hasCompletedOnboarding: current.hasCompletedOnboarding || false,
       scanHistory: Array.isArray(current.scanHistory) ? current.scanHistory : [],
+      identificationHistory: Array.isArray(current.identificationHistory) ? current.identificationHistory : [],
       monthlyScans: current.monthlyScans && typeof current.monthlyScans === 'object' ? current.monthlyScans : {},
     });
   };
@@ -132,6 +166,7 @@ const [UserPreferencesProviderBase, useUserPreferencesBase] = createContextHook(
       language: current.language || "en",
       hasCompletedOnboarding: current.hasCompletedOnboarding || false,
       scanHistory: Array.isArray(current.scanHistory) ? current.scanHistory : [],
+      identificationHistory: Array.isArray(current.identificationHistory) ? current.identificationHistory : [],
       monthlyScans: current.monthlyScans && typeof current.monthlyScans === 'object' ? current.monthlyScans : {},
     });
   };
@@ -143,6 +178,7 @@ const [UserPreferencesProviderBase, useUserPreferencesBase] = createContextHook(
       language: current.language || "en",
       hasCompletedOnboarding: true,
       scanHistory: Array.isArray(current.scanHistory) ? current.scanHistory : [],
+      identificationHistory: Array.isArray(current.identificationHistory) ? current.identificationHistory : [],
       monthlyScans: current.monthlyScans && typeof current.monthlyScans === 'object' ? current.monthlyScans : {},
     });
   };
@@ -193,11 +229,46 @@ const [UserPreferencesProviderBase, useUserPreferencesBase] = createContextHook(
         language: current.language || "en",
         hasCompletedOnboarding: current.hasCompletedOnboarding || false,
         scanHistory: updatedHistory,
+        identificationHistory: Array.isArray(current.identificationHistory) ? current.identificationHistory : [],
         monthlyScans: updatedMonthlyScans,
       });
       console.log('✅ Scan added to history successfully');
     } catch (error) {
       console.error('Error adding scan to history:', error);
+    }
+  };
+
+  const addIdentification = async (identification: Omit<IdentificationHistory, 'id' | 'timestamp'>) => {
+    try {
+      const current = preferences || { ...defaultPreferences };
+      const currentMonth = getCurrentMonthKey();
+
+      const newIdentification: IdentificationHistory = {
+        ...identification,
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+      };
+
+      const currentHistory = Array.isArray(current.identificationHistory) ? current.identificationHistory : [];
+      const currentMonthlyScans = current.monthlyScans && typeof current.monthlyScans === 'object' ? current.monthlyScans : {};
+
+      const updatedHistory = [newIdentification, ...currentHistory].slice(0, MAX_SCAN_HISTORY);
+      const updatedMonthlyScans = {
+        ...currentMonthlyScans,
+        [currentMonth]: (currentMonthlyScans[currentMonth] || 0) + 1,
+      };
+
+      await savePreferences({
+        careLevel: current.careLevel || null,
+        language: current.language || "en",
+        hasCompletedOnboarding: current.hasCompletedOnboarding || false,
+        scanHistory: Array.isArray(current.scanHistory) ? current.scanHistory : [],
+        identificationHistory: updatedHistory,
+        monthlyScans: updatedMonthlyScans,
+      });
+      console.log('✅ Identification added to history successfully');
+    } catch (error) {
+      console.error('Error adding identification to history:', error);
     }
   };
 
@@ -210,21 +281,24 @@ const [UserPreferencesProviderBase, useUserPreferencesBase] = createContextHook(
       language: current.language || "en",
       hasCompletedOnboarding: current.hasCompletedOnboarding || false,
       scanHistory: updatedHistory,
+      identificationHistory: Array.isArray(current.identificationHistory) ? current.identificationHistory : [],
       monthlyScans: current.monthlyScans && typeof current.monthlyScans === 'object' ? current.monthlyScans : {},
     });
   };
 
   const current = preferences || { ...defaultPreferences };
-  
+
   return {
     careLevel: current.careLevel || null,
     language: current.language || "en",
     hasCompletedOnboarding: current.hasCompletedOnboarding || false,
     scanHistory: Array.isArray(current.scanHistory) ? current.scanHistory : [],
+    identificationHistory: Array.isArray(current.identificationHistory) ? current.identificationHistory : [],
     setLanguage,
     setCareLevel,
     completeOnboarding,
     addScan,
+    addIdentification,
     deleteScan,
     getRemainingScans,
     canScan,

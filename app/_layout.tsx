@@ -19,16 +19,8 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="camera" options={{ headerShown: false }} />
-      <Stack.Screen name="results" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="plant-detail" options={{ headerShown: false }} />
-      <Stack.Screen name="gallery" options={{ headerShown: false }} />
-      <Stack.Screen name="identify-camera" options={{ headerShown: false }} />
-      <Stack.Screen name="identify-plant" options={{ headerShown: false }} />
-      <Stack.Screen name="my-plants" options={{ headerShown: false }} />
-      <Stack.Screen name="profile" options={{ headerShown: false }} />
-      <Stack.Screen name="photo-gallery" options={{ headerShown: false }} />
-      <Stack.Screen name="add-plant" options={{ headerShown: false }} />
       <Stack.Screen name="paywall" options={{ headerShown: false }} />
     </Stack>
   );

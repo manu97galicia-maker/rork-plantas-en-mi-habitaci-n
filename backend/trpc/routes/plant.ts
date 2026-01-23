@@ -1,8 +1,17 @@
 import * as z from "zod";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createTRPCRouter, rateLimitedProcedure } from "../create-context";
 
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || "";
 const FREEPIK_API_KEY = process.env.FREEPIK_API_KEY || "";
 const FREEPIK_API_URL = "https://api.freepik.com/v1/resources";
+
+// Model IDs
+const GEMINI_2_5_FLASH = "gemini-2.5-flash"; // For plant identification
+const NANO_BANANA = "gemini-2.5-flash-preview-image-05-20"; // For image decoration
+
+// Initialize Google Generative AI
+const genAI = GOOGLE_API_KEY ? new GoogleGenerativeAI(GOOGLE_API_KEY) : null;
 
 type FreepikSearchResponse = {
   data?: {
@@ -180,12 +189,187 @@ export const plantRouter = createTRPCRouter({
       }
     }),
 
+  // Plant identification using Gemini 2.5 Flash
+  identifyPlant: rateLimitedProcedure
+    .input(z.object({
+      imageBase64: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      console.log(`[PlantAPI] Device ${ctx.deviceId} identifying plant`);
+
+      if (!genAI) {
+        console.error("[PlantAPI] GOOGLE_API_KEY not configured");
+        return {
+          success: false,
+          error: "API not configured",
+          plant: null
+        };
+      }
+
+      try {
+        const model = genAI.getGenerativeModel({ model: GEMINI_2_5_FLASH });
+
+        const prompt = `Analyze this image and identify the plant. Provide a JSON response with the following structure:
+{
+  "name": "Common name of the plant",
+  "scientificName": "Scientific/botanical name",
+  "confidence": "high/medium/low",
+  "description": "Brief description of the plant",
+  "careLevel": "easy/medium/hard",
+  "wateringFrequency": "Description of watering needs",
+  "lightRequirements": "Description of light needs",
+  "toxicity": "Information about toxicity to pets/humans if applicable",
+  "funFact": "An interesting fact about this plant"
+}
+
+If no plant is detected in the image, return:
+{
+  "name": null,
+  "error": "No plant detected in the image"
+}
+
+Only respond with valid JSON, no additional text.`;
+
+        const result = await model.generateContent([
+          prompt,
+          {
+            inlineData: {
+              mimeType: "image/jpeg",
+              data: input.imageBase64,
+            },
+          },
+        ]);
+
+        const response = result.response;
+        const text = response.text();
+
+        // Parse the JSON response
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          console.error("[PlantAPI] Failed to parse plant identification response");
+          return {
+            success: false,
+            error: "Failed to parse response",
+            plant: null
+          };
+        }
+
+        const plantData = JSON.parse(jsonMatch[0]);
+
+        if (plantData.error || !plantData.name) {
+          console.log(`[PlantAPI] No plant detected: ${plantData.error}`);
+          return {
+            success: false,
+            error: plantData.error || "No plant detected",
+            plant: null
+          };
+        }
+
+        console.log(`[PlantAPI] ✓ Identified plant: ${plantData.name}`);
+        return {
+          success: true,
+          plant: plantData
+        };
+      } catch (error: any) {
+        console.error(`[PlantAPI] Error identifying plant:`, error?.message);
+        return {
+          success: false,
+          error: error?.message || "Unknown error",
+          plant: null
+        };
+      }
+    }),
+
+  // Image decoration using Nano Banana (Gemini 2.5 Flash Image)
+  decorateImage: rateLimitedProcedure
+    .input(z.object({
+      imageBase64: z.string(),
+      prompt: z.string(),
+      style: z.string().optional().default("natural"),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      console.log(`[PlantAPI] Device ${ctx.deviceId} decorating image with Nano Banana`);
+
+      if (!genAI) {
+        console.error("[PlantAPI] GOOGLE_API_KEY not configured");
+        return {
+          success: false,
+          error: "API not configured",
+          imageBase64: null
+        };
+      }
+
+      try {
+        const model = genAI.getGenerativeModel({
+          model: NANO_BANANA,
+          generationConfig: {
+            responseModalities: ["image", "text"],
+          } as any,
+        });
+
+        const decorationPrompt = `${input.prompt}. Style: ${input.style}. Keep the plant as the main focus and enhance the image beautifully.`;
+
+        const result = await model.generateContent([
+          decorationPrompt,
+          {
+            inlineData: {
+              mimeType: "image/jpeg",
+              data: input.imageBase64,
+            },
+          },
+        ]);
+
+        const response = result.response;
+        const candidates = response.candidates;
+
+        if (!candidates || candidates.length === 0) {
+          console.error("[PlantAPI] No candidates in Nano Banana response");
+          return {
+            success: false,
+            error: "No image generated",
+            imageBase64: null
+          };
+        }
+
+        // Find the image part in the response
+        const parts = candidates[0].content?.parts || [];
+        const imagePart = parts.find((part: any) => part.inlineData?.mimeType?.startsWith("image/"));
+
+        if (!imagePart || !imagePart.inlineData) {
+          console.error("[PlantAPI] No image in Nano Banana response");
+          return {
+            success: false,
+            error: "No image in response",
+            imageBase64: null
+          };
+        }
+
+        console.log(`[PlantAPI] ✓ Image decorated successfully with Nano Banana`);
+        return {
+          success: true,
+          imageBase64: imagePart.inlineData.data,
+          mimeType: imagePart.inlineData.mimeType,
+        };
+      } catch (error: any) {
+        console.error(`[PlantAPI] Error decorating image:`, error?.message);
+        return {
+          success: false,
+          error: error?.message || "Unknown error",
+          imageBase64: null
+        };
+      }
+    }),
+
   healthCheck: rateLimitedProcedure
     .query(({ ctx }) => {
-      return { 
-        status: "ok", 
+      return {
+        status: "ok",
         deviceId: ctx.deviceId,
         timestamp: new Date().toISOString(),
+        models: {
+          plantIdentification: GEMINI_2_5_FLASH,
+          imageDecoration: NANO_BANANA,
+        },
       };
     }),
 });
